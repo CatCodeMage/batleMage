@@ -15,6 +15,7 @@
   <a href="instalacion.html">Guía de instalación</a>
   <a class="actual" href="tecnica.html">Guía técnica</a>
   <h3>En esta página</h3>
+  <a href="#t-enunciado">Enunciado y objetivos</a>
   <a href="#t-decisiones">Decisiones y porqués</a>
   <a href="#t-arquitectura">Arquitectura</a>
   <a href="#t-bucle">Bucle de juego</a>
@@ -28,7 +29,35 @@
 <main>
 <h1>Guía técnica</h1>
 <p class="meta">Fase presentable 0 · Juego 3D en OpenGL · Equipo de 6 personas · Última actualización: 2026-09-30</p>
-<div class="todo"><b>Contexto:</b> esta fase es una demo inicial para demostrar que el proyecto es posible, no una entrega. <b>Pendiente:</b> enunciado del proyecto, reparto de tareas y arquitectura del código.</div>
+<div class="todo"><b>Contexto:</b> esta fase es una demo inicial para demostrar que el proyecto es posible, no una entrega. <b>Pendiente:</b> asignar personas a cada área de trabajo y detallar la arquitectura del código.</div>
+
+<h3 id="t-enunciado">Enunciado y objetivos</h3>
+<p><b>Enunciado (propuesta propia del equipo).</b> Entorno de desarrollo que permite generar batallas mágicas en 3D de forma autónoma y grabarlas para incrustarlas en series, reduciendo el coste de animar combates de alta calidad. El ahorro viene de dos ideas: que las batallas <b>se hagan solas</b> y que se <b>graben</b> automáticamente.</p>
+
+<p><b>Acciones de los combatientes (por ahora):</b></p>
+<table>
+  <tr><th>Acción</th><th>Descripción</th></tr>
+  <tr><td>Lanzar magia</td><td>Ataque a distancia con un proyectil simple (por ejemplo, un palo).</td></tr>
+  <tr><td>Esquivar</td><td>Evitar un ataque moviéndose.</td></tr>
+  <tr><td>Bloquear con magia</td><td>Escudo translúcido que absorbe un ataque.</td></tr>
+</table>
+
+<p><b>Objetivos de la demo (fase 0):</b></p>
+<ol>
+  <li>Escena 3D con arena, iluminación y texturas.</li>
+  <li>Simulación autónoma de un combate <b>1 contra 1</b>: los combatientes deciden qué acción usar, mediante un bot de reglas sencillas.</li>
+  <li>Cámara automática que sigue la acción.</li>
+  <li>Grabación de la batalla como secuencia de imágenes (<code>.png</code>).</li>
+  <li>Duración de la batalla y acciones permitidas configurables.</li>
+</ol>
+
+<p><b>Objetivos posteriores (solo si los anteriores están completos):</b></p>
+<ul>
+  <li>Sustituir el bot de reglas por modelos entrenados con aprendizaje automático (ML), que aprendan a elegir acciones y hagan que la batalla dure un tiempo determinado.</li>
+  <li>Combates por equipos (más de 1 contra 1).</li>
+  <li>A largo plazo: efectos visuales de todo tipo (partículas, etc.) y alteración del propio mundo físico durante la batalla.</li>
+</ul>
+<div class="why"><b>¿Por qué 1 contra 1 y ML fuera de la demo?</b> Para no ser demasiado ambiciosos: primero se demuestra que la idea central (batalla autónoma + grabación) funciona. El ML y los equipos solo se abordan si sobra tiempo. Una de las personas del equipo tiene experiencia en ML.</div>
 
 <h3 id="t-decisiones">Decisiones y porqués</h3>
 <table>
@@ -43,11 +72,35 @@
   <tr><td>Librerías incluidas en el repositorio</td><td>vcpkg, descarga manual por persona</td><td>Los compañeros clonan y compilan sin configurar nada. vcpkg en este equipo solo funciona en modo manifiesto y ocultaba lo que pasa por debajo.</td><td>Decidido</td></tr>
   <tr><td>Contexto OpenGL 3.3 core</td><td>4.6 (proyecto base del profe), 1.1 a pelo</td><td>Shaders modernos sin depender de la versión más alta; lo soporta cualquier gráfica actual.</td><td>Decidido para la demo</td></tr>
   <tr><td>Interfaz gráfica (menús)</td><td>ImGui, nfd (las del profe)</td><td>Se descartaron por ahora. Si hace falta, se buscará otra librería.</td><td><i>Pendiente</i></td></tr>
-  <tr><td>Enunciado del proyecto</td><td>Uno de los tres propuestos</td><td>—</td><td><i>Pendiente</i></td></tr>
+  <tr><td>Enunciado propio (batallas mágicas autónomas)</td><td>Uno de los propuestos por el profe</td><td>La asignatura permite proponer un enunciado propio. Ver el apartado de enunciado.</td><td>Decidido</td></tr>
+  <tr><td>Combates 1 contra 1</td><td>Equipos</td><td>Limitar el alcance. Los equipos quedan como objetivo extra si sobra tiempo.</td><td>Decidido</td></tr>
+  <tr><td>Proyectiles simples y escudos translúcidos</td><td>Efectos de partículas</td><td>Suficiente para la demo. Los efectos avanzados quedan a largo plazo.</td><td>Decidido</td></tr>
+  <tr><td>Simulación separada del render</td><td>Lógica dentro del bucle de dibujo</td><td>La simulación no depende de OpenGL, usa paso de tiempo fijo y es determinista con semilla. Permite ejecutarla a toda velocidad y entrenar ML más adelante sin rehacer el código.</td><td>Decidido</td></tr>
+  <tr><td>Combatiente = estado de entrada, acción de salida</td><td>Comportamiento dentro del combatiente</td><td>En la demo decide un bot de reglas; más adelante, un modelo entrenado, sin cambiar el resto.</td><td>Decidido</td></tr>
+  <tr><td>Grabación como secuencia de imágenes</td><td>Vídeo directo</td><td>Es lo más simple; se puede convertir a vídeo después.</td><td>Decidido para la demo</td></tr>
+  <tr><td>Entrenamiento de ML</td><td>Python externo, neuroevolución en C++</td><td>Fuera de la demo. Se decidirá el enfoque cuando toque.</td><td><i>Pendiente</i></td></tr>
+  <tr><td>Librerías para modelos 3D y guardar imágenes</td><td>Assimp, tinyobjloader, stb_image_write...</td><td>Se elegirán cuando se necesiten.</td><td><i>Pendiente</i></td></tr>
 </table>
 
 <h3 id="t-arquitectura">Arquitectura</h3>
-<p><i>Pendiente.</i> Ahora mismo todo vive en <code>main.cpp</code> (ventana azul con el bucle de juego). Aquí irá la estructura de carpetas y clases (quién es responsable de qué) cuando la definamos.</p>
+<p>Ahora mismo todo vive en <code>main.cpp</code> (ventana azul con el bucle de juego). Idea de organización en dos capas:</p>
+<table>
+  <tr><th>Capa</th><th>Qué hace</th><th>Reglas</th></tr>
+  <tr><td><b>Simulación</b></td><td>Combatientes, acciones, reglas del combate, estado.</td><td>Sin OpenGL ni ventana. Paso de tiempo fijo. Determinista con semilla.</td></tr>
+  <tr><td><b>Render</b></td><td>Arena, luces, texturas, cámara, grabación.</td><td>Solo lee el estado de la simulación y lo dibuja.</td></tr>
+</table>
+<p><i>Pendiente:</i> estructura de carpetas y clases concretas.</p>
+
+<p><b>Reparto propuesto en seis áreas</b> (nombres por rellenar):</p>
+<table>
+  <tr><th>Área</th><th>Contenido</th><th>Responsable</th></tr>
+  <tr><td>1. Motor base</td><td>Ventana, bucle de juego, entrada</td><td>—</td></tr>
+  <tr><td>2. Escena y visualización</td><td>Arena, luces, texturas, sombras</td><td>—</td></tr>
+  <tr><td>3. Simulación</td><td>Reglas del combate, acciones, estado</td><td>—</td></tr>
+  <tr><td>4. Comportamiento y ML</td><td>Bot de reglas ahora, ML después</td><td>—</td></tr>
+  <tr><td>5. Cámara y grabación</td><td>Cámara automática, exportar fotogramas</td><td>—</td></tr>
+  <tr><td>6. Documentación y análisis</td><td>Guías, actas, estadísticas del combate</td><td>—</td></tr>
+</table>
 
 <h3 id="t-bucle">Bucle de juego</h3>
 <p>Estructura de cualquier juego, independiente de la librería. Es lo que hace el <code>main.cpp</code> actual:</p>
@@ -106,6 +159,9 @@ liberar recursos (glfwTerminate)</code></pre>
   <li><b>¿Por qué ese aviso de LIBCMT?</b> Ver las notas técnicas.</li>
   <li><b>¿Por qué no usáis el entorno del profe entero?</b> Preferimos montar el nuestro para entender cada pieza, y reutilizamos solo SOIL2, que sí nos hacía falta para texturas.</li>
   <li><b>¿Por qué un proyecto vacío?</b> Ver la <a href="instalacion.html#i-clonar">guía de instalación</a>.</li>
+  <li><b>¿Por qué separar la simulación del render?</b> Para poder ejecutar la simulación sin dibujar y a toda velocidad, que es lo que hará falta para entrenar ML, y para que el mismo combate se pueda reproducir y grabar igual con la misma semilla.</li>
+  <li><b>¿Cómo se ahorra coste de animación?</b> El combate lo genera el sistema solo, sin animar cada fotograma a mano, y se graba automáticamente.</li>
+  <li><b>¿Dónde entra el ML?</b> En el comportamiento de los combatientes. Reciben un estado y eligen una acción; hoy lo hace un bot de reglas y más adelante será un modelo entrenado, sin tocar el resto.</li>
 </ul>
 
 <h2 id="registro">Registro de cambios</h2>
@@ -113,6 +169,7 @@ liberar recursos (glfwTerminate)</code></pre>
   <tr><th>Fecha</th><th>Quién</th><th>Cambio</th></tr>
   <tr><td>2026-09-29</td><td>—</td><td>Creación del documento.</td></tr>
   <tr><td>2026-09-30</td><td>—</td><td>Decididas y documentadas GLFW, GLEW estático, GLM y SOIL2. 3D. Explicado LNK4098 y la corrección del <code>.gitignore</code>.</td></tr>
+  <tr><td>2026-09-30</td><td>—</td><td>Añadidos enunciado propio (batallas mágicas autónomas), objetivos, acciones, separación simulación/render y propuesta de reparto en seis áreas.</td></tr>
 </table>
 </main>
 
