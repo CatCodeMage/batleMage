@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Guía de instalación VGI</title>
+<link rel="stylesheet" href="estilos.css">
+</head>
+<body>
+<div class="wrap">
+
+<nav>
+  <strong>Proyecto VGI</strong>
+  <h3>Documentos</h3>
+  <a class="actual" href="instalacion.html">Guía de instalación</a>
+  <a href="tecnica.html">Guía técnica</a>
+  <h3>En esta página</h3>
+  <a href="#i-req">Requisitos</a>
+  <a href="#i-clonar">Clonar y ejecutar</a>
+  <a href="#i-libs">Librerías incluidas</a>
+  <a href="#i-config">Configuración del proyecto</a>
+  <a href="#i-problemas">Problemas frecuentes</a>
+  <a href="#registro">Registro de cambios</a>
+</nav>
+
+<main>
+<h1>Guía de instalación</h1>
+<p class="meta">Fase presentable 0 · Juego 3D en OpenGL · Equipo de 6 personas · Última actualización: 2026-09-30</p>
+<div class="todo"><b>Pendiente:</b> enunciado del proyecto, reparto de tareas y arquitectura del código. No afectan a la instalación.</div>
+
+<h3 id="i-req">Requisitos</h3>
+<ul>
+  <li>Windows 10/11 de 64 bits.</li>
+  <li>Visual Studio con la carga de trabajo <b>Desarrollo para el escritorio con C++</b>.</li>
+  <li>Driver de la tarjeta gráfica actualizado (aporta la implementación real de OpenGL).</li>
+  <li>Git.</li>
+</ul>
+
+<h3 id="i-clonar">Clonar y ejecutar</h3>
+<ol>
+  <li>Clonar el repositorio: <code>https://github.com/CatCodeMage/batleMage.git</code></li>
+  <li>Abrir <code>posibleProyecto.slnx</code> con Visual Studio.</li>
+  <li>Elegir <b>x64</b> y <b>Debug</b> en la barra superior.</li>
+  <li>Ejecutar. Debe salir una ventana azul oscuro y una consola con la línea <code>OpenGL: ...</code>.</li>
+</ol>
+<div class="why"><b>¿Hay que descargar algo más?</b> No. Las librerías están dentro del repositorio, en <code>posibleProyecto\libs</code>, y el proyecto las busca con rutas relativas (<code>$(ProjectDir)libs\...</code>), así que funciona igual en cualquier ordenador y carpeta.</div>
+<div class="why"><b>¿Por qué el proyecto es "vacío"?</b> La plantilla de Proyecto vacío (C++) no trae código que haya que borrar ni depende de MFC o ATL, que son para interfaces clásicas de Windows y COM. Un juego OpenGL crea su propia ventana con una librería. Las plantillas DLL y biblioteca estática generan bibliotecas, no un ejecutable, y la de Makefile usa un sistema de compilación propio que no necesitamos.</div>
+
+<h3 id="i-libs">Librerías incluidas en <code>libs</code></h3>
+<table>
+  <tr><th>Librería</th><th>Versión</th><th>Para qué sirve</th><th>Por qué esta</th></tr>
+  <tr><td>GLFW</td><td>3.5.1</td><td>Crea la ventana y el contexto OpenGL; lee teclado y ratón.</td><td>Es la que usa el proyecto base del profe. Simple y multiplataforma.</td></tr>
+  <tr><td>GLEW</td><td>2.3.1</td><td>Carga en ejecución las funciones modernas de OpenGL.</td><td>Windows solo expone directamente OpenGL 1.1.</td></tr>
+  <tr><td>GLM</td><td>master</td><td>Vectores y matrices (solo cabeceras).</td><td>Necesaria para 3D y no hay que compilarla.</td></tr>
+  <tr><td>SOIL2</td><td>1.3.0</td><td>Carga imágenes (PNG, JPG, BMP...) como texturas.</td><td>Tomada del proyecto base del profe. Es un fork de Martin Lucas Golini del SOIL original de Jonathan Dummer.</td></tr>
+  <tr><td><code>opengl32.lib</code></td><td>—</td><td>Enlaza con OpenGL.</td><td>Viene con Windows.</td></tr>
+</table>
+<p>Estructura de carpetas:</p>
+<pre><code>posibleProyecto\
+  docs\                        (estas guías)
+  posibleProyecto\
+    main.cpp
+    libs\
+      glfw-3.5.1\   include\  lib-vc2026\
+      glew-2.3.1\   include\  lib\Release\x64\
+      glm-master\   glm\
+      soil2\        include\soil2\SOIL2.h   lib\x64\soil2.lib</code></pre>
+<div class="why"><b>ImGui y nfd no se incluyen.</b> El proyecto base del profe los usa, pero decidimos no usarlos por ahora; si hace falta interfaz, se buscará otra librería.</div>
+
+<h3 id="i-config">Configuración del proyecto (Debug|x64 y Release|x64)</h3>
+<p>Ya está guardada en el <code>.vcxproj</code>. Se documenta para saber qué hace cada ajuste y poder revisarla.</p>
+<table>
+  <tr><th>Apartado en Visual Studio</th><th>Valor</th></tr>
+  <tr><td>C/C++ → General → Directorios de inclusión adicionales</td><td><code>$(ProjectDir)libs\glfw-3.5.1\include</code><br><code>$(ProjectDir)libs\glew-2.3.1\include</code><br><code>$(ProjectDir)libs\glm-master</code><br><code>$(ProjectDir)libs\soil2\include</code></td></tr>
+  <tr><td>C/C++ → Preprocesador</td><td>Debug: <code>GLEW_STATIC;_DEBUG;_CONSOLE</code><br>Release: <code>GLEW_STATIC;NDEBUG;_CONSOLE</code></td></tr>
+  <tr><td>Vinculador → General → Directorios de bibliotecas adicionales</td><td><code>$(ProjectDir)libs\glfw-3.5.1\lib-vc2026</code><br><code>$(ProjectDir)libs\glew-2.3.1\lib\Release\x64</code><br><code>$(ProjectDir)libs\soil2\lib\x64</code></td></tr>
+  <tr><td>Vinculador → Entrada → Dependencias adicionales</td><td><code>opengl32.lib;glfw3.lib;glew32s.lib;soil2.lib</code></td></tr>
+  <tr><td>Solo Release: Vinculador → Sistema → Subsistema</td><td><code>Windows (/SUBSYSTEM:WINDOWS)</code></td></tr>
+  <tr><td>Solo Release: Vinculador → Opciones avanzadas → Punto de entrada</td><td><code>mainCRTStartup</code></td></tr>
+</table>
+<div class="why"><b>¿Por qué GLEW estático (<code>glew32s.lib</code> + <code>GLEW_STATIC</code>)?</b> La versión dinámica (<code>glew32.lib</code>) exige copiar <code>glew32.dll</code> junto al <code>.exe</code>, que se genera en <code>x64\Debug</code>, una carpeta ignorada por Git. Cada compañero vería el error <i>"no se encontró glew32.dll"</i>. Enlazando GLEW de forma estática el código va dentro del <code>.exe</code> y no hay DLL que copiar. GLFW y SOIL2 ya son estáticas.</div>
+<div class="why"><b>¿Por qué la terminal solo en Debug?</b> En Release el subsistema es <i>Windows</i>, y <code>mainCRTStartup</code> hace que siga arrancando en <code>main()</code> sin cambiar el código. Consecuencia: en Release no se ve <code>std::cout</code> ni <code>std::cerr</code>, así que los errores se depuran siempre en Debug.</div>
+
+<h3 id="i-problemas">Problemas frecuentes</h3>
+<table>
+  <tr><th>Síntoma</th><th>Causa probable</th></tr>
+  <tr><td><code>C1083: no se puede abrir el archivo incluir 'X'</code></td><td>Falta la ruta de inclusión o está en la configuración equivocada (Debug y Release se configuran por separado).</td></tr>
+  <tr><td><code>LNK2019: símbolo externo sin resolver</code></td><td>Falta una <code>.lib</code> en las dependencias, falta su ruta de biblioteca, o se compila en x86 en lugar de x64.</td></tr>
+  <tr><td><i>"No se encontró glew32.dll"</i></td><td>Falta <code>GLEW_STATIC</code> en el preprocesador o se enlaza <code>glew32.lib</code> en lugar de <code>glew32s.lib</code>.</td></tr>
+  <tr><td><code>LNK4098</code> (LIBCMT en conflicto)</td><td>Aviso, no error. Ver la <a href="tecnica.html#t-notas">guía técnica</a>.</td></tr>
+  <tr><td>Los cambios en Propiedades no se guardan</td><td>Hay que pulsar <b>Aplicar</b> y <b>Aceptar</b>, y guardar con Ctrl+Shift+S.</td></tr>
+</table>
+<p class="meta">Añadid aquí cada problema real que os encontréis, con su solución.</p>
+
+<h2 id="registro">Registro de cambios</h2>
+<table>
+  <tr><th>Fecha</th><th>Quién</th><th>Cambio</th></tr>
+  <tr><td>2026-09-29</td><td>—</td><td>Creación del documento. Tipo de proyecto: vacío, C++, x64.</td></tr>
+  <tr><td>2026-09-30</td><td>—</td><td>Incluidas GLFW 3.5.1, GLEW 2.3.1 (estático), GLM y SOIL2 1.3.0 en <code>libs</code>. Configuración de Debug y Release. Terminal solo en Debug.</td></tr>
+</table>
+</main>
+
+</div>
+</body>
+</html>
