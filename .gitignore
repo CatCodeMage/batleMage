@@ -361,3 +361,7 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+# Keep libs/ in the repo even if it sits inside bin/, Release/ or x64/ folders.
+!**/libs/
+!**/libs/**
