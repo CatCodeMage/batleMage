@@ -111,7 +111,7 @@
       <PreprocessorDefinitions>GLEW_STATIC;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(ProjectDir)libs\glm-master;$(ProjectDir)libs\glew-2.3.1\include;$(ProjectDir)libs\glfw-3.5.1\include;$(ProjectDir)libs\soil2\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)libs\glm-master;$(ProjectDir)libs\glew-2.3.1\include;$(ProjectDir)libs\glfw-3.5.1\include;$(ProjectDir)libs\soil2\include;$(ProjectDir)src</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -132,7 +132,7 @@
       <PreprocessorDefinitions>GLEW_STATIC;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(ProjectDir)libs\glm-master;$(ProjectDir)libs\glew-2.3.1\include;$(ProjectDir)libs\glfw-3.5.1\include;$(ProjectDir)libs\soil2\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)libs\glm-master;$(ProjectDir)libs\glew-2.3.1\include;$(ProjectDir)libs\glfw-3.5.1\include;$(ProjectDir)libs\soil2\include;$(ProjectDir)src</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -147,6 +147,40 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="src\app\Application.cpp" />
+    <ClCompile Include="src\app\BatchRunner.cpp" />
+    <ClCompile Include="src\app\Options.cpp" />
+    <ClCompile Include="src\app\Window.cpp" />
+    <ClCompile Include="src\gfx\AutoCamera.cpp" />
+    <ClCompile Include="src\gfx\Mesh.cpp" />
+    <ClCompile Include="src\gfx\MeshFactory.cpp" />
+    <ClCompile Include="src\gfx\Recorder.cpp" />
+    <ClCompile Include="src\gfx\Renderer.cpp" />
+    <ClCompile Include="src\gfx\Shader.cpp" />
+    <ClCompile Include="src\gfx\Texture.cpp" />
+    <ClCompile Include="src\sim\Battle.cpp" />
+    <ClCompile Include="src\sim\Match.cpp" />
+    <ClCompile Include="src\sim\RuleBasedAgent.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\app\Application.h" />
+    <ClInclude Include="src\app\BatchRunner.h" />
+    <ClInclude Include="src\app\Options.h" />
+    <ClInclude Include="src\app\Window.h" />
+    <ClInclude Include="src\gfx\AutoCamera.h" />
+    <ClInclude Include="src\gfx\Mesh.h" />
+    <ClInclude Include="src\gfx\MeshFactory.h" />
+    <ClInclude Include="src\gfx\Recorder.h" />
+    <ClInclude Include="src\gfx\Renderer.h" />
+    <ClInclude Include="src\gfx\Shader.h" />
+    <ClInclude Include="src\gfx\Texture.h" />
+    <ClInclude Include="src\sim\Action.h" />
+    <ClInclude Include="src\sim\Battle.h" />
+    <ClInclude Include="src\sim\IAgent.h" />
+    <ClInclude Include="src\sim\Match.h" />
+    <ClInclude Include="src\sim\Rng.h" />
+    <ClInclude Include="src\sim\Rules.h" />
+    <ClInclude Include="src\sim\RuleBasedAgent.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Demo de batallas autónomas</title>
+<link rel="stylesheet" href="estilos.css">
+</head>
+<body>
+<div class="wrap">
+
+<nav>
+  <strong>Proyecto VGI</strong>
+  <h3>Documentos</h3>
+  <a href="instalacion.html">Guía de instalación</a>
+  <a href="tecnica.html">Guía técnica</a>
+  <a class="actual" href="demo.html">Demo (diseño)</a>
+  <h3>En esta página</h3>
+  <a href="#d-que">Qué es la demo</a>
+  <a href="#d-uso">Cómo ejecutarla</a>
+  <a href="#d-arq">Arquitectura</a>
+  <a href="#d-decisiones">Decisiones de diseño</a>
+  <a href="#d-ml">Dónde entra el ML</a>
+  <a href="#d-portfolio">Mapa al portfolio</a>
+  <a href="#d-verificado">Qué se ha comprobado</a>
+  <a href="#d-limites">Límites y pendiente</a>
+  <a href="#d-profe">Cómo explicarla</a>
+</nav>
+
+<main>
+<h1>Demo de batallas mágicas autónomas</h1>
+<p class="meta">Fase presentable 0 · Escrita y programada por Claude (IA) a petición del equipo · 2026-09-30</p>
+<div class="todo"><b>Importante:</b> este código lo ha escrito Claude, no el equipo. Este documento existe para que se pueda entender, explicar y modificar. Todo está en local, en <code>posibleProyecto\posibleProyecto\src</code>, sin subir a Git.</div>
+
+<h2 id="d-que">Qué es la demo</h2>
+<p>Un programa en C++ y OpenGL 3.3 donde <b>dos magos luchan solos</b> (1 contra 1) en una arena 3D, y una <b>cámara automática</b> graba el combate. Demuestra la idea central del proyecto: una batalla generada por el sistema, sin animar nada a mano, y grabable.</p>
+<table>
+  <tr><th>Objetivo de la demo (ver guía técnica)</th><th>Estado</th></tr>
+  <tr><td>Escena 3D con arena, iluminación y texturas</td><td>Hecho</td></tr>
+  <tr><td>Simulación autónoma 1 contra 1 con un bot de reglas</td><td>Hecho</td></tr>
+  <tr><td>Acciones: lanzar magia (proyectil simple), esquivar, bloquear con escudo translúcido</td><td>Hecho</td></tr>
+  <tr><td>Cámara automática que sigue la acción</td><td>Hecho</td></tr>
+  <tr><td>Grabación como secuencia de imágenes PNG</td><td>Hecho</td></tr>
+  <tr><td>Duración y acciones permitidas configurables</td><td>Hecho (opciones y teclas)</td></tr>
+  <tr><td>ML, equipos, efectos avanzados</td><td>No incluido (objetivos posteriores)</td></tr>
+</table>
+
+<h2 id="d-uso">Cómo ejecutarla</h2>
+<p>Se abre <code>posibleProyecto.slnx</code>, configuración <b>Debug | x64</b>, y se ejecuta. Sin opciones, muestra batallas en bucle. Las opciones de línea de comandos se pueden poner en <i>Propiedades → Depuración → Argumentos del comando</i>, o ejecutando el <code>.exe</code> desde una terminal.</p>
+<table>
+  <tr><th>Comando</th><th>Qué hace</th></tr>
+  <tr><td><code>posibleProyecto.exe</code></td><td>Ventana interactiva. Al acabar una batalla empieza otra con la semilla siguiente.</td></tr>
+  <tr><td><code>--record --seed 4</code></td><td>Graba <b>una</b> batalla como PNG en <code>recordings\battle_seed4\</code> y termina. Misma semilla = misma batalla.</td></tr>
+  <tr><td><code>--simulate 500</code></td><td><b>Sin ventana</b>: simula 500 batallas y muestra estadísticas.</td></tr>
+  <tr><td><code>--duration 20</code></td><td>Duración máxima de la batalla (s). Por defecto 30.</td></tr>
+  <tr><td><code>--no-magic</code>, <code>--no-dodge</code>, <code>--no-block</code></td><td>Prohíben esa acción en la batalla.</td></tr>
+  <tr><td><code>--out DIR --width W --height H --fps N</code></td><td>Carpeta y formato de la grabación.</td></tr>
+  <tr><td><code>--help</code></td><td>Lista completa de opciones.</td></tr>
+</table>
+<p><b>Teclas en la ventana:</b> <code>ESC</code> salir · <code>ESPACIO</code> pausa · <code>R</code> nueva batalla · <code>F</code> avance rápido x4 · <code>1</code> <code>2</code> <code>3</code> activar/desactivar magia, esquivar y bloquear en caliente. La información (semilla, tiempo, vida) va en el título de la ventana.</p>
+<div class="todo"><b>Ojo con Release:</b> en Release no hay consola (subsistema Windows), así que no se ve el resumen que imprime el programa. Usad Debug para probar. Además, la carpeta <code>recordings\</code> se crea dentro del proyecto: si algún día se hace <code>git add</code> de todo, se subirían los PNG. Conviene añadir <code>recordings/</code> al <code>.gitignore</code> o grabar con <code>--out</code> fuera del repositorio.</div>
+
+<h2 id="d-arq">Arquitectura</h2>
+<p>Tres capas con dependencias en un solo sentido. <code>sim</code> no conoce a nadie; <code>gfx</code> solo conoce a <code>sim</code>; <code>app</code> une todo.</p>
+<pre><code>main.cpp              solo arranca: lee opciones y elige el modo
+src/
+  sim/                SIMULACION (sin OpenGL, sin ventana)
+    Rng.h               generador aleatorio determinista
+    Action.h            acciones y conjunto de acciones permitidas (ActionMask)
+    Rules.h             todos los numeros del combate (daño, mana, cooldowns...)
+    Battle.h/.cpp       el mundo: combatientes, proyectiles, reglas, fin de batalla
+    IAgent.h            interfaz del "cerebro" de un combatiente
+    RuleBasedAgent.*    bot de reglas (hoy); aqui enchufara el ML (mañana)
+    Match.*             une una Battle con dos agentes
+  gfx/                RENDER (OpenGL)
+    Shader, Mesh, Texture   envoltorios RAII de recursos de la GPU
+    MeshFactory             cubo, esfera y plano
+    Renderer                dibuja el estado de una Battle (solo lo LEE)
+    AutoCamera              cámara automática
+    Recorder                guarda el framebuffer como PNG
+  app/                APLICACION
+    Window                  GLFW + contexto + GLEW
+    Options                 línea de comandos
+    Application             bucle interactivo y bucle de grabación
+    BatchRunner             modo estadísticas sin ventana</code></pre>
+<p><b>Flujo de un paso:</b> <code>Match::tick()</code> pide a cada agente una acción (le pasa una <code>Observation</code> y las acciones legales) → <code>Battle::step(a0, a1)</code> avanza 1/60 s → <code>AutoCamera::update</code> → <code>Renderer::render</code> dibuja el estado → (en grabación) <code>Recorder::capture</code> guarda la imagen.</p>
+
+<h2 id="d-decisiones">Decisiones de diseño y porqués</h2>
+
+<h3>1. La simulación está separada del dibujo</h3>
+<div class="why"><b>Qué:</b> <code>sim/</code> no incluye nada de OpenGL ni de la ventana. <b>Por qué:</b> para entrenar ML hacen falta miles de combates muy rápidos y sin dibujar. Si la lógica estuviera dentro del bucle de render, sería lento o imposible. <b>Prueba:</b> el modo <code>--simulate</code> corre sin ventana y va unas 5.700 veces más rápido que el tiempo real.</div>
+
+<h3>2. Paso de tiempo fijo (1/60 s)</h3>
+<div class="why"><b>Qué:</b> la simulación avanza siempre en pasos de 1/60 s (<code>sim::kDt</code>), y el bucle interactivo acumula tiempo real y da tantos pasos como quepan. <b>Por qué:</b> si el paso dependiera de los FPS, la misma batalla saldría distinta en un ordenador rápido y otro lento, y no sería reproducible ni grabable de forma fiable. El render solo dibuja lo que hay.</div>
+
+<h3>3. Determinismo con semilla</h3>
+<div class="why"><b>Qué:</b> todo el azar sale de <code>Rng</code>, un generador propio (xorshift64*) sembrado con la semilla de la batalla; la semilla de los agentes se deriva de ella. No se usa <code>rand()</code> ni la hora. <b>Por qué:</b> "misma semilla = misma batalla" permite volver a grabar un combate idéntico, depurarlo y comparar agentes en igualdad de condiciones. Se ha comprobado simulando dos veces con la misma semilla: resultados idénticos.</div>
+
+<h3>4. El agente es una interfaz (<code>IAgent</code>)</h3>
+<div class="why"><b>Qué:</b> un agente recibe una <code>Observation</code> y las acciones legales, y devuelve una <code>Action</code>. <b>Por qué:</b> es el punto de enchufe del ML. Hoy lo implementa un bot de reglas; mañana una red entrenada implementará la misma interfaz sin cambiar la simulación, el render ni la grabación (principio abierto/cerrado e inversión de dependencias: <code>Match</code> depende de la interfaz, no de una clase concreta).</div>
+
+<h3>5. La batalla valida las acciones (no se fía del agente)</h3>
+<div class="why"><b>Qué:</b> si un agente pide una acción ilegal (sin maná, en cooldown, prohibida por configuración, ya ocupado), <code>Battle</code> la ignora y hace <code>Idle</code>. Además, a cada agente se le entrega la máscara de acciones legales. <b>Por qué:</b> un agente de ML en entrenamiento hará cosas absurdas y no debe poder romper las reglas. Así también se cumple "seleccionar qué movimientos se pueden hacer": basta cambiar <code>ActionMask</code>, y se puede hacer en caliente (teclas 1, 2, 3).</div>
+
+<h3>6. <code>Observation</code>: lo que ve el agente</h3>
+<div class="why"><b>Qué:</b> una estructura pequeña con vida, maná, distancia, cooldowns y si viene un proyectil (y en cuántos segundos llega); todo normalizado. <b>Por qué:</b> el agente no toca el estado interno de la batalla. Esa estructura es directamente el vector de entrada que necesitaría una red neuronal y limita lo que un agente puede "hacer trampa" viendo.</div>
+
+<h3>7. Todas las cifras del combate en <code>Rules</code></h3>
+<div class="why"><b>Qué:</b> daño, coste de maná, cooldowns, velocidades, radios... en una sola estructura. <b>Por qué:</b> equilibrar el juego o entrenar con otras reglas no obliga a tocar la lógica; y no hay "números mágicos" repartidos por el código.</div>
+
+<h3>8. <code>Match</code> une cerebros y mundo</h3>
+<div class="why"><b>Qué:</b> es la única clase que conoce a la vez a <code>Battle</code> y a los agentes. <b>Por qué:</b> <code>Battle</code> queda limpia (solo reglas y estado) y el ciclo "observar → decidir → actuar" está en un único sitio, fácil de sustituir (por ejemplo, por un entorno de entrenamiento).</div>
+
+<h3>9. El render solo lee (<code>Renderer</code>)</h3>
+<div class="why"><b>Qué:</b> recibe una <code>const Battle&amp;</code> y dibuja. <b>Por qué:</b> es imposible que un fallo de dibujo altere la simulación, y se puede dibujar el mismo estado de otra forma (o no dibujarlo) sin tocar la lógica.</div>
+
+<h3>10. La escena se "recolecta" y luego se dibuja en pasadas</h3>
+<div class="why"><b>Qué:</b> primero se construye una lista de piezas (malla + matriz + material) y luego se recorre para la pasada opaca y para las sombras. <b>Por qué:</b> las sombras planas necesitan dibujar las mismas piezas proyectadas sobre el suelo; así no se duplica el código de construcción de cada modelo.</div>
+
+<h3>11. Recursos de GPU con RAII</h3>
+<div class="why"><b>Qué:</b> <code>Shader</code>, <code>Mesh</code>, <code>Texture</code> y <code>Window</code> liberan sus recursos en el destructor, y <code>Mesh</code>/<code>Texture</code> solo se pueden mover, no copiar. <b>Por qué:</b> evita fugas y dobles liberaciones sin tener que acordarse de llamar a <code>glDelete*</code> a mano.</div>
+
+<h3>12. Shaders embebidos y textura procedural</h3>
+<div class="why"><b>Qué:</b> el GLSL va como texto dentro de <code>Renderer.cpp</code> y el suelo usa una textura generada por código (tablero con ruido y juntas). <b>Por qué:</b> el programa funciona desde cualquier carpeta sin depender de archivos externos ni de la ruta de trabajo, un problema típico en equipos. Cargar una imagen real con SOIL2 es un cambio pequeño cuando haga falta.</div>
+
+<h3>13. Iluminación Phong con luces puntuales dinámicas</h3>
+<div class="why"><b>Qué:</b> una luz direccional (ambiente + difusa + especular) y hasta 8 luces puntuales, una por proyectil, del color de su dueño. <b>Por qué:</b> cubre el requisito de iluminación del portfolio y aporta un efecto muy vistoso con poco código: cada hechizo ilumina la arena al pasar.</div>
+
+<h3>14. Sombras planas proyectadas</h3>
+<div class="why"><b>Qué:</b> cada pieza se aplasta sobre el suelo con una matriz de proyección según la luz y se pinta semitransparente. <b>Por qué:</b> es la técnica de sombras más simple que funciona. Tiene límites (ver más abajo), pero da profundidad a la escena.</div>
+
+<h3>15. Cámara automática con el paso fijo de la simulación</h3>
+<div class="why"><b>Qué:</b> la cámara se actualiza una vez por paso de simulación (no por fotograma), encuadra el punto medio, ajusta la distancia a la separación, oscila despacio y se acerca al ganador al final. <b>Por qué:</b> al depender solo del estado y de <code>kDt</code>, la grabación es reproducible; y el suavizado exponencial evita saltos bruscos.</div>
+
+<h3>16. Grabación a PNG con SOIL2</h3>
+<div class="why"><b>Qué:</b> <code>Recorder</code> lee el framebuffer tras dibujar y guarda PNG con <code>SOIL_save_image</code> (ya incluida en el proyecto). En grabación se da un número fijo de pasos por fotograma (a 30 fps, 2 pasos de 1/60 s) y se dibuja a máxima velocidad. <b>Por qué:</b> una secuencia de imágenes es lo más simple y robusto, y no añade ninguna librería; se convierte a vídeo con cualquier herramienta (p. ej. ffmpeg). El tiempo de la batalla no depende de lo que tarde el ordenador en dibujar.</div>
+
+<h3>17. <code>main.cpp</code> mínimo y opciones separadas</h3>
+<div class="why"><b>Qué:</b> <code>main</code> solo lee las opciones y arranca un modo. <b>Por qué:</b> cada responsabilidad (opciones, ventana, bucle, estadísticas) está en su clase, y es fácil añadir modos nuevos sin tocar el resto.</div>
+
+<h3>18. Modo estadísticas sin ventana (<code>BatchRunner</code>)</h3>
+<div class="why"><b>Qué:</b> simula N batallas y resume victorias, duración y contadores por combatiente. <b>Por qué:</b> es el módulo de "análisis" y, a la vez, la demostración de que la simulación funciona sin OpenGL: es exactamente lo que se usará para entrenar y comparar agentes.</div>
+
+<h2 id="d-ml">Dónde entra el ML</h2>
+<p>No hay ML en la demo, pero el diseño lo admite sin cambios. Para sustituir el bot bastaría con:</p>
+<pre><code>class AgenteEntrenado : public sim::IAgent {
+    Action decide(const Observation&amp; obs, const ActionMask&amp; legal, Rng&amp; rng) override {
+        // 1) convertir obs en un vector de numeros
+        // 2) pasarlo por el modelo (pesos entrenados)
+        // 3) quedarse con la mejor accion de las que permite 'legal'
+    }
+};</code></pre>
+<p>Y usarlo en <code>makeDefaultMatch</code> en lugar de <code>RuleBasedAgent</code>. Para entrenar, se repiten batallas con <code>Match::tick()</code> (sin ventana, 5.700 veces más rápido que el tiempo real en este equipo) y se mide el resultado con las estadísticas de <code>Battle::stats()</code>. La <b>duración X</b> de la batalla ya es un parámetro (<code>BattleConfig::maxDuration</code>); para que el agente aprenda a alargarla o acortarla, se traduciría en la función de recompensa.</p>
+
+<h2 id="d-portfolio">Mapa al portfolio del profe</h2>
+<table>
+  <tr><th>Módulo que pide el portfolio</th><th>Dónde está en la demo</th></tr>
+  <tr><td>Modelo de datos gráfico</td><td><code>sim::Battle</code> (estado del mundo), <code>gfx::Mesh</code> y <code>MeshFactory</code> (geometría)</td></tr>
+  <tr><td>Visualización · Iluminación</td><td>Phong en <code>Renderer.cpp</code> (luz direccional + luces puntuales de los proyectiles)</td></tr>
+  <tr><td>Visualización · Texturas</td><td><code>Texture::checker</code> aplicada al suelo</td></tr>
+  <tr><td>Visualización · Sombras</td><td>Sombras planas proyectadas (<code>shadowMatrix</code>)</td></tr>
+  <tr><td>Edición</td><td>Teclas para activar/desactivar acciones y opciones de línea de comandos (no hay editor gráfico todavía)</td></tr>
+  <tr><td>Análisis</td><td><code>BatchRunner</code> y contadores de <code>Battle::stats()</code></td></tr>
+</table>
+
+<h2 id="d-verificado">Qué se ha comprobado (de verdad)</h2>
+<ul>
+  <li><b>Compila y enlaza</b> en Debug|x64 con MSBuild (solo los avisos <code>LNK4098</code> y <code>LNK4099</code> ya conocidos). También compila en Release|x64, pero el ejecutable de Release no se ha ejecutado.</li>
+  <li><b>Modo interactivo:</b> se arrancó el ejecutable, se mantuvo abierto 10 s y el título de la ventana mostró la batalla avanzando a ritmo real (semilla 1, 4,9 s y luego 8,7 s, con la vida bajando).</li>
+  <li><b>Modo estadísticas:</b> 500 batallas en ~2 s (unos 343.000 pasos/s, ~5.700x tiempo real). Con las tres acciones, la duración media fue de 23 s y 179 de 500 acabaron por tiempo; sin esquivar ni bloquear, la media bajó a 5,9 s. Es decir: la configuración de acciones cambia el resultado como debe.</li>
+  <li><b>Reproducibilidad:</b> dos ejecuciones con la misma semilla dieron resultados idénticos.</li>
+  <li><b>Render y grabación:</b> se ejecutó con ventana real (OpenGL 3.3 Core en la gráfica de este equipo) y se generaron 572 fotogramas PNG de una batalla completa; se revisaron varios visualmente (suelo texturizado, sombras, escudos translúcidos, proyectiles que iluminan, barras de vida, caída del perdedor y primer plano del ganador).</li>
+  <li><b>No comprobado:</b> las teclas (ESC, ESPACIO, R, F, 1, 2, 3: están programadas pero no se pulsaron), el reinicio automático tras acabar una batalla en modo interactivo, la ejecución en Release, otros ordenadores y otras tarjetas gráficas.</li>
+</ul>
+
+<h2 id="d-limites">Límites y pendiente</h2>
+<ul>
+  <li><b>Personajes muy simples:</b> formas de cubos y esferas. No hay modelos cargados ni animación de esqueleto; los movimientos son inclinaciones sencillas.</li>
+  <li><b>Sombras planas:</b> solo caen sobre el suelo; no se proyectan sobre otros objetos ni se suavizan.</li>
+  <li><b>Sin interfaz gráfica:</b> la información va en el título de la ventana y las barras de vida. Lo de "editor" se reduce a opciones y teclas.</li>
+  <li><b>Equilibrio sin afinar:</b> el bot defensivo gana más que el agresivo y un tercio de las batallas llegan al límite de tiempo. Se ajusta en <code>Rules.h</code> y en los perfiles de <code>Match.cpp</code>.</li>
+  <li><b>Grabación:</b> secuencia de PNG, no vídeo directo. No hay ffmpeg instalado en este equipo; se puede convertir con <code>ffmpeg -framerate 30 -i frame_%05d.png -pix_fmt yuv420p batalla.mp4</code>.</li>
+  <li><b>Sin pruebas automáticas:</b> solo la verificación manual descrita arriba. Un siguiente paso sensato es testear <code>Battle</code> (al ser pura lógica, es fácil).</li>
+  <li><b>Pendiente de decisión del equipo:</b> ML, equipos, efectos y arquitectura definitiva.</li>
+</ul>
+
+<h2 id="d-profe">Cómo explicarla al profe</h2>
+<p>Un guion corto y honesto:</p>
+<ol>
+  <li>"La idea es que las batallas se generen solas y se graben, para abaratar la animación de combates."</li>
+  <li>"Esta demo la ha programado una IA (Claude) siguiendo nuestro diseño, para comprobar que el proyecto es viable. La hemos revisado y documentado."</li>
+  <li>Enseñar el vídeo o la ventana: dos magos que lanzan hechizos, esquivan y bloquean; cámara automática; luces y sombras.</li>
+  <li>Enseñar <code>--simulate 500</code>: 500 batallas en segundos <i>sin ventana</i>. "Por eso separamos simulación y render: para poder entrenar ML".</li>
+  <li>Enseñar <code>IAgent</code>: "aquí enchufaremos el modelo entrenado sin cambiar nada más".</li>
+  <li>Decir lo que falta: modelos y animación reales, ML, interfaz, más acciones.</li>
+</ol>
+
+<h2 id="registro">Registro de cambios</h2>
+<table>
+  <tr><th>Fecha</th><th>Quién</th><th>Cambio</th></tr>
+  <tr><td>2026-09-30</td><td>Claude</td><td>Demo inicial: simulación autónoma 1 contra 1, render 3D, cámara automática, grabación PNG, modo estadísticas.</td></tr>
+</table>
+</main>
+
+</div>
+</body>
+</html>
