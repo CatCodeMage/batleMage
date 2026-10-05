@@ -3,7 +3,7 @@
 #include <variant>
 #include <glm/glm.hpp>
 
-#include "Collision.h"
+//#include "Collision.h"
 
 
 enum class tipoAsset
@@ -29,7 +29,7 @@ public:
     ~Assets();
 
 private:
-    BoxCollider m_hitbox;
+    //BoxCollider m_hitbox;
     tipoAsset m_tipo;
     estadoAsset m_estado;
 

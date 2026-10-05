@@ -7,7 +7,7 @@
 
 enum class skybox{
     CIELO_AZUL
-}
+};
 
 class World
 {   
@@ -18,5 +18,6 @@ public:
 private:
     Map* m_map;
     std::vector<Assets*> m_assets;
-    fondo m_skybox;
+    skybox m_skybox;
+    glm::vec3 m_puntDeLlum;
 };
