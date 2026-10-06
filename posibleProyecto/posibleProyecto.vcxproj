@@ -149,6 +149,7 @@
     <ClCompile Include="camera.cpp" />
     <ClCompile Include="cubo.cpp" />
     <ClCompile Include="drawObjects.cpp" />
+    <ClCompile Include="Input.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="MeshLibrary.cpp" />
@@ -161,6 +162,7 @@
     <ClInclude Include="cubo.h" />
     <ClInclude Include="drawObjects.h" />
     <ClInclude Include="global.h" />
+    <ClInclude Include="Input.h" />
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="MeshLibrary.h" />
     <ClInclude Include="resource.h" />

@@ -5,10 +5,10 @@
 #include "camera.h"
 #include "MeshLibrary.h"
 #include "suelo.h"
+#include "Input.h"
 
 int shouldContinue(GLFWwindow* window) {
-    return (glfwWindowShouldClose(window) == 0) && 
-           (glfwGetKey(window, GLFW_KEY_ESCAPE) != GLFW_PRESS);
+    return glfwWindowShouldClose(window) == 0;
 }
 
 GLuint setShaders() { // Set shaders
@@ -61,6 +61,10 @@ void buclePrincipaLTiempoReal(GLFWwindow* window, SystemInfo& sysInfo) {
 
     GLint mvpLoc = glGetUniformLocation(setShaders(), "uMVP");
 
+    Input keysInput;
+
+    keysInput.init(window);
+
     while (shouldContinue(window)) {
         clearLastFrame();
 
@@ -93,6 +97,7 @@ int guranteWindowCreated(GLFWwindow* window) {
         glfwTerminate();
         return -1;
     }
+
     glfwMakeContextCurrent(window);
 
     glewExperimental = GL_TRUE;
@@ -133,9 +138,9 @@ GLFWwindow* createWindow() {
 
 int main()
 {
-    SystemInfo sysInfo;
-
     GLFWwindow* window = createWindow();
+
+    SystemInfo sysInfo; // Se tiene que hacer despues de createWindow, respetar orden
 
     if (window == nullptr)
         return -1;
