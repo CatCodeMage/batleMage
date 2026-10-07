@@ -1,0 +1,105 @@
+{
+    "metadata": {
+        "version": "1.0",
+        "fecha": "2026-10-04T12:00:00Z",
+        "totalIteraciones": 1523,
+        "ganador": "personaje_1"
+    },
+    "escenario": {
+        "ancho": 100,
+        "alto": 100,
+        "profundidad": 100
+    },
+    "personajes": {
+        "personaje_1": {
+            "nombre": "Aragorn",
+            "modelo": "guerrero.glb"
+        },
+        "personaje_2": {
+            "nombre": "Legolas",
+            "modelo": "arquero.glb"
+        }
+    },
+    "assets": {
+        "arbol_01": {
+            "tipo": "arbol",
+            "posicionInicial": [
+                10,
+                0,
+                5
+            ]
+        },
+        "muro_01": {
+            "tipo": "muro",
+            "posicionInicial": [
+                20,
+                0,
+                15
+            ]
+        },
+        "arbusto_01": {
+            "tipo": "arbusto",
+            "posicionInicial": [
+                30,
+                0,
+                25
+            ]
+        }
+    },
+    "frames": [
+        {
+            "t": 0,
+            "personajes": {
+                "personaje_1": {
+                    "posicion": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "vida": 100,
+                    "mana": 50
+                },
+                "personaje_2": {
+                    "posicion": [
+                        50,
+                        0,
+                        0
+                    ],
+                    "vida": 100,
+                    "mana": 50
+                }
+            },
+            "assets": {
+                "arbol_01": "perfecto",
+                "muro_01": "perfecto"
+            }
+        },
+        {
+            "t": 1,
+            "personajes": {
+                "personaje_1": {
+                    "posicion": [
+                        1,
+                        0,
+                        0
+                    ],
+                    "vida": 98,
+                    "mana": 45
+                },
+                "personaje_2": {
+                    "posicion": [
+                        49,
+                        0,
+                        0
+                    ],
+                    "vida": 95,
+                    "mana": 48
+                }
+            },
+            "assets": {
+                "arbol_01": "dañado",
+                "muro_01": "perfecto"
+            }
+        }
+    ]
+}
