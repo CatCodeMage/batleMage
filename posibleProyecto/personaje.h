@@ -3,19 +3,25 @@
 
 #include "controladorPersonaje.h"
 #include <memory>
+#include <vector>
 
 enum class EstadoPersonaje {
-    IDLE,      
+    IDLE,      //en la esfera esta siempre en idle
     VOLANDO,    
     CASTEANDO, 
-    MUERTO      
+    MUERTO,
+    QUEMADO,
+    PARALIZADO,
+    ENVENENADO
+    //se pueden meter mas
 };
 
 struct DatosRenderPersonaje
 {
     int idPersonaje;
     float posX, posY, posZ;
-    EstadoPersonaje estadoActual;
+    float rotX, rotY, rotZ;
+    std::vector<EstadoPersonaje> m_estadosActuales;
 };
 
 class Personaje
@@ -23,11 +29,12 @@ class Personaje
 private:
     int m_id;
     float m_vida;
-    float m_mana;
+    float m_mana; 
     float m_capacidadMagia; //estadistica del personaje como las del noita 
                         //(ej: veloc recarga mana, num hechizos lanzar a la vez...)
     float m_x, m_y, m_z;
-    EstadoPersonaje m_estadoActual;
+    float m_rotX, m_rotY, m_rotZ;
+    std::vector<EstadoPersonaje> m_estadosActuales;
     ControladorPersonaje* m_controlador;
 
 public:
@@ -35,11 +42,17 @@ public:
     void update(float deltaTime);
 
     void moverse(float deltaX, float deltaY, float deltaZ);
+    void rotar(float deltaRotX, float deltaRotY, float deltaRotZ);
     void lanzarHechizo();
     void recibirDaño(float cantidadDaño);
     void aumentarVida(float cantidad);
     void disminuirMana(float cantidad);
     void aumentarMana(float cantidad);
+
+    void añadirEstado(EstadoPersonaje nuevoEstado);
+    void borrarEstado(EstadoPersonaje estado);
+    bool yaTieneEstado(EstadoPersonaje estado);
+    std::vector<EstadoPersonaje> getEstados() const;
 
     int getId() const;
     float getVida() const;
