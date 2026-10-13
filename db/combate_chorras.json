@@ -1,0 +1,277 @@
+{
+  "metadata": {
+    "version": "1.1",
+    "totalIteraciones": 14,
+    "ganador": "personaje_2"
+  },
+  "escenario": {
+    "ancho": 100,
+    "alto": 100,
+    "profundidad": 100
+  },
+  "personajes": {
+    "personaje_1": { "nombre": "Aragorn", "modelo": "cube.glb", "manaMaximo": 50, "regeneracionManaPorSegundo": 2 },
+    "personaje_2": { "nombre": "Legolas", "modelo": "cube.glb",  "manaMaximo": 50, "regeneracionManaPorSegundo": 2 }
+  },
+  "assets": {
+    "arbol_01":   { "tipo": "arbol",   "posicionInicial": [10, 0, 5] },
+    "muro_01":    { "tipo": "muro",    "posicionInicial": [20, 0, 15] },
+    "arbusto_01": { "tipo": "arbusto", "posicionInicial": [30, 0, 25] }
+  },
+  "hechizos": {
+    "bola_fuego":  { "costeMana": 15, "daño": 20 },
+    "rayo_arcano": { "costeMana": 10, "daño": 12 },
+    "curación":    { "costeMana": 20, "daño": -25 },
+    "explosión":   { "costeMana": 25, "daño": 30 }
+  },
+  "frames": [
+    {
+      "t": 0,
+      "personajes": {
+        "personaje_1": { "posicion": [0, 0, 0],  "vida": 100, "mana": 50 },
+        "personaje_2": { "posicion": [50, 0, 0], "vida": 100, "mana": 50 }
+      },
+      "assets": {
+        "arbol_01": "perfecto",
+        "muro_01": "perfecto",
+        "arbusto_01": "perfecto"
+      },
+      "hechizos": []
+    },
+    {
+      "t": 1,
+      "personajes": {
+        "personaje_1": { "posicion": [2, 0, 0],  "vida": 100, "mana": 50 },
+        "personaje_2": { "posicion": [48, 0, 0], "vida": 100, "mana": 50 }
+      },
+      "assets": {
+        "arbol_01": "perfecto",
+        "muro_01": "perfecto",
+        "arbusto_01": "perfecto"
+      },
+      "hechizos": []
+    },
+    {
+      "t": 2,
+      "personajes": {
+        "personaje_1": { "posicion": [4, 0, 0],  "vida": 100, "mana": 37 },
+        "personaje_2": { "posicion": [46, 0, 0], "vida": 100, "mana": 50 }
+      },
+      "assets": {
+        "arbol_01": "perfecto",
+        "muro_01": "perfecto",
+        "arbusto_01": "perfecto"
+      },
+      "hechizos": [
+        {
+          "idHechizo": "h_001",
+          "lanzador": "personaje_1",
+          "tipo": "bola_fuego",
+          "costeMana": 15,
+          "origen": [4, 1, 0],
+          "destino": [46, 1, 0],
+          "objetivo": "personaje_2"
+        }
+      ]
+    },
+    {
+      "t": 3,
+      "personajes": {
+        "personaje_1": { "posicion": [6, 0, 0],  "vida": 100, "mana": 39 },
+        "personaje_2": { "posicion": [44, 0, 0], "vida": 80,  "mana": 50 }
+      },
+      "assets": {
+        "arbol_01": "perfecto",
+        "muro_01": "perfecto",
+        "arbusto_01": "perfecto"
+      },
+      "hechizos": []
+    },
+    {
+      "t": 4,
+      "personajes": {
+        "personaje_1": { "posicion": [8, 0, 0],  "vida": 100, "mana": 41 },
+        "personaje_2": { "posicion": [42, 0, 0], "vida": 80,  "mana": 42 }
+      },
+      "assets": {
+        "arbol_01": "perfecto",
+        "muro_01": "perfecto",
+        "arbusto_01": "perfecto"
+      },
+      "hechizos": [
+        {
+          "idHechizo": "h_002",
+          "lanzador": "personaje_2",
+          "tipo": "rayo_arcano",
+          "costeMana": 10,
+          "origen": [42, 1, 0],
+          "destino": [8, 1, 0],
+          "objetivo": "personaje_1"
+        }
+      ]
+    },
+    {
+      "t": 5,
+      "personajes": {
+        "personaje_1": { "posicion": [10, 0, 0], "vida": 88, "mana": 43 },
+        "personaje_2": { "posicion": [40, 0, 0], "vida": 80, "mana": 44 }
+      },
+      "assets": {
+        "arbol_01": "dañado",
+        "muro_01": "perfecto",
+        "arbusto_01": "perfecto"
+      },
+      "hechizos": []
+    },
+    {
+      "t": 6,
+      "personajes": {
+        "personaje_1": { "posicion": [10, 0, 4], "vida": 88, "mana": 45 },
+        "personaje_2": { "posicion": [38, 0, 0], "vida": 80, "mana": 46 }
+      },
+      "assets": {
+        "arbol_01": "dañado",
+        "muro_01": "perfecto",
+        "arbusto_01": "perfecto"
+      },
+      "hechizos": []
+    },
+    {
+      "t": 7,
+      "personajes": {
+        "personaje_1": { "posicion": [10, 0, 5], "vida": 88, "mana": 32 },
+        "personaje_2": { "posicion": [36, 0, 0], "vida": 80, "mana": 48 }
+      },
+      "assets": {
+        "arbol_01": "dañado",
+        "muro_01": "perfecto",
+        "arbusto_01": "perfecto"
+      },
+      "hechizos": [
+        {
+          "idHechizo": "h_003",
+          "lanzador": "personaje_1",
+          "tipo": "bola_fuego",
+          "costeMana": 15,
+          "origen": [10, 1, 5],
+          "destino": [10, 1, 5],
+          "objetivo": "arbol_01"
+        }
+      ]
+    },
+    {
+      "t": 8,
+      "personajes": {
+        "personaje_1": { "posicion": [10, 0, 5], "vida": 88, "mana": 34 },
+        "personaje_2": { "posicion": [34, 0, 0], "vida": 80, "mana": 35 }
+      },
+      "assets": {
+        "muro_01": "perfecto",
+        "arbusto_01": "perfecto"
+      },
+      "hechizos": [
+        {
+          "idHechizo": "h_004",
+          "lanzador": "personaje_2",
+          "tipo": "bola_fuego",
+          "costeMana": 15,
+          "origen": [34, 1, 0],
+          "destino": [10, 1, 5],
+          "objetivo": "personaje_1"
+        }
+      ]
+    },
+    {
+      "t": 9,
+      "personajes": {
+        "personaje_1": { "posicion": [10, 0, 5], "vida": 68, "mana": 36 },
+        "personaje_2": { "posicion": [32, 0, 0], "vida": 80, "mana": 37 }
+      },
+      "assets": {
+        "muro_01": "perfecto",
+        "arbusto_01": "dañado"
+      },
+      "hechizos": []
+    },
+    {
+      "t": 10,
+      "personajes": {
+        "personaje_1": { "posicion": [12, 0, 5], "vida": 68, "mana": 38 },
+        "personaje_2": { "posicion": [30, 0, 0], "vida": 80, "mana": 39 }
+      },
+      "assets": {
+        "muro_01": "perfecto",
+        "arbusto_01": "dañado"
+      },
+      "hechizos": []
+    },
+    {
+      "t": 11,
+      "personajes": {
+        "personaje_1": { "posicion": [14, 0, 5], "vida": 68, "mana": 40 },
+        "personaje_2": { "posicion": [28, 0, 0], "vida": 80, "mana": 16 }
+      },
+      "assets": {
+        "muro_01": "perfecto",
+        "arbusto_01": "dañado"
+      },
+      "hechizos": [
+        {
+          "idHechizo": "h_005",
+          "lanzador": "personaje_2",
+          "tipo": "explosión",
+          "costeMana": 25,
+          "origen": [28, 1, 0],
+          "destino": [14, 1, 5],
+          "objetivo": "personaje_1"
+        }
+      ]
+    },
+    {
+      "t": 12,
+      "personajes": {
+        "personaje_1": { "posicion": [14, 0, 5], "vida": 38, "mana": 42 },
+        "personaje_2": { "posicion": [28, 0, 0], "vida": 80, "mana": 18 }
+      },
+      "assets": {
+        "muro_01": "dañado",
+        "arbusto_01": "dañado"
+      },
+      "hechizos": []
+    },
+    {
+      "t": 13,
+      "personajes": {
+        "personaje_1": { "posicion": [16, 0, 5], "vida": 38, "mana": 44 },
+        "personaje_2": { "posicion": [26, 0, 0], "vida": 80, "mana": 20 }
+      },
+      "assets": {
+        "muro_01": "dañado",
+        "arbusto_01": "dañado"
+      },
+      "hechizos": []
+    },
+    {
+      "t": 14,
+      "personajes": {
+        "personaje_1": { "posicion": [18, 0, 5], "vida": 0,  "mana": 46 },
+        "personaje_2": { "posicion": [24, 0, 0], "vida": 80, "mana": 22 }
+      },
+      "assets": {
+        "muro_01": "dañado",
+        "arbusto_01": "dañado"
+      },
+      "hechizos": [
+        {
+          "idHechizo": "h_006",
+          "lanzador": "personaje_2",
+          "tipo": "explosión",
+          "costeMana": 25,
+          "origen": [24, 1, 0],
+          "destino": [18, 1, 5],
+          "objetivo": "personaje_1"
+        }
+      ]
+    }
+  ]
+}
