@@ -31,7 +31,7 @@ void Camera::update(const Input& input, float dt) {
 	bool shiftDown = input.keyDown(GLFW_KEY_LEFT_SHIFT);
 
 	const float speed = 1.f;
-	const float rotSpeed = 2.f;
+	const float rotSpeed = 4.f;
 
 	float x_mov, y_mov, z_mov;
 
