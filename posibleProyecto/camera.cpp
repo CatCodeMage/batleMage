@@ -21,27 +21,36 @@ void Camera::updateView() {
 	w_view = glm::lookAt(w_pos, w_pos + w_front, glm::vec3(0.f, 1.f, 0.f));
 }
 
-void Camera::update(const Input& input, float dt) {
+bool Camera::procesOrders(const Input& input, float& fwd, float& strafe, float& turn) {
 	bool wDown = input.keyDown(GLFW_KEY_W);
 	bool aDown = input.keyDown(GLFW_KEY_A);
 	bool sDown = input.keyDown(GLFW_KEY_S);
 	bool dDown = input.keyDown(GLFW_KEY_D);
 	bool qDown = input.keyDown(GLFW_KEY_Q);
 	bool eDown = input.keyDown(GLFW_KEY_E);
-	bool shiftDown = input.keyDown(GLFW_KEY_LEFT_SHIFT);
+
+	fwd = (float)wDown - (float)sDown;   // -1, 0 o 1; W+S se anulan
+	strafe = (float)dDown - (float)aDown;
+	turn = (float)eDown - (float)qDown;
+
+	return input.keyDown(GLFW_KEY_LEFT_SHIFT);
+}
+
+void Camera::update(const Input& input,const SystemInfo& sysInfo) {
+	this->set_camera((float)sysInfo.getWidht(), (float)sysInfo.getHeight());
+
+	float dt = sysInfo.getDeltaTime();
+
+	float fwd, strafe, turn; 
 
 	const float speed = 1.f;
-	const float rotSpeed = 4.f;
+	const float rotSpeed = 10.f;
 
 	float x_mov, y_mov, z_mov;
 
-	float fwd = (float)wDown - (float)sDown;   // -1, 0 o 1; W+S se anulan
-	float strafe = (float)dDown - (float)aDown;
-	float turn = (float)eDown - (float)qDown;
-
-	if (shiftDown) {
+	if (procesOrders(input, fwd, strafe, turn)) {
 		x_mov = y_mov = 0.f;
-		z_mov = fwd * dt * speed;
+		z_mov = - fwd * dt * speed;
 		w_yaw += strafe * dt * rotSpeed;
 		w_pitch += turn * dt * rotSpeed;
 		w_pitch = glm::clamp(w_pitch, -89.f, 89.f);   // para que este en el angulo correcto

@@ -1,13 +1,15 @@
 #pragma once
 #include "global.h" 
 #include "Input.h"
+#include "systemInfo.h"
 
 class Camera
 {
 public:
 	Camera(); 
 	void set_camera(float widht, float height);
-	void update(const Input & input, float dt);
+	void update(const Input & input, const SystemInfo& sysInfo);
+	bool procesOrders(const Input& input, float& fwd, float& strafe, float& turn);
 
 	glm::mat4 get_view() const { return w_view; };
 	glm::mat4 get_proj() const { return w_proj; };

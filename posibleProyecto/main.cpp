@@ -6,6 +6,7 @@
 #include "MeshLibrary.h"
 #include "suelo.h"
 #include "Input.h"
+#include "Renderer.h"
 
 int shouldContinue(GLFWwindow* window) {
     return glfwWindowShouldClose(window) == 0;
@@ -59,7 +60,9 @@ void buclePrincipaLTiempoReal(GLFWwindow* window, SystemInfo& sysInfo) {
 
     Camera viewCamera;
 
-    GLint mvpLoc = glGetUniformLocation(setShaders(), "uMVP");
+    GLuint program = setShaders();
+    Renderer renderer;
+    renderer.init(program);
 
     Input keysInput;
 
@@ -70,23 +73,17 @@ void buclePrincipaLTiempoReal(GLFWwindow* window, SystemInfo& sysInfo) {
 
         sysInfo.getCurrentState(window);
 
-
-        viewCamera.set_camera((float)sysInfo.getWidht(), (float)sysInfo.getHeight());
-
-        viewCamera.update(keysInput, sysInfo.getDeltaTime());
+        viewCamera.update(keysInput, sysInfo);
 
         glm::mat4 vp = viewCamera.get_proj() * viewCamera.get_view();
 
-        // Suelo: sin transformación
-        glUniformMatrix4fv(mvpLoc, 1, GL_FALSE, glm::value_ptr(vp));
-        libMesh.get(floorId).draw();
-
-        // Cubo: subido a y=1 y girando sobre sí mismo
         glm::mat4 cubeModel = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 1.0f, 0.0f))
             * glm::rotate(glm::mat4(1.0f), sysInfo.getTimeStored(), glm::vec3(0.5f, 1.0f, 0.0f));
-        glUniformMatrix4fv(mvpLoc, 1, GL_FALSE, glm::value_ptr(vp * cubeModel));
-        libMesh.get(cubeId).draw();
-        
+
+        renderer.submit(floorId, glm::mat4(1.0f), glm::vec4(1.0f), 1);
+        renderer.submit(cubeId, cubeModel, glm::vec4(0.9f, 0.4f, 0.2f, 1.0f));
+        renderer.flush(libMesh, vp);
+
         updateFrame(window);
     }
 
