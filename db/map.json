@@ -1,111 +1,91 @@
 {
   "principal": {
     "size": [100, 100, 100],
-    "marks": [
-      {
-        "id": "mark_001",
-        "type": "scorch",
-        "posicion": [4, 0, 0],
-        "estado": "quemado"
-      },
-      {
-        "id": "mark_002",
-        "type": "puddle",
-        "posicion": [10, 0, 5],
-        "estado": "mojado"
-      },
-      {
-        "id": "mark_003",
-        "type": "impact",
-        "posicion": [20, 0, 15],
-        "estado": "intacto"
-      }
-    ],
-    "assets": [
-      {
+    "assets": {
+      "tree_01": {
         "type": "tree",
         "position": [10, 4, 4]
       },
-      {
+      "tree_02": {
         "type": "tree",
         "position": [15, 4, 22]
       },
-      {
+      "tree_03": {
         "type": "tree",
         "position": [30, 4, 8]
       },
-      {
+      "tree_04": {
         "type": "tree",
         "position": [55, 4, 40]
       },
-      {
+      "tree_05": {
         "type": "tree",
         "position": [70, 4, 12]
       },
-      {
+      "tree_06": {
         "type": "tree",
         "position": [88, 4, 60]
       },
-      {
+      "rock_01": {
         "type": "rock",
         "position": [5, 2, 15]
       },
-      {
+      "rock_02": {
         "type": "rock",
         "position": [20, 2, 35]
       },
-      {
+      "rock_03": {
         "type": "rock",
         "position": [42, 2, 10]
       },
-      {
+      "rock_04": {
         "type": "rock",
         "position": [60, 2, 55]
       },
-      {
+      "rock_05": {
         "type": "rock",
         "position": [75, 2, 30]
       },
-      {
+      "rock_06": {
         "type": "rock",
         "position": [92, 2, 80]
       },
-      {
+      "rock_07": {
         "type": "rock",
         "position": [25, 2, 70]
       },
-      {
+      "bush_01": {
         "type": "bush",
         "position": [8, 1, 30]
       },
-      {
+      "bush_02": {
         "type": "bush",
         "position": [18, 1, 50]
       },
-      {
+      "bush_03": {
         "type": "bush",
         "position": [35, 1, 25]
       },
-      {
+      "bush_04": {
         "type": "bush",
         "position": [48, 1, 65]
       },
-      {
+      "bush_05": {
         "type": "bush",
         "position": [63, 1, 18]
       },
-      {
+      "bush_06": {
         "type": "bush",
         "position": [80, 1, 45]
       },
-      {
+      "bush_07": {
         "type": "bush",
         "position": [95, 1, 20]
       },
-      {
+      "bush_08": {
         "type": "bush",
         "position": [12, 1, 85]
       }
-    ]
+    }
   }
 }

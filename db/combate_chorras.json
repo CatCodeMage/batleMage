@@ -1,275 +1,678 @@
 {
   "metadata": {
-    "version": "1.1",
-    "totalIteraciones": 14,
-    "ganador": "personaje_2"
+    "version": "1.5",
+    "iterations": 14,
+    "winner": "player_2"
   },
-  "escenario": {
-    "ancho": 100,
-    "alto": 100,
-    "profundidad": 100
+  "map": "./bd/map.json",
+  "players": {
+    "player_1": { "type": "sphere", "position": [-20, 0, -20] },
+    "player_2": { "type": "sphere", "position": [20, 0, 20] }
   },
-  "personajes": {
-    "personaje_1": { "nombre": "Aragorn", "modelo": "cube.glb", "manaMaximo": 50, "regeneracionManaPorSegundo": 2 },
-    "personaje_2": { "nombre": "Legolas", "modelo": "cube.glb",  "manaMaximo": 50, "regeneracionManaPorSegundo": 2 }
-  },
-  "assets": {
-    "arbol_01":   { "tipo": "arbol",   "posicionInicial": [10, 0, 5] },
-    "muro_01":    { "tipo": "muro",    "posicionInicial": [20, 0, 15] },
-    "arbusto_01": { "tipo": "arbusto", "posicionInicial": [30, 0, 25] }
-  },
-  "hechizos": {
-    "bola_fuego":  { "costeMana": 15, "daño": 20 },
-    "rayo_arcano": { "costeMana": 10, "daño": 12 },
-    "curación":    { "costeMana": 20, "daño": -25 },
-    "explosión":   { "costeMana": 25, "daño": 30 }
-  },
+  "spells": "./bd/spells.json",
   "frames": [
     {
       "t": 0,
-      "personajes": {
-        "personaje_1": { "posicion": [0, 0, 0],  "vida": 100, "mana": 50 },
-        "personaje_2": { "posicion": [50, 0, 0], "vida": 100, "mana": 50 }
+      "players": {
+        "player_1": { "position": [-20, 0, -20], "state": "alive" },
+        "player_2": { "position": [20, 0, 20],   "state": "alive" }
       },
       "assets": {
-        "arbol_01": "perfecto",
-        "muro_01": "perfecto",
-        "arbusto_01": "perfecto"
+        "tree_01": "perfect",
+        "tree_02": "perfect",
+        "tree_03": "perfect",
+        "tree_04": "perfect",
+        "tree_05": "perfect",
+        "tree_06": "perfect",
+        "rock_01": "perfect",
+        "rock_02": "perfect",
+        "rock_03": "perfect",
+        "rock_04": "perfect",
+        "rock_05": "perfect",
+        "rock_06": "perfect",
+        "rock_07": "perfect",
+        "bush_01": "perfect",
+        "bush_02": "perfect",
+        "bush_03": "perfect",
+        "bush_04": "perfect",
+        "bush_05": "perfect",
+        "bush_06": "perfect",
+        "bush_07": "perfect",
+        "bush_08": "perfect"
       },
-      "hechizos": []
+      "spells": [],
+      "mapstate": [
+        {
+          "burns": [],
+          "freezed": [],
+          "poisoned": [],
+          "wet": []
+        }
+      ]
     },
     {
       "t": 1,
-      "personajes": {
-        "personaje_1": { "posicion": [2, 0, 0],  "vida": 100, "mana": 50 },
-        "personaje_2": { "posicion": [48, 0, 0], "vida": 100, "mana": 50 }
+      "players": {
+        "player_1": { "position": [-18, 0, -18], "state": "alive" },
+        "player_2": { "position": [18, 0, 18],   "state": "alive" }
       },
       "assets": {
-        "arbol_01": "perfecto",
-        "muro_01": "perfecto",
-        "arbusto_01": "perfecto"
+        "tree_01": "perfect",
+        "tree_02": "perfect",
+        "tree_03": "perfect",
+        "tree_04": "perfect",
+        "tree_05": "perfect",
+        "tree_06": "perfect",
+        "rock_01": "perfect",
+        "rock_02": "perfect",
+        "rock_03": "perfect",
+        "rock_04": "perfect",
+        "rock_05": "perfect",
+        "rock_06": "perfect",
+        "rock_07": "perfect",
+        "bush_01": "perfect",
+        "bush_02": "perfect",
+        "bush_03": "perfect",
+        "bush_04": "perfect",
+        "bush_05": "perfect",
+        "bush_06": "perfect",
+        "bush_07": "perfect",
+        "bush_08": "perfect"
       },
-      "hechizos": []
+      "spells": [],
+      "mapstate": [
+        {
+          "burns": [],
+          "freezed": [],
+          "poisoned": [],
+          "wet": []
+        }
+      ]
     },
     {
       "t": 2,
-      "personajes": {
-        "personaje_1": { "posicion": [4, 0, 0],  "vida": 100, "mana": 37 },
-        "personaje_2": { "posicion": [46, 0, 0], "vida": 100, "mana": 50 }
+      "players": {
+        "player_1": { "position": [-16, 0, -16], "state": "alive" },
+        "player_2": { "position": [16, 0, 16],   "state": "alive" }
       },
       "assets": {
-        "arbol_01": "perfecto",
-        "muro_01": "perfecto",
-        "arbusto_01": "perfecto"
+        "tree_01": "perfect",
+        "tree_02": "perfect",
+        "tree_03": "perfect",
+        "tree_04": "perfect",
+        "tree_05": "perfect",
+        "tree_06": "perfect",
+        "rock_01": "perfect",
+        "rock_02": "perfect",
+        "rock_03": "perfect",
+        "rock_04": "perfect",
+        "rock_05": "perfect",
+        "rock_06": "perfect",
+        "rock_07": "perfect",
+        "bush_01": "perfect",
+        "bush_02": "perfect",
+        "bush_03": "perfect",
+        "bush_04": "perfect",
+        "bush_05": "perfect",
+        "bush_06": "perfect",
+        "bush_07": "perfect",
+        "bush_08": "perfect"
       },
-      "hechizos": [
+      "spells": [
         {
-          "idHechizo": "h_001",
-          "lanzador": "personaje_1",
-          "tipo": "bola_fuego",
-          "costeMana": 15,
-          "origen": [4, 1, 0],
-          "destino": [46, 1, 0],
-          "objetivo": "personaje_2"
+          "0": {
+            "name": "fire_ball",
+            "origin": [-16, 1, -16],
+            "position": [-16, 1, -16],
+            "destination": [16, 1, 16]
+          }
+        }
+      ],
+      "mapstate": [
+        {
+          "burns": [],
+          "freezed": [],
+          "poisoned": [],
+          "wet": []
         }
       ]
     },
     {
       "t": 3,
-      "personajes": {
-        "personaje_1": { "posicion": [6, 0, 0],  "vida": 100, "mana": 39 },
-        "personaje_2": { "posicion": [44, 0, 0], "vida": 80,  "mana": 50 }
+      "players": {
+        "player_1": { "position": [-14, 0, -14], "state": "alive" },
+        "player_2": { "position": [14, 0, 14],   "state": "alive" }
       },
       "assets": {
-        "arbol_01": "perfecto",
-        "muro_01": "perfecto",
-        "arbusto_01": "perfecto"
+        "tree_01": "damaged",
+        "tree_02": "perfect",
+        "tree_03": "perfect",
+        "tree_04": "perfect",
+        "tree_05": "perfect",
+        "tree_06": "perfect",
+        "rock_01": "perfect",
+        "rock_02": "perfect",
+        "rock_03": "perfect",
+        "rock_04": "perfect",
+        "rock_05": "perfect",
+        "rock_06": "perfect",
+        "rock_07": "perfect",
+        "bush_01": "perfect",
+        "bush_02": "perfect",
+        "bush_03": "perfect",
+        "bush_04": "perfect",
+        "bush_05": "perfect",
+        "bush_06": "perfect",
+        "bush_07": "perfect",
+        "bush_08": "perfect"
       },
-      "hechizos": []
+      "spells": [
+        {
+          "0": {
+            "name": "fire_ball",
+            "origin": [-16, 1, -16],
+            "position": [-6, 1, -6],
+            "destination": [16, 1, 16]
+          }
+        }
+      ],
+      "mapstate": [
+        {
+          "burns": [[-6, 0, -6]],
+          "freezed": [],
+          "poisoned": [],
+          "wet": []
+        }
+      ]
     },
     {
       "t": 4,
-      "personajes": {
-        "personaje_1": { "posicion": [8, 0, 0],  "vida": 100, "mana": 41 },
-        "personaje_2": { "posicion": [42, 0, 0], "vida": 80,  "mana": 42 }
+      "players": {
+        "player_1": { "position": [-12, 0, -12], "state": "alive" },
+        "player_2": { "position": [12, 0, 12],   "state": "burning" }
       },
       "assets": {
-        "arbol_01": "perfecto",
-        "muro_01": "perfecto",
-        "arbusto_01": "perfecto"
+        "tree_01": "damaged",
+        "tree_02": "perfect",
+        "tree_03": "perfect",
+        "tree_04": "perfect",
+        "tree_05": "perfect",
+        "tree_06": "perfect",
+        "rock_01": "perfect",
+        "rock_02": "perfect",
+        "rock_03": "perfect",
+        "rock_04": "perfect",
+        "rock_05": "perfect",
+        "rock_06": "perfect",
+        "rock_07": "perfect",
+        "bush_01": "perfect",
+        "bush_02": "perfect",
+        "bush_03": "perfect",
+        "bush_04": "perfect",
+        "bush_05": "perfect",
+        "bush_06": "perfect",
+        "bush_07": "perfect",
+        "bush_08": "perfect"
       },
-      "hechizos": [
+      "spells": [
         {
-          "idHechizo": "h_002",
-          "lanzador": "personaje_2",
-          "tipo": "rayo_arcano",
-          "costeMana": 10,
-          "origen": [42, 1, 0],
-          "destino": [8, 1, 0],
-          "objetivo": "personaje_1"
+          "0": {
+            "name": "lightning_bolt",
+            "origin": [12, 1, 12],
+            "position": [12, 1, 12],
+            "destination": [-12, 1, -12]
+          }
+        }
+      ],
+      "mapstate": [
+        {
+          "burns": [[-6, 0, -6], [12, 0, 12]],
+          "freezed": [],
+          "poisoned": [],
+          "wet": []
         }
       ]
     },
     {
       "t": 5,
-      "personajes": {
-        "personaje_1": { "posicion": [10, 0, 0], "vida": 88, "mana": 43 },
-        "personaje_2": { "posicion": [40, 0, 0], "vida": 80, "mana": 44 }
+      "players": {
+        "player_1": { "position": [-10, 0, -10], "state": "shocked" },
+        "player_2": { "position": [10, 0, 10],   "state": "burning" }
       },
       "assets": {
-        "arbol_01": "dañado",
-        "muro_01": "perfecto",
-        "arbusto_01": "perfecto"
+        "tree_01": "damaged",
+        "tree_02": "perfect",
+        "tree_03": "perfect",
+        "tree_04": "perfect",
+        "tree_05": "perfect",
+        "tree_06": "perfect",
+        "rock_01": "perfect",
+        "rock_02": "perfect",
+        "rock_03": "perfect",
+        "rock_04": "perfect",
+        "rock_05": "perfect",
+        "rock_06": "perfect",
+        "rock_07": "perfect",
+        "bush_01": "perfect",
+        "bush_02": "perfect",
+        "bush_03": "perfect",
+        "bush_04": "perfect",
+        "bush_05": "damaged",
+        "bush_06": "perfect",
+        "bush_07": "perfect",
+        "bush_08": "perfect"
       },
-      "hechizos": []
+      "spells": [
+        {
+          "0": {
+            "name": "lightning_bolt",
+            "origin": [12, 1, 12],
+            "position": [-10, 1, -10],
+            "destination": [-12, 1, -12]
+          }
+        }
+      ],
+      "mapstate": [
+        {
+          "burns": [[-6, 0, -6], [12, 0, 12], [-12, 0, -12]],
+          "freezed": [],
+          "poisoned": [],
+          "wet": []
+        }
+      ]
     },
     {
       "t": 6,
-      "personajes": {
-        "personaje_1": { "posicion": [10, 0, 4], "vida": 88, "mana": 45 },
-        "personaje_2": { "posicion": [38, 0, 0], "vida": 80, "mana": 46 }
+      "players": {
+        "player_1": { "position": [-8, 0, -8], "state": "shocked" },
+        "player_2": { "position": [8, 0, 8],   "state": "burning" }
       },
       "assets": {
-        "arbol_01": "dañado",
-        "muro_01": "perfecto",
-        "arbusto_01": "perfecto"
+        "tree_01": "damaged",
+        "tree_02": "perfect",
+        "tree_03": "perfect",
+        "tree_04": "perfect",
+        "tree_05": "perfect",
+        "tree_06": "perfect",
+        "rock_01": "perfect",
+        "rock_02": "perfect",
+        "rock_03": "perfect",
+        "rock_04": "perfect",
+        "rock_05": "perfect",
+        "rock_06": "perfect",
+        "rock_07": "perfect",
+        "bush_01": "perfect",
+        "bush_02": "perfect",
+        "bush_03": "perfect",
+        "bush_04": "perfect",
+        "bush_05": "damaged",
+        "bush_06": "perfect",
+        "bush_07": "perfect",
+        "bush_08": "perfect"
       },
-      "hechizos": []
+      "spells": [],
+      "mapstate": [
+        {
+          "burns": [[-6, 0, -6], [12, 0, 12], [-12, 0, -12]],
+          "freezed": [],
+          "poisoned": [],
+          "wet": []
+        }
+      ]
     },
     {
       "t": 7,
-      "personajes": {
-        "personaje_1": { "posicion": [10, 0, 5], "vida": 88, "mana": 32 },
-        "personaje_2": { "posicion": [36, 0, 0], "vida": 80, "mana": 48 }
+      "players": {
+        "player_1": { "position": [-6, 0, -6], "state": "shocked" },
+        "player_2": { "position": [6, 0, 6],   "state": "burning" }
       },
       "assets": {
-        "arbol_01": "dañado",
-        "muro_01": "perfecto",
-        "arbusto_01": "perfecto"
+        "tree_01": "damaged",
+        "tree_02": "perfect",
+        "tree_03": "perfect",
+        "tree_04": "perfect",
+        "tree_05": "perfect",
+        "tree_06": "perfect",
+        "rock_01": "perfect",
+        "rock_02": "perfect",
+        "rock_03": "perfect",
+        "rock_04": "perfect",
+        "rock_05": "perfect",
+        "rock_06": "perfect",
+        "rock_07": "perfect",
+        "bush_01": "perfect",
+        "bush_02": "perfect",
+        "bush_03": "perfect",
+        "bush_04": "perfect",
+        "bush_05": "damaged",
+        "bush_06": "perfect",
+        "bush_07": "perfect",
+        "bush_08": "perfect"
       },
-      "hechizos": [
+      "spells": [
         {
-          "idHechizo": "h_003",
-          "lanzador": "personaje_1",
-          "tipo": "bola_fuego",
-          "costeMana": 15,
-          "origen": [10, 1, 5],
-          "destino": [10, 1, 5],
-          "objetivo": "arbol_01"
+          "0": {
+            "name": "ice_lance",
+            "origin": [-6, 1, -6],
+            "position": [-6, 1, -6],
+            "destination": [6, 1, 6]
+          },
+          "1": {
+            "name": "fire_ball",
+            "origin": [6, 1, 6],
+            "position": [6, 1, 6],
+            "destination": [-6, 1, -6]
+          }
+        }
+      ],
+      "mapstate": [
+        {
+          "burns": [[-6, 0, -6], [12, 0, 12], [-12, 0, -12]],
+          "freezed": [[-6, 0, -6]],
+          "poisoned": [],
+          "wet": []
         }
       ]
     },
     {
       "t": 8,
-      "personajes": {
-        "personaje_1": { "posicion": [10, 0, 5], "vida": 88, "mana": 34 },
-        "personaje_2": { "posicion": [34, 0, 0], "vida": 80, "mana": 35 }
+      "players": {
+        "player_1": { "position": [-4, 0, -4], "state": "burning" },
+        "player_2": { "position": [4, 0, 4],   "state": "frozen" }
       },
       "assets": {
-        "muro_01": "perfecto",
-        "arbusto_01": "perfecto"
+        "tree_01": "damaged",
+        "tree_02": "perfect",
+        "tree_03": "perfect",
+        "tree_04": "perfect",
+        "tree_05": "perfect",
+        "tree_06": "perfect",
+        "rock_01": "perfect",
+        "rock_02": "perfect",
+        "rock_03": "perfect",
+        "rock_04": "perfect",
+        "rock_05": "perfect",
+        "rock_06": "perfect",
+        "rock_07": "perfect",
+        "bush_01": "perfect",
+        "bush_02": "perfect",
+        "bush_03": "perfect",
+        "bush_04": "perfect",
+        "bush_05": "damaged",
+        "bush_06": "perfect",
+        "bush_07": "perfect",
+        "bush_08": "perfect"
       },
-      "hechizos": [
+      "spells": [
         {
-          "idHechizo": "h_004",
-          "lanzador": "personaje_2",
-          "tipo": "bola_fuego",
-          "costeMana": 15,
-          "origen": [34, 1, 0],
-          "destino": [10, 1, 5],
-          "objetivo": "personaje_1"
+          "0": {
+            "name": "ice_lance",
+            "origin": [-6, 1, -6],
+            "position": [4, 1, 4],
+            "destination": [6, 1, 6]
+          },
+          "1": {
+            "name": "fire_ball",
+            "origin": [6, 1, 6],
+            "position": [-4, 1, -4],
+            "destination": [-6, 1, -6]
+          }
+        }
+      ],
+      "mapstate": [
+        {
+          "burns": [[-6, 0, -6], [12, 0, 12], [-12, 0, -12], [6, 0, 6]],
+          "freezed": [[-6, 0, -6], [6, 0, 6]],
+          "poisoned": [],
+          "wet": []
         }
       ]
     },
     {
       "t": 9,
-      "personajes": {
-        "personaje_1": { "posicion": [10, 0, 5], "vida": 68, "mana": 36 },
-        "personaje_2": { "posicion": [32, 0, 0], "vida": 80, "mana": 37 }
+      "players": {
+        "player_1": { "position": [-2, 0, -2], "state": "burning" },
+        "player_2": { "position": [2, 0, 2],   "state": "frozen" }
       },
       "assets": {
-        "muro_01": "perfecto",
-        "arbusto_01": "dañado"
+        "tree_02": "perfect",
+        "tree_03": "perfect",
+        "tree_04": "perfect",
+        "tree_05": "perfect",
+        "tree_06": "perfect",
+        "rock_01": "perfect",
+        "rock_02": "perfect",
+        "rock_03": "perfect",
+        "rock_04": "perfect",
+        "rock_05": "perfect",
+        "rock_06": "perfect",
+        "rock_07": "perfect",
+        "bush_01": "perfect",
+        "bush_02": "perfect",
+        "bush_03": "perfect",
+        "bush_04": "perfect",
+        "bush_05": "damaged",
+        "bush_06": "perfect",
+        "bush_07": "perfect",
+        "bush_08": "perfect"
       },
-      "hechizos": []
+      "spells": [],
+      "mapstate": [
+        {
+          "burns": [[-6, 0, -6], [12, 0, 12], [-12, 0, -12], [6, 0, 6]],
+          "freezed": [[-6, 0, -6], [6, 0, 6]],
+          "poisoned": [],
+          "wet": []
+        }
+      ]
     },
     {
       "t": 10,
-      "personajes": {
-        "personaje_1": { "posicion": [12, 0, 5], "vida": 68, "mana": 38 },
-        "personaje_2": { "posicion": [30, 0, 0], "vida": 80, "mana": 39 }
+      "players": {
+        "player_1": { "position": [0, 0, 0], "state": "burning" },
+        "player_2": { "position": [0, 0, 0], "state": "frozen" }
       },
       "assets": {
-        "muro_01": "perfecto",
-        "arbusto_01": "dañado"
+        "tree_02": "perfect",
+        "tree_03": "perfect",
+        "tree_04": "perfect",
+        "tree_05": "perfect",
+        "tree_06": "perfect",
+        "rock_01": "perfect",
+        "rock_02": "perfect",
+        "rock_03": "perfect",
+        "rock_04": "perfect",
+        "rock_05": "perfect",
+        "rock_06": "perfect",
+        "rock_07": "perfect",
+        "bush_01": "perfect",
+        "bush_02": "perfect",
+        "bush_03": "perfect",
+        "bush_04": "perfect",
+        "bush_06": "perfect",
+        "bush_07": "perfect",
+        "bush_08": "perfect"
       },
-      "hechizos": []
+      "spells": [
+        {
+          "0": {
+            "name": "meteor",
+            "origin": [0, 5, 0],
+            "position": [0, 5, 0],
+            "destination": [0, 0, 0]
+          }
+        }
+      ],
+      "mapstate": [
+        {
+          "burns": [[-6, 0, -6], [12, 0, 12], [-12, 0, -12], [6, 0, 6]],
+          "freezed": [[-6, 0, -6], [6, 0, 6]],
+          "poisoned": [],
+          "wet": []
+        }
+      ]
     },
     {
       "t": 11,
-      "personajes": {
-        "personaje_1": { "posicion": [14, 0, 5], "vida": 68, "mana": 40 },
-        "personaje_2": { "posicion": [28, 0, 0], "vida": 80, "mana": 16 }
+      "players": {
+        "player_1": { "position": [-2, 0, 0], "state": "burning" },
+        "player_2": { "position": [2, 0, 0],  "state": "alive" }
       },
       "assets": {
-        "muro_01": "perfecto",
-        "arbusto_01": "dañado"
+        "tree_02": "perfect",
+        "tree_03": "perfect",
+        "tree_04": "perfect",
+        "tree_05": "perfect",
+        "tree_06": "perfect",
+        "rock_01": "perfect",
+        "rock_02": "perfect",
+        "rock_03": "perfect",
+        "rock_04": "perfect",
+        "rock_05": "perfect",
+        "rock_06": "perfect",
+        "rock_07": "perfect",
+        "bush_01": "perfect",
+        "bush_02": "perfect",
+        "bush_03": "perfect",
+        "bush_04": "perfect",
+        "bush_06": "perfect",
+        "bush_07": "perfect",
+        "bush_08": "perfect"
       },
-      "hechizos": [
+      "spells": [],
+      "mapstate": [
         {
-          "idHechizo": "h_005",
-          "lanzador": "personaje_2",
-          "tipo": "explosión",
-          "costeMana": 25,
-          "origen": [28, 1, 0],
-          "destino": [14, 1, 5],
-          "objetivo": "personaje_1"
+          "burns": [[-6, 0, -6], [12, 0, 12], [-12, 0, -12], [6, 0, 6], [0, 0, 0]],
+          "freezed": [[-6, 0, -6], [6, 0, 6]],
+          "poisoned": [],
+          "wet": []
         }
       ]
     },
     {
       "t": 12,
-      "personajes": {
-        "personaje_1": { "posicion": [14, 0, 5], "vida": 38, "mana": 42 },
-        "personaje_2": { "posicion": [28, 0, 0], "vida": 80, "mana": 18 }
+      "players": {
+        "player_1": { "position": [-4, 0, 0], "state": "burning" },
+        "player_2": { "position": [4, 0, 0],  "state": "alive" }
       },
       "assets": {
-        "muro_01": "dañado",
-        "arbusto_01": "dañado"
+        "tree_02": "perfect",
+        "tree_03": "perfect",
+        "tree_04": "perfect",
+        "tree_05": "perfect",
+        "tree_06": "perfect",
+        "rock_01": "perfect",
+        "rock_02": "perfect",
+        "rock_03": "perfect",
+        "rock_04": "perfect",
+        "rock_05": "perfect",
+        "rock_06": "perfect",
+        "rock_07": "perfect",
+        "bush_01": "perfect",
+        "bush_02": "perfect",
+        "bush_03": "perfect",
+        "bush_04": "perfect",
+        "bush_06": "perfect",
+        "bush_07": "perfect",
+        "bush_08": "perfect"
       },
-      "hechizos": []
+      "spells": [
+        {
+          "0": {
+            "name": "poison_cloud",
+            "origin": [4, 1, 0],
+            "position": [4, 1, 0],
+            "destination": [-4, 1, 0]
+          }
+        }
+      ],
+      "mapstate": [
+        {
+          "burns": [[-6, 0, -6], [12, 0, 12], [-12, 0, -12], [6, 0, 6], [0, 0, 0]],
+          "freezed": [[-6, 0, -6], [6, 0, 6]],
+          "poisoned": [],
+          "wet": []
+        }
+      ]
     },
     {
       "t": 13,
-      "personajes": {
-        "personaje_1": { "posicion": [16, 0, 5], "vida": 38, "mana": 44 },
-        "personaje_2": { "posicion": [26, 0, 0], "vida": 80, "mana": 20 }
+      "players": {
+        "player_1": { "position": [-6, 0, 0], "state": "poisoned" },
+        "player_2": { "position": [6, 0, 0],  "state": "alive" }
       },
       "assets": {
-        "muro_01": "dañado",
-        "arbusto_01": "dañado"
+        "tree_02": "perfect",
+        "tree_03": "perfect",
+        "tree_04": "perfect",
+        "tree_05": "perfect",
+        "tree_06": "perfect",
+        "rock_01": "perfect",
+        "rock_03": "perfect",
+        "rock_04": "perfect",
+        "rock_05": "perfect",
+        "rock_06": "perfect",
+        "rock_07": "perfect",
+        "bush_01": "perfect",
+        "bush_02": "perfect",
+        "bush_03": "perfect",
+        "bush_04": "perfect",
+        "bush_06": "perfect",
+        "bush_07": "perfect",
+        "bush_08": "perfect"
       },
-      "hechizos": []
+      "spells": [
+        {
+          "0": {
+            "name": "poison_cloud",
+            "origin": [4, 1, 0],
+            "position": [-4, 1, 0],
+            "destination": [-4, 1, 0]
+          }
+        }
+      ],
+      "mapstate": [
+        {
+          "burns": [[-6, 0, -6], [12, 0, 12], [-12, 0, -12], [6, 0, 6], [0, 0, 0]],
+          "freezed": [[-6, 0, -6], [6, 0, 6]],
+          "poisoned": [[-4, 0, 0]],
+          "wet": []
+        }
+      ]
     },
     {
       "t": 14,
-      "personajes": {
-        "personaje_1": { "posicion": [18, 0, 5], "vida": 0,  "mana": 46 },
-        "personaje_2": { "posicion": [24, 0, 0], "vida": 80, "mana": 22 }
+      "players": {
+        "player_1": { "position": [-6, 0, 0], "state": "dead" },
+        "player_2": { "position": [6, 0, 0],  "state": "alive" }
       },
       "assets": {
-        "muro_01": "dañado",
-        "arbusto_01": "dañado"
+        "tree_02": "perfect",
+        "tree_03": "perfect",
+        "tree_04": "perfect",
+        "tree_05": "perfect",
+        "tree_06": "perfect",
+        "rock_01": "perfect",
+        "rock_03": "perfect",
+        "rock_04": "perfect",
+        "rock_05": "perfect",
+        "rock_06": "perfect",
+        "rock_07": "perfect",
+        "bush_01": "perfect",
+        "bush_02": "perfect",
+        "bush_03": "perfect",
+        "bush_04": "perfect",
+        "bush_06": "perfect",
+        "bush_07": "perfect",
+        "bush_08": "perfect"
       },
-      "hechizos": [
+      "spells": [],
+      "mapstate": [
         {
-          "idHechizo": "h_006",
-          "lanzador": "personaje_2",
-          "tipo": "explosión",
-          "costeMana": 25,
-          "origen": [24, 1, 0],
-          "destino": [18, 1, 5],
-          "objetivo": "personaje_1"
+          "burns": [[-6, 0, -6], [12, 0, 12], [-12, 0, -12], [6, 0, 6], [0, 0, 0]],
+          "freezed": [[-6, 0, -6], [6, 0, 6]],
+          "poisoned": [[-4, 0, 0]],
+          "wet": []
         }
       ]
     }
