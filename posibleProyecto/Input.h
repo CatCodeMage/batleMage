@@ -5,6 +5,8 @@ class Input {
 public:
     void init(GLFWwindow* window);
     bool keyDown(int key) const { return key >= 0 && key <= GLFW_KEY_LAST && w_keys[key]; }
+    float get_dx() const { return w_dx; };
+    float get_dY() const { return w_dy; }
     void consumeMouseDelta(float& dx, float& dy);   // devuelve lo acumulado y lo pone a 0
 private:
     static void onKey(GLFWwindow* w, int key, int scancode, int action, int mods);

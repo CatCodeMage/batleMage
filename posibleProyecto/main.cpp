@@ -70,7 +70,10 @@ void buclePrincipaLTiempoReal(GLFWwindow* window, SystemInfo& sysInfo) {
 
         sysInfo.getCurrentState(window);
 
+
         viewCamera.set_camera((float)sysInfo.getWidht(), (float)sysInfo.getHeight());
+
+        viewCamera.update(keysInput, sysInfo.getDeltaTime());
 
         glm::mat4 vp = viewCamera.get_proj() * viewCamera.get_view();
 
