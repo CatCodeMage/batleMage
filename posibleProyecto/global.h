@@ -12,3 +12,4 @@
 #include <string>
 #include <cstdint>
 #include <cassert>
+#include <cstddef>

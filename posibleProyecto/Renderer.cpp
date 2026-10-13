@@ -1,35 +1,39 @@
 #include "Renderer.h"
-Renderer::Renderer() {
-    // Para en caso de no hacer init que explote el codigo
-    w_locModel = -1; 
-    w_locViewProj = -1; 
-    w_locColor = -1; 
-    w_locKind = -1;
-}
 
-void Renderer::submit(MeshId id, const glm::mat4& model, const glm::vec4& color, int kind) {
-    w_items.push_back({ id, model, color, kind });
+Renderer::Renderer() {
+    w_locViewProj = -1;
+    w_locNumLights = -1;
+    w_locLights = -1;
 }
 
 void Renderer::init(GLuint program) {
-    // Encontrar las variables de los shaders para tener el puntero para el flush
-    // Los shaders son raros, pero mucho
-    w_locModel = glGetUniformLocation(program, "uModel");
     w_locViewProj = glGetUniformLocation(program, "uViewProj");
-    w_locColor = glGetUniformLocation(program, "uColor");
-    w_locKind = glGetUniformLocation(program, "uKind");
+    w_locNumLights = glGetUniformLocation(program, "uNumLights");
+    w_locLights = glGetUniformLocation(program, "uLights[0]");
+}
+
+void Renderer::submitLight(const glm::vec3& pos, float radius, const glm::vec3& color, float intensity) {
+    if (w_lights.size() >= MAX_LIGHTS) return;     // de momento se ignoran las que sobran
+    w_lights.push_back({ pos, radius, color, intensity });
+}
+ 
+void Renderer::submit(MeshId id, const glm::mat4& model, const glm::vec4& color, int kind) {
+    if (id >= w_batches.size()) w_batches.resize(id + 1);
+    w_batches[id].push_back({ model, color, (float)kind });
 }
 
 void Renderer::flush(const MeshLibrary& lib, const glm::mat4& viewProj) {
-    // Projeccio
+
     glUniformMatrix4fv(w_locViewProj, 1, GL_FALSE, glm::value_ptr(viewProj));
 
-    for (const DrawItem& it : w_items) {
-        glUniformMatrix4fv(w_locModel, 1, GL_FALSE, glm::value_ptr(it.model)); // posicion + rotacion
-        glUniform4fv(w_locColor, 1, glm::value_ptr(it.color)); // Color base
-        glUniform1i(w_locKind, it.kind); // Tipo de draw del objeto, mirar shaders
-        lib.get(it.mesh).draw(); // Dibuja el objeto
+    glUniform1i(w_locNumLights, (GLint)w_lights.size());
+    if (!w_lights.empty())
+        glUniform4fv(w_locLights, (GLsizei)(w_lights.size() * 2), (const GLfloat*)w_lights.data());
+
+    for (MeshId i = 0; i < w_batches.size(); ++i) {
+        lib.get(i).drawInstances(w_batches[i]);
+        w_batches[i].clear();
     }
 
-    w_items.clear();
+    w_lights.clear();
 }

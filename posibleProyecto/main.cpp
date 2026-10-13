@@ -82,6 +82,11 @@ void buclePrincipaLTiempoReal(GLFWwindow* window, SystemInfo& sysInfo) {
 
         renderer.submit(floorId, glm::mat4(1.0f), glm::vec4(1.0f), 1);
         renderer.submit(cubeId, cubeModel, glm::vec4(0.9f, 0.4f, 0.2f, 1.0f));
+
+        float t = sysInfo.getTimeStored();
+        renderer.submitLight(glm::vec3(3.0f * cos(t), 3.0f, 3.0f * sin(t)), 8.0f, glm::vec3(1.0f, 0.8f, 0.5f), 2.0f);
+        renderer.submitLight(glm::vec3(-3.0f, 2.0f, 0.0f), 6.0f, glm::vec3(0.3f, 0.5f, 1.0f), 2.0f);
+
         renderer.flush(libMesh, vp);
 
         updateFrame(window);

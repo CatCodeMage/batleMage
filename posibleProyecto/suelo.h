@@ -1,5 +1,5 @@
 #pragma once
 
-extern float floorVertices[12];
+extern float floorVertices[24];
 
 extern unsigned int floorIndices[6];
