@@ -1,0 +1,111 @@
+{
+  "principal": {
+    "size": [100, 100, 100],
+    "marks": [
+      {
+        "id": "mark_001",
+        "type": "scorch",
+        "posicion": [4, 0, 0],
+        "estado": "quemado"
+      },
+      {
+        "id": "mark_002",
+        "type": "puddle",
+        "posicion": [10, 0, 5],
+        "estado": "mojado"
+      },
+      {
+        "id": "mark_003",
+        "type": "impact",
+        "posicion": [20, 0, 15],
+        "estado": "intacto"
+      }
+    ],
+    "assets": [
+      {
+        "type": "tree",
+        "position": [10, 4, 4]
+      },
+      {
+        "type": "tree",
+        "position": [15, 4, 22]
+      },
+      {
+        "type": "tree",
+        "position": [30, 4, 8]
+      },
+      {
+        "type": "tree",
+        "position": [55, 4, 40]
+      },
+      {
+        "type": "tree",
+        "position": [70, 4, 12]
+      },
+      {
+        "type": "tree",
+        "position": [88, 4, 60]
+      },
+      {
+        "type": "rock",
+        "position": [5, 2, 15]
+      },
+      {
+        "type": "rock",
+        "position": [20, 2, 35]
+      },
+      {
+        "type": "rock",
+        "position": [42, 2, 10]
+      },
+      {
+        "type": "rock",
+        "position": [60, 2, 55]
+      },
+      {
+        "type": "rock",
+        "position": [75, 2, 30]
+      },
+      {
+        "type": "rock",
+        "position": [92, 2, 80]
+      },
+      {
+        "type": "rock",
+        "position": [25, 2, 70]
+      },
+      {
+        "type": "bush",
+        "position": [8, 1, 30]
+      },
+      {
+        "type": "bush",
+        "position": [18, 1, 50]
+      },
+      {
+        "type": "bush",
+        "position": [35, 1, 25]
+      },
+      {
+        "type": "bush",
+        "position": [48, 1, 65]
+      },
+      {
+        "type": "bush",
+        "position": [63, 1, 18]
+      },
+      {
+        "type": "bush",
+        "position": [80, 1, 45]
+      },
+      {
+        "type": "bush",
+        "position": [95, 1, 20]
+      },
+      {
+        "type": "bush",
+        "position": [12, 1, 85]
+      }
+    ]
+  }
+}
