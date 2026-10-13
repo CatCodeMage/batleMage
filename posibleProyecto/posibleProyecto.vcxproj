@@ -157,6 +157,7 @@
     <ClCompile Include="shaders.cpp" />
     <ClCompile Include="suelo.cpp" />
     <ClCompile Include="systemInfo.cpp" />
+    <ClCompile Include="Transform.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="camera.h" />
@@ -171,6 +172,7 @@
     <ClInclude Include="shaders.h" />
     <ClInclude Include="suelo.h" />
     <ClInclude Include="systemInfo.h" />
+    <ClInclude Include="Transform.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="posibleProyecto.rc" />
