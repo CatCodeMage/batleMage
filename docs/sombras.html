@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sistema de sombras VGI</title>
+<link rel="stylesheet" href="estilos.css">
+</head>
+<body>
+<div class="wrap">
+<nav>
+  <strong>Proyecto VGI</strong>
+  <h3>Documentos</h3>
+  <a href="instalacion.html">Guía de instalación</a>
+  <a href="tecnica.html">Guía técnica</a>
+  <a class="actual" href="sombras.html">Sistema de sombras</a>
+  <h3>En esta página</h3>
+  <a href="#funcionamiento">Funcionamiento</a>
+  <a href="#codigo">Dónde está el código</a>
+  <a href="#configuracion">Configuración</a>
+  <a href="#rendimiento">Rendimiento y límites</a>
+  <a href="#pruebas">Pruebas</a>
+  <a href="#referencias">Referencias</a>
+</nav>
+<main>
+<h1>Sistema de sombras</h1>
+<p class="meta">OpenGL 3.3 core · Implementado el 2026-10-14 · Sin librerías adicionales</p>
+<p>La primera luz enviada al renderer (la naranja que orbita en la demo) proyecta sombras sobre las entidades opacas. La segunda luz azul y el ambiente siguen iluminando las zonas en sombra. <b>F2</b> activa o desactiva las sombras para comparar el resultado; los controles de cámara siguen siendo los mismos.</p>
+
+<h3 id="funcionamiento">Funcionamiento: dibujar desde la luz y desde la cámara</h3>
+<ol>
+  <li><b>Preparar instancias:</b> se suben las matrices y colores de cada lote de mallas una sola vez al buffer de GPU.</li>
+  <li><b>Mirar desde la luz:</b> una luz puntual ilumina en todas las direcciones. Se dibuja la escena desde seis cámaras de 90 grados (+X, -X, +Y, -Y, +Z, -Z). Cada cámara guarda solo profundidad en una cara de una textura cubemap.</li>
+  <li><b>Guardar distancia:</b> el shader de profundidad escribe <code>distancia(fragmento, luz) / alcance</code>. Así todas las caras usan la misma medida radial.</li>
+  <li><b>Dibujar desde la cámara:</b> por cada fragmento se consulta la textura en la dirección que va de la luz al fragmento. Si la distancia guardada es menor que la actual, otro objeto tapa la luz.</li>
+  <li><b>Aplicar visibilidad:</b> solo se reduce la contribución de la luz que genera ese mapa. No se oscurecen artificialmente el ambiente ni las otras luces.</li>
+</ol>
+<div class="why"><b>¿Por qué seis caras?</b> Un mapa 2D solo cubre un cono de una luz puntual. El cubemap cubre el entorno completo y mantiene el comportamiento de las luces actuales. Se usan seis pasadas explícitas, sin geometry shader, para mantener el código fácil de seguir.</div>
+<p><b>Bordes:</b> el filtro PCF hace cinco comparaciones cercanas (centro y cuatro vecinos) y promedia su visibilidad. Suaviza el escalonado; no simula físicamente la penumbra de una fuente de luz con tamaño.</p>
+<p><b>Autosombreado:</b> un pequeño <i>bias</i> resta distancia al comparar, evitando manchas por errores de precisión y por las muestras vecinas del filtro. Se adapta al tamaño del texel en el mundo (<code>2 × distancia / resolución</code>) y a la inclinación de la superficie, con un mínimo de 0,01 unidades. Un bias excesivo separa la sombra del objeto; uno pequeño produce manchas. Las normales usan la inversa transpuesta para admitir escalados no uniformes (evitar escalas cero).</p>
+
+<h3 id="codigo">Dónde está el código</h3>
+<table>
+  <tr><th>Archivo</th><th>Responsabilidad</th></tr>
+  <tr><td><code>ShadowMath.h</code></td><td>Validación del alcance y posición; matrices de las seis cámaras. Sin llamadas OpenGL.</td></tr>
+  <tr><td><code>ShadowMap.h/.cpp</code></td><td>Crea y libera cubemap/FBO, selecciona y limpia cada cara. Comprueba que el framebuffer esté completo.</td></tr>
+  <tr><td><code>shaders.h/.cpp</code></td><td>Programas de profundidad y de color, comparación radial, bias y PCF. La compilación/enlace de shaders devuelve 0 si falla.</td></tr>
+  <tr><td><code>Renderer.h/.cpp</code></td><td>Selecciona la luz, sube lotes, ejecuta las seis pasadas y dibuja el color. Restaura el FBO de dibujo y el viewport antes de dibujar la escena.</td></tr>
+  <tr><td><code>Mesh.h/.cpp</code></td><td>Separa subir instancias de dibujarlas para reutilizar el mismo buffer en todas las pasadas.</td></tr>
+  <tr><td><code>main.cpp</code></td><td>Activa Z-buffer, configura viewport con el contexto activo, gestiona F2 y libera recursos antes de cerrar la ventana.</td></tr>
+  <tr><td><code>tests/shadow_tests.cpp</code></td><td>Pruebas matemáticas y pruebas reales de GPU en una ventana oculta.</td></tr>
+</table>
+
+<h3 id="configuracion">Configuración y contrato del renderer</h3>
+<pre><code>// Despues de crear el contexto y el programa de color:
+glEnable(GL_DEPTH_TEST);
+Renderer renderer;
+renderer.init(program);
+renderer.setShadowLightIndex(0); // orden de las llamadas a submitLight
+renderer.setShadowsEnabled(true);
+
+// Cada frame: establecer viewport, limpiar color/profundidad,
+// enviar entidades y luces, y llamar a flush como antes.
+renderer.flush(meshLibrary, viewProjection);
+
+// Antes de destruir el contexto:
+renderer.destroy();
+glDeleteProgram(program); // el programa de color pertenece al llamante</code></pre>
+<ul>
+  <li><code>setShadowLightIndex(-1)</code> o un índice ausente omiten las sombras. La elección es explícita: no cambia automáticamente al mover la cámara.</li>
+  <li>El mapa se actualiza cada frame para que funcionen luces y entidades móviles. Los lotes y luces se vacían tras el dibujo, igual que antes.</li>
+  <li>Resolución predeterminada: <code>ShadowMap::DEFAULT_RESOLUTION = 512</code>. Se puede cambiar antes de compilar. Duplicarla cuadruplica la memoria y los píxeles de profundidad.</li>
+  <li>La distancia cercana es 0,1 unidades. El alcance lejano es <code>Light::radius</code>. Luces sin intensidad, con alcance insuficiente o con posición/alcance no finitos no generan mapa.</li>
+  <li>La escena debe usar prueba de profundidad, escritura de profundidad y profundidad limpia a 1 (valores habituales de OpenGL). En la demo no hay scissor, blending ni culling. Si se añaden, hay que configurar su estado para cada pasada.</li>
+  <li>La unidad de textura 0 se reserva durante el dibujo. Su enlace cubemap y la unidad activa se restauran después. El renderer deja activo su programa de color y el último VAO, igual que el renderer original.</li>
+  <li>Si falla el programa de sombras o el FBO, se registra el fallo y se conserva la iluminación normal. <code>shadowsReady()</code> permite comprobarlo.</li>
+</ul>
+
+<h3 id="rendimiento">Rendimiento y límites</h3>
+<ul>
+  <li><b>Presupuesto limitado:</b> una luz con sombras, seis pasadas de profundidad y una de color. Para B lotes no vacíos, como máximo 7 × B llamadas de dibujo. Desactivarlas reduce el coste a B llamadas y omite las consultas de sombras.</li>
+  <li><b>Instancing:</b> una llamada por malla y pasada, aunque tenga muchas entidades. Cada lote se sube una sola vez por frame; se mantiene su capacidad de memoria CPU entre frames.</li>
+  <li><b>Memoria:</b> seis caras de 512 × 512 con profundidad de 24 bits: 4,5 MiB de datos, que pueden ocupar aproximadamente 6 MiB si el driver alinea cada texel a 32 bits. Los recursos se asignan una vez al inicializar.</li>
+  <li><b>Trabajo de fragmentos:</b> cinco lecturas únicamente para la luz elegida, en superficies orientadas hacia ella y dentro de su alcance. La pasada de profundidad no calcula colores ni iluminación.</li>
+  <li>La sombra no depende de la posición de la cámara: moverla no obliga a recrear texturas ni a cambiar el volumen de sombra.</li>
+  <li>La resolución y el bias están pensados para la escala de la demo. Mapas grandes, muchos objetos o luces con alcances grandes necesitarán ajustar calidad y posiblemente añadir selección de objetos por volumen o caché de sombras estáticas.</li>
+  <li>No hay sombras de transparencias/partículas, sombras para todas las luces, cascadas ni penumbras físicas. Todas las entidades opacas enviadas al renderer participan como emisoras y receptoras de sombra.</li>
+  <li>Los costes anteriores son estructurales; no son una promesa de FPS. El rendimiento real depende de la GPU, resolución de pantalla y complejidad de las mallas.</li>
+</ul>
+
+<h3 id="pruebas">Pruebas automáticas</h3>
+<p>Desde PowerShell, en la raíz del repositorio:</p>
+<pre><code>.\tests\run-tests.ps1
+# Solo las comprobaciones matematicas, si no hay contexto grafico:
+.\tests\run-tests.ps1 -MathOnly</code></pre>
+<p>Necesitan Visual Studio con la carga de C++ y, para las pruebas completas, una GPU/driver con OpenGL 3.3. El script encuentra el compilador instalado, genera el ejecutable en <code>x64/shadow-tests</code> (ignorado por Git) y devuelve error si falla la compilación o alguna comprobación. No descarga dependencias y no abre una ventana visible.</p>
+<ul>
+  <li>Los seis ejes se proyectan en el centro de su cara; el alcance coincide con el plano lejano. Se rechazan alcances inválidos y posiciones NaN.</li>
+  <li>Los shaders compilan/enlazan y el framebuffer de profundidad está completo. Las seis caras guardan la distancia radial esperada a cubos de posición conocida.</li>
+  <li>La imagen con sombras tiene un punto de suelo bajo la sombra más oscuro que la imagen sin ellas. Un punto expuesto mantiene su iluminación.</li>
+  <li>Se comparan todos los píxeles de un suelo sin obstáculos con y sin sombras para detectar manchas de autosombreado alejadas del centro.</li>
+  <li>Retirar el cubo elimina su sombra; sin luces permanece el ambiente; un índice de luz ausente omite las sombras y se pueden reactivar.</li>
+  <li>Se restauran FBO de dibujo, FBO de lectura, viewport y unidad de textura. La liberación repetida no causa errores OpenGL.</li>
+  <li>Una consulta GPU confirma siete pasadas con sombras y una al desactivarlas o no enviar luces. Seleccionar la segunda luz solo reduce su contribución azul y conserva la roja de la primera.</li>
+</ul>
+<p>El script guarda <code>shadows-off.ppm</code> y <code>shadows-on.ppm</code> en la carpeta de pruebas generadas para comparar visualmente las imágenes.</p>
+<p><b>Validación realizada el 2026-10-14:</b> todas las pruebas anteriores pasaron en una AMD Radeon(TM) Graphics. Se revisó también la comparación visual. El proyecto completo Debug x64 compiló y enlazó con una configuración temporal sin PDB; la compilación normal de este equipo sigue fallando por la versión de <code>MSPDB140.DLL</code>, un problema del toolchain que ya existía antes de añadir las sombras.</p>
+<p>Comprobación manual adicional: ejecutar la demo, mover la cámara y pulsar F2. La sombra del cubo debe desplazarse al orbitar la luz, y el suelo debe seguir recibiendo luz azul en las zonas ocultas a la luz naranja.</p>
+<div class="why"><b>Problemas de PDB:</b> el script de pruebas compila sin información de depuración y sin enlace incremental, para no depender de la generación de PDB. Esto no cambia la configuración de Debug/Release del juego. Si el juego falla con LNK1101/MSPDB, hay que revisar la instalación del toolchain de Visual Studio. Los avisos LNK4098 de las librerías existentes siguen siendo una cuestión independiente.</div>
+
+<h3 id="referencias">Referencias</h3>
+<p>Diseño basado en las capacidades de OpenGL disponibles en el proyecto: <a href="https://wikis.khronos.org/opengl/Cubemap_Texture">texturas cubemap</a> y <a href="https://wikis.khronos.org/opengl/Framebuffer_Object">framebuffer objects</a>, documentadas por Khronos.</p>
+</main>
+</div>
+</body>
+</html>

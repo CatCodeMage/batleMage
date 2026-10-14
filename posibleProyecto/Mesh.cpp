@@ -63,9 +63,18 @@ void Mesh::destroy() {
 }
 
 void Mesh::drawInstances(const std::vector<InstanceData>& inst) const {
+    uploadInstances(inst);
+    drawUploadedInstances((GLsizei)inst.size());
+}
+
+void Mesh::uploadInstances(const std::vector<InstanceData>& inst) const {
     if (inst.empty()) return;
-    glBindVertexArray(w_vao);
     glBindBuffer(GL_ARRAY_BUFFER, w_instanceVbo);
     glBufferData(GL_ARRAY_BUFFER, inst.size() * sizeof(InstanceData), inst.data(), GL_STREAM_DRAW);
-    glDrawElementsInstanced(GL_TRIANGLES, w_indexCount, GL_UNSIGNED_INT, 0, (GLsizei)inst.size());
+}
+
+void Mesh::drawUploadedInstances(GLsizei count) const {
+    if (count <= 0) return;
+    glBindVertexArray(w_vao);
+    glDrawElementsInstanced(GL_TRIANGLES, w_indexCount, GL_UNSIGNED_INT, 0, count);
 }

@@ -16,22 +16,7 @@ int shouldContinue(GLFWwindow* window) {
 }
 
 GLuint setShaders() { // Set shaders
-    GLuint vs = compileShader(GL_VERTEX_SHADER, vertexSrc);
-    GLuint fs = compileShader(GL_FRAGMENT_SHADER, fragmentSrc);
-
-    GLuint program = glCreateProgram();
-    glAttachShader(program, vs);
-    glAttachShader(program, fs);
-    glLinkProgram(program);
-
-    glDeleteShader(vs);
-    glDeleteShader(fs);
-
-    glEnable(GL_DEPTH_TEST); // Z-Buffer
-
-    glUseProgram(program);
-
-    return program;
+    return createShaderProgram(vertexSrc, fragmentSrc);
 }
 
 void clearLastFrame() {
@@ -80,6 +65,11 @@ void buclePrincipaLTiempoReal(GLFWwindow* window, SystemInfo& sysInfo) {
     Camera viewCamera;
 
     GLuint program = setShaders();
+    if (!program) {
+        libMesh.destroy();
+        return;
+    }
+    glEnable(GL_DEPTH_TEST); // Ambas pasadas necesitan el Z-buffer.
     Renderer renderer;
     renderer.init(program);
 
@@ -87,13 +77,25 @@ void buclePrincipaLTiempoReal(GLFWwindow* window, SystemInfo& sysInfo) {
     Input keysInput;
 
     keysInput.init(window);
+    bool shadowsEnabled = true;
+    bool previousShadowKey = false;
 
     while (shouldContinue(window)) {
         clearLastFrame();
 
         // System
         sysInfo.getCurrentState(window);
+        // Tambien al cambiar de resolucion; las sombras usan su propio viewport.
+        glViewport(0, 0, sysInfo.getWidht(), sysInfo.getHeight());
         float time = sysInfo.getTimeStored();
+
+        // F2 compara la escena con/sin sombras, una vez por pulsacion.
+        bool shadowKey = keysInput.keyDown(GLFW_KEY_F2);
+        if (shadowKey && !previousShadowKey) {
+            shadowsEnabled = !shadowsEnabled;
+            renderer.setShadowsEnabled(shadowsEnabled);
+        }
+        previousShadowKey = shadowKey;
 
         // Camara
         viewCamera.update(keysInput, sysInfo);
@@ -116,6 +118,8 @@ void buclePrincipaLTiempoReal(GLFWwindow* window, SystemInfo& sysInfo) {
         updateFrame(window);
     }
 
+    renderer.destroy();
+    glDeleteProgram(program);
     libMesh.destroy();
 }
 
@@ -176,13 +180,14 @@ int main()
     
     sysInfo.getCurrentState(window);
 
-    glViewport(0, 0, sysInfo.getWidht(), sysInfo.getHeight());
-
     if (guranteWindowCreated(window) != 0) 
         return -1;
 
+    glViewport(0, 0, sysInfo.getWidht(), sysInfo.getHeight());
+
     buclePrincipaLTiempoReal(window, sysInfo);
 
+    glfwDestroyWindow(window);
     glfwTerminate();
 
     return 0;

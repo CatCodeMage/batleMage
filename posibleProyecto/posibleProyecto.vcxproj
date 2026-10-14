@@ -156,6 +156,7 @@
     <ClCompile Include="MeshLibrary.cpp" />
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="shaders.cpp" />
+    <ClCompile Include="ShadowMap.cpp" />
     <ClCompile Include="suelo.cpp" />
     <ClCompile Include="systemInfo.cpp" />
     <ClCompile Include="Transform.cpp" />
@@ -172,6 +173,8 @@
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="shaders.h" />
+    <ClInclude Include="ShadowMap.h" />
+    <ClInclude Include="ShadowMath.h" />
     <ClInclude Include="suelo.h" />
     <ClInclude Include="systemInfo.h" />
     <ClInclude Include="Transform.h" />

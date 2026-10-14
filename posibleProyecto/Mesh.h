@@ -15,4 +15,7 @@ struct Mesh {
     void draw() const;
     void destroy(); 
     void drawInstances(const std::vector<InstanceData>& inst) const;
+    // Sube una vez por frame; reutiliza el buffer en las seis caras y en el color.
+    void uploadInstances(const std::vector<InstanceData>& inst) const;
+    void drawUploadedInstances(GLsizei count) const;
 };

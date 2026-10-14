@@ -19,6 +19,7 @@
   <a href="#t-decisiones">Decisiones y porqués</a>
   <a href="#t-arquitectura">Arquitectura</a>
   <a href="#t-bucle">Bucle de juego</a>
+  <a href="sombras.html">Sistema de sombras</a>
   <a href="#t-notas">Notas técnicas</a>
   <a href="#t-git">Git</a>
   <a href="#t-glosario">Glosario</a>
@@ -28,7 +29,7 @@
 
 <main>
 <h1>Guía técnica</h1>
-<p class="meta">Fase presentable 0 · Juego 3D en OpenGL · Equipo de 6 personas · Última actualización: 2026-09-30</p>
+<p class="meta">Fase presentable 0 · Juego 3D en OpenGL · Equipo de 6 personas · Última actualización: 2026-10-14</p>
 <div class="todo"><b>Contexto:</b> esta fase es una demo inicial para demostrar que el proyecto es posible, no una entrega. <b>Pendiente:</b> asignar personas a cada área de trabajo y detallar la arquitectura del código.</div>
 
 <h3 id="t-enunciado">Enunciado y objetivos</h3>
@@ -55,7 +56,8 @@
 <ul>
   <li>Sustituir el bot de reglas por modelos entrenados con aprendizaje automático (ML), que aprendan a elegir acciones y hagan que la batalla dure un tiempo determinado.</li>
   <li>Combates por equipos (más de 1 contra 1).</li>
-  <li>A largo plazo: efectos visuales de todo tipo (partículas, etc.) y alteración del propio mundo físico durante la batalla.</li>
+  <li><b>Pendiente:</b> incorporar un sistema de partículas para los efectos visuales de los hechizos y sus impactos (fuego, humo, chispas y explosiones).</li>
+  <li>A largo plazo: otros efectos visuales y alteración del propio mundo físico durante la batalla.</li>
 </ul>
 <div class="why"><b>¿Por qué 1 contra 1 y ML fuera de la demo?</b> Para no ser demasiado ambiciosos: primero se demuestra que la idea central (batalla autónoma + grabación) funciona. El ML y los equipos solo se abordan si sobra tiempo. Una de las personas del equipo tiene experiencia en ML.</div>
 
@@ -71,6 +73,7 @@
   <tr><td>SOIL2 1.3.0</td><td>stb_image</td><td>Es la que usa el proyecto base del profe.</td><td>Decidido</td></tr>
   <tr><td>Librerías incluidas en el repositorio</td><td>vcpkg, descarga manual por persona</td><td>Los compañeros clonan y compilan sin configurar nada. vcpkg en este equipo solo funciona en modo manifiesto y ocultaba lo que pasa por debajo.</td><td>Decidido</td></tr>
   <tr><td>Contexto OpenGL 3.3 core</td><td>4.6 (proyecto base del profe), 1.1 a pelo</td><td>Shaders modernos sin depender de la versión más alta; lo soporta cualquier gráfica actual.</td><td>Decidido para la demo</td></tr>
+  <tr><td>Sombras de una luz puntual mediante cubemap</td><td>Sombras direccionales, cubemap para cada luz</td><td>Respeta la luz puntual que orbita y limita el coste a seis pasadas de profundidad. Resolución 512 y filtro PCF de cinco muestras. Sin dependencias nuevas.</td><td>Implementado; <a href="sombras.html">explicación y pruebas</a></td></tr>
   <tr><td>Interfaz gráfica (menús)</td><td>ImGui, nfd (las del profe)</td><td>Se descartaron por ahora. Si hace falta, se buscará otra librería.</td><td><i>Pendiente</i></td></tr>
   <tr><td>Enunciado propio (batallas mágicas autónomas)</td><td>Uno de los propuestos por el profe</td><td>La asignatura permite proponer un enunciado propio. Ver el apartado de enunciado.</td><td>Decidido</td></tr>
   <tr><td>Combates 1 contra 1</td><td>Equipos</td><td>Limitar el alcance. Los equipos quedan como objetivo extra si sobra tiempo.</td><td>Decidido</td></tr>
@@ -83,7 +86,7 @@
 </table>
 
 <h3 id="t-arquitectura">Arquitectura</h3>
-<p>Ahora mismo todo vive en <code>main.cpp</code> (ventana azul con el bucle de juego). Idea de organización en dos capas:</p>
+<p>El render actual está separado en <code>Renderer</code>, <code>Mesh</code>, <code>MeshLibrary</code>, <code>Camera</code>, <code>Input</code> y <code>ShadowMap</code>. <code>main.cpp</code> monta una escena con suelo, cubo animado y dos luces. Los módulos de simulación todavía no están integrados en el ejecutable. La organización prevista sigue siendo de dos capas:</p>
 <table>
   <tr><th>Capa</th><th>Qué hace</th><th>Reglas</th></tr>
   <tr><td><b>Simulación</b></td><td>Combatientes, acciones, reglas del combate, estado.</td><td>Sin OpenGL ni ventana. Paso de tiempo fijo. Determinista con semilla.</td></tr>
@@ -170,6 +173,7 @@ liberar recursos (glfwTerminate)</code></pre>
   <tr><td>2026-09-29</td><td>—</td><td>Creación del documento.</td></tr>
   <tr><td>2026-09-30</td><td>—</td><td>Decididas y documentadas GLFW, GLEW estático, GLM y SOIL2. 3D. Explicado LNK4098 y la corrección del <code>.gitignore</code>.</td></tr>
   <tr><td>2026-09-30</td><td>—</td><td>Añadidos enunciado propio (batallas mágicas autónomas), objetivos, acciones, separación simulación/render y propuesta de reparto en seis áreas.</td></tr>
+  <tr><td>2026-10-14</td><td>—</td><td>Sombras puntuales con cubemap, filtro PCF, reutilización de instancias, tecla F2 y pruebas automáticas de profundidad y renderizado. Añadida la guía de sombras y actualizado el estado del render.</td></tr>
 </table>
 </main>
 
