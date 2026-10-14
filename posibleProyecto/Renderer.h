@@ -1,7 +1,6 @@
 #pragma once
 #include "Mesh.h"
 #include "MeshLibrary.h"
-#include "systemInfo.h" 
 
 struct Light {
     glm::vec3 pos;   float radius;      // hasta donde llega la luz
@@ -18,9 +17,8 @@ public:
     void init(GLuint program);
     void submit(MeshId id, const glm::mat4& model, const glm::vec4& color, int kind = 0);
     void flush(const MeshLibrary& lib, const glm::mat4& viewProj);
-    void submitLight(const glm::vec3& pos, float radius, const glm::vec3& color, float intensity);
+    void submitLight(const Light& light);
 private:
-    void lightSeting(SystemInfo& system);
     std::vector<Light> w_lights;
     std::vector<std::vector<InstanceData>> w_batches;     // un lote por MeshId
     GLint w_locViewProj, w_locNumLights, w_locLights;

@@ -12,12 +12,13 @@ void Renderer::init(GLuint program) {
     w_locLights = glGetUniformLocation(program, "uLights[0]");
 }
 
-void Renderer::submitLight(const glm::vec3& pos, float radius, const glm::vec3& color, float intensity) {
+void Renderer::submitLight(const Light& light) {
     if (w_lights.size() >= MAX_LIGHTS) return;     // de momento se ignoran las que sobran
-    w_lights.push_back({ pos, radius, color, intensity });
+    w_lights.push_back(light);
 }
  
 void Renderer::submit(MeshId id, const glm::mat4& model, const glm::vec4& color, int kind) {
+    assert(id != INVALID_MESH);
     if (id >= w_batches.size()) w_batches.resize(id + 1);
     w_batches[id].push_back({ model, color, (float)kind });
 }

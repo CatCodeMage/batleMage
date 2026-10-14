@@ -55,7 +55,7 @@ void createMeshes(MeshLibrary& lib) {
 }
  
 void buclePrincipaLTiempoReal(GLFWwindow* window, SystemInfo& sysInfo) {
-    
+    // Entidades
     MeshLibrary libMesh;    
     createMeshes(libMesh);
     MeshId cubeId = libMesh.find("cube");
@@ -70,12 +70,20 @@ void buclePrincipaLTiempoReal(GLFWwindow* window, SystemInfo& sysInfo) {
     cubo.transform.pos = glm::vec3(0.0f, 1.0f, 0.0f);
     cubo.color = glm::vec4(0.9f, 0.4f, 0.2f, 1.0f);
 
+    // Luces
+    std::vector<Light> luces = {
+        { glm::vec3(0.0f),              8.0f, glm::vec3(1.0f, 0.8f, 0.5f), 2.0f },   // la que orbita
+        { glm::vec3(-3.0f, 2.0f, 0.0f), 6.0f, glm::vec3(0.3f, 0.5f, 1.0f), 2.0f }    // fija
+    };
+
+    // Camara y pantalla
     Camera viewCamera;
 
     GLuint program = setShaders();
     Renderer renderer;
     renderer.init(program);
 
+    // Input
     Input keysInput;
 
     keysInput.init(window);
@@ -83,21 +91,26 @@ void buclePrincipaLTiempoReal(GLFWwindow* window, SystemInfo& sysInfo) {
     while (shouldContinue(window)) {
         clearLastFrame();
 
+        // System
         sysInfo.getCurrentState(window);
         float time = sysInfo.getTimeStored();
 
+        // Camara
         viewCamera.update(keysInput, sysInfo);
 
         glm::mat4 vp = viewCamera.get_proj() * viewCamera.get_view();
 
+        // Entidades
         cubo.transform.rot.y = time;
-
+        
         submitEntidad(renderer, suelo);
         submitEntidad(renderer, cubo);
 
-        renderer.submitLight(glm::vec3(3.0f * cos(time), 3.0f, 3.0f * sin(time)), 8.0f, glm::vec3(1.0f, 0.8f, 0.5f), 2.0f);
-        renderer.submitLight(glm::vec3(-3.0f, 2.0f, 0.0f), 6.0f, glm::vec3(0.3f, 0.5f, 1.0f), 2.0f);
+        // Light
+        luces[0].pos = glm::vec3(3.0f * cos(time), 3.0f, 3.0f * sin(time));    // UPDATE
+        for (const Light& l : luces) renderer.submitLight(l);
 
+        // Pintar
         renderer.flush(libMesh, vp);
 
         updateFrame(window);
