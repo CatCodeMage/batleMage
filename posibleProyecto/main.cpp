@@ -8,6 +8,8 @@
 #include "Input.h"
 #include "Renderer.h"
 #include "Transform.h"
+#include "Entidad.h"
+#include "drawObjects.h"
 
 int shouldContinue(GLFWwindow* window) {
     return glfwWindowShouldClose(window) == 0;
@@ -59,6 +61,15 @@ void buclePrincipaLTiempoReal(GLFWwindow* window, SystemInfo& sysInfo) {
     MeshId cubeId = libMesh.find("cube");
     MeshId floorId = libMesh.find("floor");
 
+    Entidad suelo;
+    suelo.mesh = floorId;
+    suelo.kind = 1;
+
+    Entidad cubo;
+    cubo.mesh = cubeId;
+    cubo.transform.pos = glm::vec3(0.0f, 1.0f, 0.0f);
+    cubo.color = glm::vec4(0.9f, 0.4f, 0.2f, 1.0f);
+
     Camera viewCamera;
 
     GLuint program = setShaders();
@@ -79,13 +90,10 @@ void buclePrincipaLTiempoReal(GLFWwindow* window, SystemInfo& sysInfo) {
 
         glm::mat4 vp = viewCamera.get_proj() * viewCamera.get_view();
 
-        Transform transformCube;
-        transformCube.pos = glm::vec3(0.0f, 1.0f, 0.0f);
-        transformCube.rot = glm::vec3(0.0f, time, 0.0f);
-        transformCube.color = glm::vec4(0.9f, 0.4f, 0.2f, 1.0f);
-        renderer.submit(cubeId, transformCube.toMatrix(), transformCube.color);
+        cubo.transform.rot.y = time;
 
-        renderer.submit(floorId, glm::mat4(1.0f), glm::vec4(1.0f), 1);
+        submitEntidad(renderer, suelo);
+        submitEntidad(renderer, cubo);
 
         renderer.submitLight(glm::vec3(3.0f * cos(time), 3.0f, 3.0f * sin(time)), 8.0f, glm::vec3(1.0f, 0.8f, 0.5f), 2.0f);
         renderer.submitLight(glm::vec3(-3.0f, 2.0f, 0.0f), 6.0f, glm::vec3(0.3f, 0.5f, 1.0f), 2.0f);
