@@ -77,6 +77,7 @@
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalIncludeDirectories>$(ProjectDir)libs\glm-master;$(ProjectDir)libs\glew-2.3.1\include;$(ProjectDir)libs\glfw-3.5.1\include;$(ProjectDir)libs\soil2\include;$(ProjectDir)libs\json\nlohmann\json.hpp</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -95,6 +96,7 @@
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalIncludeDirectories>$(ProjectDir)libs\glm-master;$(ProjectDir)libs\glew-2.3.1\include;$(ProjectDir)libs\glfw-3.5.1\include;$(ProjectDir)libs\soil2\include;$(ProjectDir)libs\json\nlohmann\json.hpp</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -111,7 +113,7 @@
       <PreprocessorDefinitions>GLEW_STATIC;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(ProjectDir)libs\glm-master;$(ProjectDir)libs\glew-2.3.1\include;$(ProjectDir)libs\glfw-3.5.1\include;$(ProjectDir)libs\soil2\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)libs\glm-master;$(ProjectDir)libs\glew-2.3.1\include;$(ProjectDir)libs\glfw-3.5.1\include;$(ProjectDir)libs\soil2\include;$(ProjectDir)libs\json\</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -132,7 +134,7 @@
       <PreprocessorDefinitions>GLEW_STATIC;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(ProjectDir)libs\glm-master;$(ProjectDir)libs\glew-2.3.1\include;$(ProjectDir)libs\glfw-3.5.1\include;$(ProjectDir)libs\soil2\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)libs\glm-master;$(ProjectDir)libs\glew-2.3.1\include;$(ProjectDir)libs\glfw-3.5.1\include;$(ProjectDir)libs\soil2\include;$(ProjectDir)libs\json\</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

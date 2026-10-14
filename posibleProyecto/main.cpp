@@ -53,7 +53,7 @@ void createMeshes(MeshLibrary& lib) {
         std::vector<float>(std::begin(floorVertices), std::end(floorVertices)),
         std::vector<unsigned>(std::begin(floorIndices), std::end(floorIndices)));
 }
- 
+
 void buclePrincipaLTiempoReal(GLFWwindow* window, SystemInfo& sysInfo) {
     // Entidades
     MeshLibrary libMesh;    
