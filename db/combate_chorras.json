@@ -1,21 +1,21 @@
 {
   "metadata": {
-    "version": "1.5",
+    "version": "1.6",
     "iterations": 14,
     "winner": "player_2"
   },
   "map": "./bd/map.json",
   "players": {
-    "player_1": { "type": "sphere", "position": [-20, 0, -20] },
-    "player_2": { "type": "sphere", "position": [20, 0, 20] }
+    "player_1": { "type": "sphere", "position": [-20, 0, -20], "scale": [1, 1, 1] },
+    "player_2": { "type": "sphere", "position": [20, 0, 20],   "scale": [1, 1, 1] }
   },
   "spells": "./bd/spells.json",
   "frames": [
     {
       "t": 0,
       "players": {
-        "player_1": { "position": [-20, 0, -20], "state": "alive" },
-        "player_2": { "position": [20, 0, 20],   "state": "alive" }
+        "player_1": { "position": [-20, 0, -20], "rotation": [0, 0.785, 0], "state": "alive" },
+        "player_2": { "position": [20, 0, 20],   "rotation": [0, 3.927, 0], "state": "alive" }
       },
       "assets": {
         "tree_01": "perfect",
@@ -42,19 +42,14 @@
       },
       "spells": [],
       "mapstate": [
-        {
-          "burns": [],
-          "freezed": [],
-          "poisoned": [],
-          "wet": []
-        }
+        { "burns": [], "freezed": [], "poisoned": [], "wet": [] }
       ]
     },
     {
       "t": 1,
       "players": {
-        "player_1": { "position": [-18, 0, -18], "state": "alive" },
-        "player_2": { "position": [18, 0, 18],   "state": "alive" }
+        "player_1": { "position": [-18, 0, -18], "rotation": [0, 0.785, 0], "state": "alive" },
+        "player_2": { "position": [18, 0, 18],   "rotation": [0, 3.927, 0], "state": "alive" }
       },
       "assets": {
         "tree_01": "perfect",
@@ -81,19 +76,14 @@
       },
       "spells": [],
       "mapstate": [
-        {
-          "burns": [],
-          "freezed": [],
-          "poisoned": [],
-          "wet": []
-        }
+        { "burns": [], "freezed": [], "poisoned": [], "wet": [] }
       ]
     },
     {
       "t": 2,
       "players": {
-        "player_1": { "position": [-16, 0, -16], "state": "alive" },
-        "player_2": { "position": [16, 0, 16],   "state": "alive" }
+        "player_1": { "position": [-16, 0, -16], "rotation": [0, 0.785, 0], "state": "alive" },
+        "player_2": { "position": [16, 0, 16],   "rotation": [0, 3.927, 0], "state": "alive" }
       },
       "assets": {
         "tree_01": "perfect",
@@ -124,24 +114,20 @@
             "name": "fire_ball",
             "origin": [-16, 1, -16],
             "position": [-16, 1, -16],
-            "destination": [16, 1, 16]
+            "destination": [16, 1, 16],
+            "rotation": [0, 0.785, 0]
           }
         }
       ],
       "mapstate": [
-        {
-          "burns": [],
-          "freezed": [],
-          "poisoned": [],
-          "wet": []
-        }
+        { "burns": [], "freezed": [], "poisoned": [], "wet": [] }
       ]
     },
     {
       "t": 3,
       "players": {
-        "player_1": { "position": [-14, 0, -14], "state": "alive" },
-        "player_2": { "position": [14, 0, 14],   "state": "alive" }
+        "player_1": { "position": [-14, 0, -14], "rotation": [0, 0.785, 0], "state": "alive" },
+        "player_2": { "position": [14, 0, 14],   "rotation": [0, 3.927, 0], "state": "alive" }
       },
       "assets": {
         "tree_01": "damaged",
@@ -172,24 +158,20 @@
             "name": "fire_ball",
             "origin": [-16, 1, -16],
             "position": [-6, 1, -6],
-            "destination": [16, 1, 16]
+            "destination": [16, 1, 16],
+            "rotation": [0, 0.785, 0]
           }
         }
       ],
       "mapstate": [
-        {
-          "burns": [[-6, 0, -6]],
-          "freezed": [],
-          "poisoned": [],
-          "wet": []
-        }
+        { "burns": [[-6, 0, -6]], "freezed": [], "poisoned": [], "wet": [] }
       ]
     },
     {
       "t": 4,
       "players": {
-        "player_1": { "position": [-12, 0, -12], "state": "alive" },
-        "player_2": { "position": [12, 0, 12],   "state": "burning" }
+        "player_1": { "position": [-12, 0, -12], "rotation": [0, 0.785, 0], "state": "alive" },
+        "player_2": { "position": [12, 0, 12],   "rotation": [0, 3.927, 0], "state": "alive" }
       },
       "assets": {
         "tree_01": "damaged",
@@ -220,24 +202,20 @@
             "name": "lightning_bolt",
             "origin": [12, 1, 12],
             "position": [12, 1, 12],
-            "destination": [-12, 1, -12]
+            "destination": [-12, 1, -12],
+            "rotation": [0, 3.927, 0]
           }
         }
       ],
       "mapstate": [
-        {
-          "burns": [[-6, 0, -6], [12, 0, 12]],
-          "freezed": [],
-          "poisoned": [],
-          "wet": []
-        }
+        { "burns": [[-6, 0, -6], [12, 0, 12]], "freezed": [], "poisoned": [], "wet": [] }
       ]
     },
     {
       "t": 5,
       "players": {
-        "player_1": { "position": [-10, 0, -10], "state": "shocked" },
-        "player_2": { "position": [10, 0, 10],   "state": "burning" }
+        "player_1": { "position": [-10, 0, -10], "rotation": [0, 0.785, 0], "state": "alive" },
+        "player_2": { "position": [10, 0, 10],   "rotation": [0, 3.927, 0], "state": "alive" }
       },
       "assets": {
         "tree_01": "damaged",
@@ -268,24 +246,20 @@
             "name": "lightning_bolt",
             "origin": [12, 1, 12],
             "position": [-10, 1, -10],
-            "destination": [-12, 1, -12]
+            "destination": [-12, 1, -12],
+            "rotation": [0, 3.927, 0]
           }
         }
       ],
       "mapstate": [
-        {
-          "burns": [[-6, 0, -6], [12, 0, 12], [-12, 0, -12]],
-          "freezed": [],
-          "poisoned": [],
-          "wet": []
-        }
+        { "burns": [[-6, 0, -6], [12, 0, 12], [-12, 0, -12]], "freezed": [], "poisoned": [], "wet": [] }
       ]
     },
     {
       "t": 6,
       "players": {
-        "player_1": { "position": [-8, 0, -8], "state": "shocked" },
-        "player_2": { "position": [8, 0, 8],   "state": "burning" }
+        "player_1": { "position": [-8, 0, -8], "rotation": [0, 0.785, 0], "state": "alive" },
+        "player_2": { "position": [8, 0, 8],   "rotation": [0, 3.927, 0], "state": "alive" }
       },
       "assets": {
         "tree_01": "damaged",
@@ -312,19 +286,14 @@
       },
       "spells": [],
       "mapstate": [
-        {
-          "burns": [[-6, 0, -6], [12, 0, 12], [-12, 0, -12]],
-          "freezed": [],
-          "poisoned": [],
-          "wet": []
-        }
+        { "burns": [[-6, 0, -6], [12, 0, 12], [-12, 0, -12]], "freezed": [], "poisoned": [], "wet": [] }
       ]
     },
     {
       "t": 7,
       "players": {
-        "player_1": { "position": [-6, 0, -6], "state": "shocked" },
-        "player_2": { "position": [6, 0, 6],   "state": "burning" }
+        "player_1": { "position": [-6, 0, -6], "rotation": [0, 0.785, 0], "state": "alive" },
+        "player_2": { "position": [6, 0, 6],   "rotation": [0, 3.927, 0], "state": "alive" }
       },
       "assets": {
         "tree_01": "damaged",
@@ -355,30 +324,27 @@
             "name": "ice_lance",
             "origin": [-6, 1, -6],
             "position": [-6, 1, -6],
-            "destination": [6, 1, 6]
+            "destination": [6, 1, 6],
+            "rotation": [0, 0.785, 0]
           },
           "1": {
             "name": "fire_ball",
             "origin": [6, 1, 6],
             "position": [6, 1, 6],
-            "destination": [-6, 1, -6]
+            "destination": [-6, 1, -6],
+            "rotation": [0, 3.927, 0]
           }
         }
       ],
       "mapstate": [
-        {
-          "burns": [[-6, 0, -6], [12, 0, 12], [-12, 0, -12]],
-          "freezed": [[-6, 0, -6]],
-          "poisoned": [],
-          "wet": []
-        }
+        { "burns": [[-6, 0, -6], [12, 0, 12], [-12, 0, -12]], "freezed": [[-6, 0, -6]], "poisoned": [], "wet": [] }
       ]
     },
     {
       "t": 8,
       "players": {
-        "player_1": { "position": [-4, 0, -4], "state": "burning" },
-        "player_2": { "position": [4, 0, 4],   "state": "frozen" }
+        "player_1": { "position": [-4, 0, -4], "rotation": [0, 0.785, 0], "state": "alive" },
+        "player_2": { "position": [4, 0, 4],   "rotation": [0, 3.927, 0], "state": "alive" }
       },
       "assets": {
         "tree_01": "damaged",
@@ -409,30 +375,27 @@
             "name": "ice_lance",
             "origin": [-6, 1, -6],
             "position": [4, 1, 4],
-            "destination": [6, 1, 6]
+            "destination": [6, 1, 6],
+            "rotation": [0, 0.785, 0]
           },
           "1": {
             "name": "fire_ball",
             "origin": [6, 1, 6],
             "position": [-4, 1, -4],
-            "destination": [-6, 1, -6]
+            "destination": [-6, 1, -6],
+            "rotation": [0, 3.927, 0]
           }
         }
       ],
       "mapstate": [
-        {
-          "burns": [[-6, 0, -6], [12, 0, 12], [-12, 0, -12], [6, 0, 6]],
-          "freezed": [[-6, 0, -6], [6, 0, 6]],
-          "poisoned": [],
-          "wet": []
-        }
+        { "burns": [[-6, 0, -6], [12, 0, 12], [-12, 0, -12], [6, 0, 6]], "freezed": [[-6, 0, -6], [6, 0, 6]], "poisoned": [], "wet": [] }
       ]
     },
     {
       "t": 9,
       "players": {
-        "player_1": { "position": [-2, 0, -2], "state": "burning" },
-        "player_2": { "position": [2, 0, 2],   "state": "frozen" }
+        "player_1": { "position": [-2, 0, -2], "rotation": [0, 0.785, 0], "state": "alive" },
+        "player_2": { "position": [2, 0, 2],   "rotation": [0, 3.927, 0], "state": "alive" }
       },
       "assets": {
         "tree_02": "perfect",
@@ -458,19 +421,14 @@
       },
       "spells": [],
       "mapstate": [
-        {
-          "burns": [[-6, 0, -6], [12, 0, 12], [-12, 0, -12], [6, 0, 6]],
-          "freezed": [[-6, 0, -6], [6, 0, 6]],
-          "poisoned": [],
-          "wet": []
-        }
+        { "burns": [[-6, 0, -6], [12, 0, 12], [-12, 0, -12], [6, 0, 6]], "freezed": [[-6, 0, -6], [6, 0, 6]], "poisoned": [], "wet": [] }
       ]
     },
     {
       "t": 10,
       "players": {
-        "player_1": { "position": [0, 0, 0], "state": "burning" },
-        "player_2": { "position": [0, 0, 0], "state": "frozen" }
+        "player_1": { "position": [0, 0, 0], "rotation": [0, 0.785, 0], "state": "alive" },
+        "player_2": { "position": [0, 0, 0], "rotation": [0, 3.927, 0], "state": "alive" }
       },
       "assets": {
         "tree_02": "perfect",
@@ -499,24 +457,20 @@
             "name": "meteor",
             "origin": [0, 5, 0],
             "position": [0, 5, 0],
-            "destination": [0, 0, 0]
+            "destination": [0, 0, 0],
+            "rotation": [0, 0, 0]
           }
         }
       ],
       "mapstate": [
-        {
-          "burns": [[-6, 0, -6], [12, 0, 12], [-12, 0, -12], [6, 0, 6]],
-          "freezed": [[-6, 0, -6], [6, 0, 6]],
-          "poisoned": [],
-          "wet": []
-        }
+        { "burns": [[-6, 0, -6], [12, 0, 12], [-12, 0, -12], [6, 0, 6]], "freezed": [[-6, 0, -6], [6, 0, 6]], "poisoned": [], "wet": [] }
       ]
     },
     {
       "t": 11,
       "players": {
-        "player_1": { "position": [-2, 0, 0], "state": "burning" },
-        "player_2": { "position": [2, 0, 0],  "state": "alive" }
+        "player_1": { "position": [-2, 0, 0], "rotation": [0, 0.785, 0], "state": "alive" },
+        "player_2": { "position": [2, 0, 0],  "rotation": [0, 3.927, 0], "state": "alive" }
       },
       "assets": {
         "tree_02": "perfect",
@@ -541,19 +495,14 @@
       },
       "spells": [],
       "mapstate": [
-        {
-          "burns": [[-6, 0, -6], [12, 0, 12], [-12, 0, -12], [6, 0, 6], [0, 0, 0]],
-          "freezed": [[-6, 0, -6], [6, 0, 6]],
-          "poisoned": [],
-          "wet": []
-        }
+        { "burns": [[-6, 0, -6], [12, 0, 12], [-12, 0, -12], [6, 0, 6], [0, 0, 0]], "freezed": [[-6, 0, -6], [6, 0, 6]], "poisoned": [], "wet": [] }
       ]
     },
     {
       "t": 12,
       "players": {
-        "player_1": { "position": [-4, 0, 0], "state": "burning" },
-        "player_2": { "position": [4, 0, 0],  "state": "alive" }
+        "player_1": { "position": [-4, 0, 0], "rotation": [0, 0.785, 0], "state": "alive" },
+        "player_2": { "position": [4, 0, 0],  "rotation": [0, 3.927, 0], "state": "alive" }
       },
       "assets": {
         "tree_02": "perfect",
@@ -582,24 +531,20 @@
             "name": "poison_cloud",
             "origin": [4, 1, 0],
             "position": [4, 1, 0],
-            "destination": [-4, 1, 0]
+            "destination": [-4, 1, 0],
+            "rotation": [0, 4.712, 0]
           }
         }
       ],
       "mapstate": [
-        {
-          "burns": [[-6, 0, -6], [12, 0, 12], [-12, 0, -12], [6, 0, 6], [0, 0, 0]],
-          "freezed": [[-6, 0, -6], [6, 0, 6]],
-          "poisoned": [],
-          "wet": []
-        }
+        { "burns": [[-6, 0, -6], [12, 0, 12], [-12, 0, -12], [6, 0, 6], [0, 0, 0]], "freezed": [[-6, 0, -6], [6, 0, 6]], "poisoned": [], "wet": [] }
       ]
     },
     {
       "t": 13,
       "players": {
-        "player_1": { "position": [-6, 0, 0], "state": "poisoned" },
-        "player_2": { "position": [6, 0, 0],  "state": "alive" }
+        "player_1": { "position": [-6, 0, 0], "rotation": [0, 0.785, 0], "state": "alive" },
+        "player_2": { "position": [6, 0, 0],  "rotation": [0, 3.927, 0], "state": "alive" }
       },
       "assets": {
         "tree_02": "perfect",
@@ -627,24 +572,20 @@
             "name": "poison_cloud",
             "origin": [4, 1, 0],
             "position": [-4, 1, 0],
-            "destination": [-4, 1, 0]
+            "destination": [-4, 1, 0],
+            "rotation": [0, 4.712, 0]
           }
         }
       ],
       "mapstate": [
-        {
-          "burns": [[-6, 0, -6], [12, 0, 12], [-12, 0, -12], [6, 0, 6], [0, 0, 0]],
-          "freezed": [[-6, 0, -6], [6, 0, 6]],
-          "poisoned": [[-4, 0, 0]],
-          "wet": []
-        }
+        { "burns": [[-6, 0, -6], [12, 0, 12], [-12, 0, -12], [6, 0, 6], [0, 0, 0]], "freezed": [[-6, 0, -6], [6, 0, 6]], "poisoned": [[-4, 0, 0]], "wet": [] }
       ]
     },
     {
       "t": 14,
       "players": {
-        "player_1": { "position": [-6, 0, 0], "state": "dead" },
-        "player_2": { "position": [6, 0, 0],  "state": "alive" }
+        "player_1": { "position": [-6, 0, 0], "rotation": [0, 0.785, 0], "state": "alive" },
+        "player_2": { "position": [6, 0, 0],  "rotation": [0, 3.927, 0], "state": "alive" }
       },
       "assets": {
         "tree_02": "perfect",
@@ -668,12 +609,7 @@
       },
       "spells": [],
       "mapstate": [
-        {
-          "burns": [[-6, 0, -6], [12, 0, 12], [-12, 0, -12], [6, 0, 6], [0, 0, 0]],
-          "freezed": [[-6, 0, -6], [6, 0, 6]],
-          "poisoned": [[-4, 0, 0]],
-          "wet": []
-        }
+        { "burns": [[-6, 0, -6], [12, 0, 12], [-12, 0, -12], [6, 0, 6], [0, 0, 0]], "freezed": [[-6, 0, -6], [6, 0, 6]], "poisoned": [[-4, 0, 0]], "wet": [] }
       ]
     }
   ]
