@@ -156,6 +156,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="MeshLibrary.cpp" />
+    <ClCompile Include="Paths.cpp" />
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="shaders.cpp" />
     <ClCompile Include="suelo.cpp" />
@@ -171,6 +172,7 @@
     <ClInclude Include="Input.h" />
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="MeshLibrary.h" />
+    <ClInclude Include="Paths.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="shaders.h" />

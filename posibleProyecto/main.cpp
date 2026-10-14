@@ -10,6 +10,7 @@
 #include "Transform.h"
 #include "Entidad.h"
 #include "drawObjects.h"
+#include "Paths.h"
 
 int shouldContinue(GLFWwindow* window) {
     return glfwWindowShouldClose(window) == 0;
@@ -102,6 +103,7 @@ void buclePrincipaLTiempoReal(GLFWwindow* window, SystemInfo& sysInfo) {
 
         // Entidades
         cubo.transform.rot.y = time;
+        cubo.transform.rot.z = time;
         
         submitEntidad(renderer, suelo);
         submitEntidad(renderer, cubo);
