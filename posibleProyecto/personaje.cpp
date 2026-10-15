@@ -9,11 +9,11 @@ Personaje::Personaje(int id, Vector3 posicionInicial)
     this->m_rotacion = Vector3(0,0,0);
     this->m_vida = 100.f;
     this->m_mana = 50.0f;
-    añadirEstado(EstadoPersonaje::IDLE);
+    anadirEstado(EstadoPersonaje::IDLE);
     m_controlador = nullptr;
 }
 
-void Personaje::añadirEstado(EstadoPersonaje nuevoEstado)
+void Personaje::anadirEstado(EstadoPersonaje nuevoEstado)
 {
     if(!yaTieneEstado(nuevoEstado))
     {
@@ -51,7 +51,7 @@ void Personaje::moverse(const Vector3& desplazamiento)
     m_posicion = m_posicion + desplazamiento;
     
     borrarEstado(EstadoPersonaje::IDLE);
-    añadirEstado(EstadoPersonaje::VOLANDO);
+    anadirEstado(EstadoPersonaje::VOLANDO);
 }
 
 void Personaje::rotar(const Vector3& rotacion)
@@ -61,17 +61,17 @@ void Personaje::rotar(const Vector3& rotacion)
     m_rotacion  = m_rotacion + rotacion;
 }
 
-void Personaje::recibirDaño(float cantidadDaño)
+void Personaje::recibirDano(float cantidadDano)
 {
     if(yaTieneEstado(EstadoPersonaje::MUERTO)) return;
-    m_vida -= cantidadDaño;
-    cout << "Personaje " << m_id << " recibe " << cantidadDaño << " de daño. Vida restante: " << m_vida << endl;
+    m_vida -= cantidadDano;
+    cout << "Personaje " << m_id << " recibe " << cantidadDano << " de dano. Vida restante: " << m_vida << endl;
 
     if (m_vida <= 0)
     {
         m_vida = 0;
         m_estadosActuales.clear();
-        añadirEstado(EstadoPersonaje::MUERTO);
+        anadirEstado(EstadoPersonaje::MUERTO);
         cout << "Personaje " << m_id << " ha muerto." << endl;
     }
 }
@@ -96,7 +96,7 @@ void Personaje::lanzarHechizo()
 {
     if (yaTieneEstado(EstadoPersonaje::MUERTO) || yaTieneEstado(EstadoPersonaje::PARALIZADO)) return;
 
-    añadirEstado(EstadoPersonaje::CASTEANDO);
+    anadirEstado(EstadoPersonaje::CASTEANDO);
     //cout << "Personaje " << m_id << " lanxa un hechizo en la posicion (" << m_x<< "," << m_y << "," << m_z << ")" << endl;
     //pasar projectil a la logica de colisiones
 }
