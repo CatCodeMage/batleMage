@@ -19,29 +19,6 @@
         "player_1": { "position": [-20, 0, -20], "rotation": [0, 0.000, 0], "state": "alive" },
         "player_2": { "position": [20, 0, 20],   "rotation": [0, 3.927, 0], "state": "alive" }
       },
-      "assets": {
-        "tree_01": "perfect",
-        "tree_02": "perfect",
-        "tree_03": "perfect",
-        "tree_04": "perfect",
-        "tree_05": "perfect",
-        "tree_06": "perfect",
-        "rock_01": "perfect",
-        "rock_02": "perfect",
-        "rock_03": "perfect",
-        "rock_04": "perfect",
-        "rock_05": "perfect",
-        "rock_06": "perfect",
-        "rock_07": "perfect",
-        "bush_01": "perfect",
-        "bush_02": "perfect",
-        "bush_03": "perfect",
-        "bush_04": "perfect",
-        "bush_05": "perfect",
-        "bush_06": "perfect",
-        "bush_07": "perfect",
-        "bush_08": "perfect"
-      },
       "spells": [],
       "mapstate": [
         { "burns": [], "freezed": [], "poisoned": [], "wet": [] }
@@ -53,29 +30,6 @@
         "player_1": { "position": [-19, 0, -17], "rotation": [0, 0.500, 0], "state": "alive" },
         "player_2": { "position": [17, 0, 19],   "rotation": [0, 4.500, 0], "state": "alive" }
       },
-      "assets": {
-        "tree_01": "perfect",
-        "tree_02": "perfect",
-        "tree_03": "perfect",
-        "tree_04": "perfect",
-        "tree_05": "perfect",
-        "tree_06": "perfect",
-        "rock_01": "perfect",
-        "rock_02": "perfect",
-        "rock_03": "perfect",
-        "rock_04": "perfect",
-        "rock_05": "perfect",
-        "rock_06": "perfect",
-        "rock_07": "perfect",
-        "bush_01": "perfect",
-        "bush_02": "perfect",
-        "bush_03": "perfect",
-        "bush_04": "perfect",
-        "bush_05": "perfect",
-        "bush_06": "perfect",
-        "bush_07": "perfect",
-        "bush_08": "perfect"
-      },
       "spells": [],
       "mapstate": [
         { "burns": [], "freezed": [], "poisoned": [], "wet": [] }
@@ -86,29 +40,6 @@
       "players": {
         "player_1": { "position": [-16, 0, -12], "rotation": [0, 1.000, 0], "state": "alive" },
         "player_2": { "position": [13, 0, 17],   "rotation": [0, 5.000, 0], "state": "alive" }
-      },
-      "assets": {
-        "tree_01": "perfect",
-        "tree_02": "perfect",
-        "tree_03": "perfect",
-        "tree_04": "perfect",
-        "tree_05": "perfect",
-        "tree_06": "perfect",
-        "rock_01": "perfect",
-        "rock_02": "perfect",
-        "rock_03": "perfect",
-        "rock_04": "perfect",
-        "rock_05": "perfect",
-        "rock_06": "perfect",
-        "rock_07": "perfect",
-        "bush_01": "perfect",
-        "bush_02": "perfect",
-        "bush_03": "perfect",
-        "bush_04": "perfect",
-        "bush_05": "perfect",
-        "bush_06": "perfect",
-        "bush_07": "perfect",
-        "bush_08": "perfect"
       },
       "spells": [
         {
@@ -131,29 +62,6 @@
         "player_1": { "position": [-12, 0, -8], "rotation": [0, 1.500, 0], "state": "alive" },
         "player_2": { "position": [10, 0, 14],  "rotation": [0, 4.200, 0], "state": "alive" }
       },
-      "assets": {
-        "tree_01": "damaged",
-        "tree_02": "perfect",
-        "tree_03": "perfect",
-        "tree_04": "perfect",
-        "tree_05": "perfect",
-        "tree_06": "perfect",
-        "rock_01": "perfect",
-        "rock_02": "perfect",
-        "rock_03": "perfect",
-        "rock_04": "perfect",
-        "rock_05": "perfect",
-        "rock_06": "perfect",
-        "rock_07": "perfect",
-        "bush_01": "perfect",
-        "bush_02": "perfect",
-        "bush_03": "perfect",
-        "bush_04": "perfect",
-        "bush_05": "perfect",
-        "bush_06": "perfect",
-        "bush_07": "perfect",
-        "bush_08": "perfect"
-      },
       "spells": [
         {
           "0": {
@@ -174,29 +82,6 @@
       "players": {
         "player_1": { "position": [-8, 0, -5], "rotation": [0, 2.000, 0], "state": "alive" },
         "player_2": { "position": [8, 0, 11],  "rotation": [0, 3.500, 0], "state": "alive" }
-      },
-      "assets": {
-        "tree_01": "damaged",
-        "tree_02": "perfect",
-        "tree_03": "perfect",
-        "tree_04": "perfect",
-        "tree_05": "perfect",
-        "tree_06": "perfect",
-        "rock_01": "perfect",
-        "rock_02": "perfect",
-        "rock_03": "perfect",
-        "rock_04": "perfect",
-        "rock_05": "perfect",
-        "rock_06": "perfect",
-        "rock_07": "perfect",
-        "bush_01": "perfect",
-        "bush_02": "perfect",
-        "bush_03": "perfect",
-        "bush_04": "perfect",
-        "bush_05": "perfect",
-        "bush_06": "perfect",
-        "bush_07": "perfect",
-        "bush_08": "perfect"
       },
       "spells": [
         {
@@ -219,29 +104,6 @@
         "player_1": { "position": [-4, 0, -3], "rotation": [0, 2.500, 0], "state": "alive" },
         "player_2": { "position": [7, 0, 7],   "rotation": [0, 2.800, 0], "state": "alive" }
       },
-      "assets": {
-        "tree_01": "damaged",
-        "tree_02": "perfect",
-        "tree_03": "perfect",
-        "tree_04": "perfect",
-        "tree_05": "perfect",
-        "tree_06": "perfect",
-        "rock_01": "perfect",
-        "rock_02": "perfect",
-        "rock_03": "perfect",
-        "rock_04": "perfect",
-        "rock_05": "perfect",
-        "rock_06": "perfect",
-        "rock_07": "perfect",
-        "bush_01": "perfect",
-        "bush_02": "perfect",
-        "bush_03": "perfect",
-        "bush_04": "perfect",
-        "bush_05": "damaged",
-        "bush_06": "perfect",
-        "bush_07": "perfect",
-        "bush_08": "perfect"
-      },
       "spells": [
         {
           "0": {
@@ -263,29 +125,6 @@
         "player_1": { "position": [-1, 0, -2], "rotation": [0, 3.000, 0], "state": "alive" },
         "player_2": { "position": [6, 0, 4],   "rotation": [0, 2.200, 0], "state": "alive" }
       },
-      "assets": {
-        "tree_01": "damaged",
-        "tree_02": "perfect",
-        "tree_03": "perfect",
-        "tree_04": "perfect",
-        "tree_05": "perfect",
-        "tree_06": "perfect",
-        "rock_01": "perfect",
-        "rock_02": "perfect",
-        "rock_03": "perfect",
-        "rock_04": "perfect",
-        "rock_05": "perfect",
-        "rock_06": "perfect",
-        "rock_07": "perfect",
-        "bush_01": "perfect",
-        "bush_02": "perfect",
-        "bush_03": "perfect",
-        "bush_04": "perfect",
-        "bush_05": "damaged",
-        "bush_06": "perfect",
-        "bush_07": "perfect",
-        "bush_08": "perfect"
-      },
       "spells": [],
       "mapstate": [
         { "burns": [[-6, 0, -2], [8, 0, 11], [-8, 0, -5]], "freezed": [], "poisoned": [], "wet": [] }
@@ -296,29 +135,6 @@
       "players": {
         "player_1": { "position": [2, 0, -3], "rotation": [0, 3.500, 0], "state": "alive" },
         "player_2": { "position": [5, 0, 2],  "rotation": [0, 1.600, 0], "state": "alive" }
-      },
-      "assets": {
-        "tree_01": "damaged",
-        "tree_02": "perfect",
-        "tree_03": "perfect",
-        "tree_04": "perfect",
-        "tree_05": "perfect",
-        "tree_06": "perfect",
-        "rock_01": "perfect",
-        "rock_02": "perfect",
-        "rock_03": "perfect",
-        "rock_04": "perfect",
-        "rock_05": "perfect",
-        "rock_06": "perfect",
-        "rock_07": "perfect",
-        "bush_01": "perfect",
-        "bush_02": "perfect",
-        "bush_03": "perfect",
-        "bush_04": "perfect",
-        "bush_05": "damaged",
-        "bush_06": "perfect",
-        "bush_07": "perfect",
-        "bush_08": "perfect"
       },
       "spells": [
         {
@@ -348,29 +164,6 @@
         "player_1": { "position": [4, 0, -5], "rotation": [0, 4.000, 0], "state": "alive" },
         "player_2": { "position": [3, 0, 1],  "rotation": [0, 0.900, 0], "state": "alive" }
       },
-      "assets": {
-        "tree_01": "damaged",
-        "tree_02": "perfect",
-        "tree_03": "perfect",
-        "tree_04": "perfect",
-        "tree_05": "perfect",
-        "tree_06": "perfect",
-        "rock_01": "perfect",
-        "rock_02": "perfect",
-        "rock_03": "perfect",
-        "rock_04": "perfect",
-        "rock_05": "perfect",
-        "rock_06": "perfect",
-        "rock_07": "perfect",
-        "bush_01": "perfect",
-        "bush_02": "perfect",
-        "bush_03": "perfect",
-        "bush_04": "perfect",
-        "bush_05": "damaged",
-        "bush_06": "perfect",
-        "bush_07": "perfect",
-        "bush_08": "perfect"
-      },
       "spells": [
         {
           "0": {
@@ -399,28 +192,6 @@
         "player_1": { "position": [5, 0, -7], "rotation": [0, 4.500, 0], "state": "alive" },
         "player_2": { "position": [2, 0, 1],  "rotation": [0, 0.400, 0], "state": "alive" }
       },
-      "assets": {
-        "tree_02": "perfect",
-        "tree_03": "perfect",
-        "tree_04": "perfect",
-        "tree_05": "perfect",
-        "tree_06": "perfect",
-        "rock_01": "perfect",
-        "rock_02": "perfect",
-        "rock_03": "perfect",
-        "rock_04": "perfect",
-        "rock_05": "perfect",
-        "rock_06": "perfect",
-        "rock_07": "perfect",
-        "bush_01": "perfect",
-        "bush_02": "perfect",
-        "bush_03": "perfect",
-        "bush_04": "perfect",
-        "bush_05": "damaged",
-        "bush_06": "perfect",
-        "bush_07": "perfect",
-        "bush_08": "perfect"
-      },
       "spells": [],
       "mapstate": [
         { "burns": [[-6, 0, -2], [8, 0, 11], [-8, 0, -5], [5, 0, 2]], "freezed": [[2, 0, -3], [5, 0, 2]], "poisoned": [], "wet": [] }
@@ -431,27 +202,6 @@
       "players": {
         "player_1": { "position": [4, 0, -4], "rotation": [0, 5.000, 0], "state": "alive" },
         "player_2": { "position": [1, 0, 0],  "rotation": [0, 6.000, 0], "state": "alive" }
-      },
-      "assets": {
-        "tree_02": "perfect",
-        "tree_03": "perfect",
-        "tree_04": "perfect",
-        "tree_05": "perfect",
-        "tree_06": "perfect",
-        "rock_01": "perfect",
-        "rock_02": "perfect",
-        "rock_03": "perfect",
-        "rock_04": "perfect",
-        "rock_05": "perfect",
-        "rock_06": "perfect",
-        "rock_07": "perfect",
-        "bush_01": "perfect",
-        "bush_02": "perfect",
-        "bush_03": "perfect",
-        "bush_04": "perfect",
-        "bush_06": "perfect",
-        "bush_07": "perfect",
-        "bush_08": "perfect"
       },
       "spells": [
         {
@@ -474,27 +224,6 @@
         "player_1": { "position": [2, 0, -1], "rotation": [0, 5.500, 0], "state": "alive" },
         "player_2": { "position": [1, 0, -1], "rotation": [0, 5.500, 0], "state": "alive" }
       },
-      "assets": {
-        "tree_02": "perfect",
-        "tree_03": "perfect",
-        "tree_04": "perfect",
-        "tree_05": "perfect",
-        "tree_06": "perfect",
-        "rock_01": "perfect",
-        "rock_02": "perfect",
-        "rock_03": "perfect",
-        "rock_04": "perfect",
-        "rock_05": "perfect",
-        "rock_06": "perfect",
-        "rock_07": "perfect",
-        "bush_01": "perfect",
-        "bush_02": "perfect",
-        "bush_03": "perfect",
-        "bush_04": "perfect",
-        "bush_06": "perfect",
-        "bush_07": "perfect",
-        "bush_08": "perfect"
-      },
       "spells": [],
       "mapstate": [
         { "burns": [[-6, 0, -2], [8, 0, 11], [-8, 0, -5], [5, 0, 2], [4, 0, -4]], "freezed": [[2, 0, -3], [5, 0, 2]], "poisoned": [], "wet": [] }
@@ -505,27 +234,6 @@
       "players": {
         "player_1": { "position": [0, 0, 0], "rotation": [0, 6.000, 0], "state": "alive" },
         "player_2": { "position": [2, 0, -2], "rotation": [0, 5.000, 0], "state": "alive" }
-      },
-      "assets": {
-        "tree_02": "perfect",
-        "tree_03": "perfect",
-        "tree_04": "perfect",
-        "tree_05": "perfect",
-        "tree_06": "perfect",
-        "rock_01": "perfect",
-        "rock_02": "perfect",
-        "rock_03": "perfect",
-        "rock_04": "perfect",
-        "rock_05": "perfect",
-        "rock_06": "perfect",
-        "rock_07": "perfect",
-        "bush_01": "perfect",
-        "bush_02": "perfect",
-        "bush_03": "perfect",
-        "bush_04": "perfect",
-        "bush_06": "perfect",
-        "bush_07": "perfect",
-        "bush_08": "perfect"
       },
       "spells": [
         {
@@ -548,26 +256,6 @@
         "player_1": { "position": [-3, 0, 1], "rotation": [0, 6.500, 0], "state": "alive" },
         "player_2": { "position": [4, 0, -1],  "rotation": [0, 4.500, 0], "state": "alive" }
       },
-      "assets": {
-        "tree_02": "perfect",
-        "tree_03": "perfect",
-        "tree_04": "perfect",
-        "tree_05": "perfect",
-        "tree_06": "perfect",
-        "rock_01": "perfect",
-        "rock_03": "perfect",
-        "rock_04": "perfect",
-        "rock_05": "perfect",
-        "rock_06": "perfect",
-        "rock_07": "perfect",
-        "bush_01": "perfect",
-        "bush_02": "perfect",
-        "bush_03": "perfect",
-        "bush_04": "perfect",
-        "bush_06": "perfect",
-        "bush_07": "perfect",
-        "bush_08": "perfect"
-      },
       "spells": [
         {
           "0": {
@@ -588,26 +276,6 @@
       "players": {
         "player_1": { "position": [-6, 0, 0], "rotation": [0, 7.000, 0], "state": "alive" },
         "player_2": { "position": [6, 0, 0],  "rotation": [0, 3.927, 0], "state": "alive" }
-      },
-      "assets": {
-        "tree_02": "perfect",
-        "tree_03": "perfect",
-        "tree_04": "perfect",
-        "tree_05": "perfect",
-        "tree_06": "perfect",
-        "rock_01": "perfect",
-        "rock_03": "perfect",
-        "rock_04": "perfect",
-        "rock_05": "perfect",
-        "rock_06": "perfect",
-        "rock_07": "perfect",
-        "bush_01": "perfect",
-        "bush_02": "perfect",
-        "bush_03": "perfect",
-        "bush_04": "perfect",
-        "bush_06": "perfect",
-        "bush_07": "perfect",
-        "bush_08": "perfect"
       },
       "spells": [],
       "mapstate": [
