@@ -35,6 +35,9 @@ public:
     // Obtener la lista de hechizos activos
     const std::vector<std::unique_ptr<Hechizo>>& getActiveHechizos() const;
 
+    // Obtener catalogo de hechizos
+    const std::unordered_map<int, hechizosTemplate>& getCatalogoHechizos() const;
+
 private:
     std::vector<std::unique_ptr<Hechizo>> spellPool;
 
