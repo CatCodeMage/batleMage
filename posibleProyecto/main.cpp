@@ -6,6 +6,11 @@
 #include "MeshLibrary.h"
 #include "suelo.h"
 #include "Input.h"
+#include "Renderer.h"
+#include "Transform.h"
+#include "Entidad.h"
+#include "drawObjects.h"
+#include "Paths.h"
 
 int shouldContinue(GLFWwindow* window) {
     return glfwWindowShouldClose(window) == 0;
@@ -49,18 +54,37 @@ void createMeshes(MeshLibrary& lib) {
         std::vector<float>(std::begin(floorVertices), std::end(floorVertices)),
         std::vector<unsigned>(std::begin(floorIndices), std::end(floorIndices)));
 }
- 
+
 void buclePrincipaLTiempoReal(GLFWwindow* window, SystemInfo& sysInfo) {
-    
+    // Entidades
     MeshLibrary libMesh;    
     createMeshes(libMesh);
     MeshId cubeId = libMesh.find("cube");
     MeshId floorId = libMesh.find("floor");
 
+    Entidad suelo;
+    suelo.mesh = floorId;
+    suelo.kind = 1;
+
+    Entidad cubo;
+    cubo.mesh = cubeId;
+    cubo.transform.pos = glm::vec3(0.0f, 1.0f, 0.0f);
+    cubo.color = glm::vec4(0.9f, 0.4f, 0.2f, 1.0f);
+
+    // Luces
+    std::vector<Light> luces = {
+        { glm::vec3(0.0f),              8.0f, glm::vec3(1.0f, 0.8f, 0.5f), 2.0f },   // la que orbita
+        { glm::vec3(-3.0f, 2.0f, 0.0f), 6.0f, glm::vec3(0.3f, 0.5f, 1.0f), 2.0f }    // fija
+    };
+
+    // Camara y pantalla
     Camera viewCamera;
 
-    GLint mvpLoc = glGetUniformLocation(setShaders(), "uMVP");
+    GLuint program = setShaders();
+    Renderer renderer;
+    renderer.init(program);
 
+    // Input
     Input keysInput;
 
     keysInput.init(window);
@@ -68,22 +92,29 @@ void buclePrincipaLTiempoReal(GLFWwindow* window, SystemInfo& sysInfo) {
     while (shouldContinue(window)) {
         clearLastFrame();
 
+        // System
         sysInfo.getCurrentState(window);
+        float time = sysInfo.getTimeStored();
 
-        viewCamera.set_camera((float)sysInfo.getWidht(), (float)sysInfo.getHeight());
+        // Camara
+        viewCamera.update(keysInput, sysInfo);
 
         glm::mat4 vp = viewCamera.get_proj() * viewCamera.get_view();
 
-        // Suelo: sin transformación
-        glUniformMatrix4fv(mvpLoc, 1, GL_FALSE, glm::value_ptr(vp));
-        libMesh.get(floorId).draw();
-
-        // Cubo: subido a y=1 y girando sobre sí mismo
-        glm::mat4 cubeModel = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 1.0f, 0.0f))
-            * glm::rotate(glm::mat4(1.0f), sysInfo.getTimeStored(), glm::vec3(0.5f, 1.0f, 0.0f));
-        glUniformMatrix4fv(mvpLoc, 1, GL_FALSE, glm::value_ptr(vp * cubeModel));
-        libMesh.get(cubeId).draw();
+        // Entidades
+        cubo.transform.rot.y = time;
+        cubo.transform.rot.z = time;
         
+        submitEntidad(renderer, suelo);
+        submitEntidad(renderer, cubo);
+
+        // Light
+        luces[0].pos = glm::vec3(3.0f * cos(time), 3.0f, 3.0f * sin(time));    // UPDATE
+        for (const Light& l : luces) renderer.submitLight(l);
+
+        // Pintar
+        renderer.flush(libMesh, vp);
+
         updateFrame(window);
     }
 

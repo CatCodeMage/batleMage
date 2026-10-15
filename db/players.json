@@ -1,0 +1,8 @@
+{
+    "sphere": {
+        "radious": 5.0,
+        "scale": [1.0, 1.2, 1.0],
+        "slices": 20,
+        "stacks": 20
+    }
+}

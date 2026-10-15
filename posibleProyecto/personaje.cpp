@@ -2,45 +2,76 @@
 #include <iostream>
 using namespace std;
 
-Personaje::Personaje(int id, float x, float y, float z)
+Personaje::Personaje(int id, Vector3 posicionInicial)
 {
     this->m_id = id;
-    this->m_x = x;
-    this->m_y = y;
-    this->m_z = z;
+    this->m_posicion = posicionInicial;
+    this->m_rotacion = Vector3(0,0,0);
     this->m_vida = 100.f;
     this->m_mana = 50.0f;
-    this->m_estadoActual = EstadoPersonaje::IDLE;
+    anadirEstado(EstadoPersonaje::IDLE);
     m_controlador = nullptr;
+}
+
+void Personaje::anadirEstado(EstadoPersonaje nuevoEstado)
+{
+    if(!yaTieneEstado(nuevoEstado))
+    {
+        m_estadosActuales.push_back(nuevoEstado);
+    }
+}
+
+void Personaje::borrarEstado(EstadoPersonaje estado)
+{
+    auto it = std::find(m_estadosActuales.begin(), m_estadosActuales.end(), estado);
+    if(it != m_estadosActuales.end())
+    {
+        m_estadosActuales.erase(it);
+    }
+}
+
+bool Personaje::yaTieneEstado(EstadoPersonaje estado)
+{
+    return std::find(m_estadosActuales.begin(), m_estadosActuales.end(), estado) != m_estadosActuales.end();
 }
 
 void Personaje::update(float deltaTime)
 {
-    if(m_estadoActual == EstadoPersonaje::MUERTO) return;
+    if(yaTieneEstado(EstadoPersonaje::MUERTO))return;
     if(m_controlador != nullptr)
     {
         m_controlador->actualizar(*this, deltaTime);
     }
 }
 
-void Personaje::moverse(float deltaX, float deltaY, float deltaZ)
+void Personaje::moverse(const Vector3& desplazamiento)
 {
-    m_x += deltaX;
-    m_y += deltaY;
-    m_z += deltaZ;
-    m_estadoActual = EstadoPersonaje::VOLANDO;
+    if (yaTieneEstado(EstadoPersonaje::MUERTO) || yaTieneEstado(EstadoPersonaje::PARALIZADO)) return;
+
+    m_posicion = m_posicion + desplazamiento;
+    
+    borrarEstado(EstadoPersonaje::IDLE);
+    anadirEstado(EstadoPersonaje::VOLANDO);
 }
 
-void Personaje::recibirDaño(float cantidadDaño)
+void Personaje::rotar(const Vector3& rotacion)
 {
-    if(m_estadoActual == EstadoPersonaje::MUERTO) return;
-    m_vida -= cantidadDaño;
-    cout << "Personaje " << m_id << " recibe " << cantidadDaño << " de daño. Vida restante: " << m_vida << endl;
+    if (yaTieneEstado(EstadoPersonaje::MUERTO) || yaTieneEstado(EstadoPersonaje::PARALIZADO)) return;
+
+    m_rotacion  = m_rotacion + rotacion;
+}
+
+void Personaje::recibirDano(float cantidadDano)
+{
+    if(yaTieneEstado(EstadoPersonaje::MUERTO)) return;
+    m_vida -= cantidadDano;
+    cout << "Personaje " << m_id << " recibe " << cantidadDano << " de dano. Vida restante: " << m_vida << endl;
 
     if (m_vida <= 0)
     {
         m_vida = 0;
-        m_estadoActual = EstadoPersonaje::MUERTO;
+        m_estadosActuales.clear();
+        anadirEstado(EstadoPersonaje::MUERTO);
         cout << "Personaje " << m_id << " ha muerto." << endl;
     }
 }
@@ -63,8 +94,10 @@ void Personaje::disminuirMana(float cantidad)
 
 void Personaje::lanzarHechizo() 
 {
-    m_estadoActual = EstadoPersonaje::CASTEANDO;
-    cout << "Personaje " << m_id << " lanxa un hechizo en la posicion (" << m_x<< "," << m_y << "," << m_z << ")" << endl;
+    if (yaTieneEstado(EstadoPersonaje::MUERTO) || yaTieneEstado(EstadoPersonaje::PARALIZADO)) return;
+
+    anadirEstado(EstadoPersonaje::CASTEANDO);
+    //cout << "Personaje " << m_id << " lanxa un hechizo en la posicion (" << m_x<< "," << m_y << "," << m_z << ")" << endl;
     //pasar projectil a la logica de colisiones
 }
 
@@ -73,32 +106,31 @@ void Personaje::setControlador(ControladorPersonaje* nuevoControlador)
     m_controlador = nuevoControlador;
 }
 
-void Personaje::setEstado(EstadoPersonaje nuevoEstado) 
-{
-    m_estadoActual = nuevoEstado;
-}
-
 int Personaje::getId() const { return m_id; }
 
 float Personaje::getVida() const { return m_vida; }
 
 float Personaje::getMana() const { return m_mana; }
 
-float Personaje::getX() const { return m_x; }
+Vector3 Personaje::getPosicion() const { return m_posicion; }
+Vector3 Personaje::getRotacion() const { return m_rotacion; }
 
-float Personaje::getY() const { return m_y; }
+void Personaje::setPosicion(const Vector3& nuevaPosicion) { m_posicion = nuevaPosicion; }
+void Personaje::setRotacion(const Vector3& nuevaRotacion) { m_rotacion = nuevaRotacion; }
 
-float Personaje::getZ() const { return m_z; }
-
-EstadoPersonaje Personaje::getEstado() const { return m_estadoActual; }
+std::vector<EstadoPersonaje> Personaje::getEstados() const
+{
+    return m_estadosActuales;
+}
 
 DatosRenderPersonaje Personaje::obtenerDatosParaGraficar()
 {
     return DatosRenderPersonaje 
     {
         m_id,
-        m_x, m_y, m_z,
-        m_estadoActual
+        m_posicion,
+        m_rotacion,
+        m_estadosActuales
     };
 }
 

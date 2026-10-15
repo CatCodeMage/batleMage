@@ -12,3 +12,6 @@
 #include <string>
 #include <cstdint>
 #include <cassert>
+#include <cstddef>
+#include <filesystem>
+#include <nlohmann/json.hpp>

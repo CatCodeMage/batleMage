@@ -1,276 +1,285 @@
 {
   "metadata": {
-    "version": "1.1",
-    "totalIteraciones": 14,
-    "ganador": "personaje_2"
+    "version": "1.7",
+    "iterations": 14,
+    "winner": "player_2",
+    "rotationOrder": "XYZ",
+    "rotationUnit": "radians"
   },
-  "escenario": {
-    "ancho": 100,
-    "alto": 100,
-    "profundidad": 100
+  "map": "./bd/map.json",
+  "players": {
+    "player_1": { "type": "sphere", "position": [-20, 0, -20], "scale": [1, 1, 1] },
+    "player_2": { "type": "sphere", "position": [20, 0, 20],   "scale": [1, 1, 1] }
   },
-  "personajes": {
-    "personaje_1": { "nombre": "Aragorn", "modelo": "cube.glb", "manaMaximo": 50, "regeneracionManaPorSegundo": 2 },
-    "personaje_2": { "nombre": "Legolas", "modelo": "cube.glb",  "manaMaximo": 50, "regeneracionManaPorSegundo": 2 }
-  },
-  "assets": {
-    "arbol_01":   { "tipo": "arbol",   "posicionInicial": [10, 0, 5] },
-    "muro_01":    { "tipo": "muro",    "posicionInicial": [20, 0, 15] },
-    "arbusto_01": { "tipo": "arbusto", "posicionInicial": [30, 0, 25] }
-  },
-  "hechizos": {
-    "bola_fuego":  { "costeMana": 15, "daño": 20 },
-    "rayo_arcano": { "costeMana": 10, "daño": 12 },
-    "curación":    { "costeMana": 20, "daño": -25 },
-    "explosión":   { "costeMana": 25, "daño": 30 }
-  },
+  "spells": "./bd/spells.json",
   "frames": [
     {
       "t": 0,
-      "personajes": {
-        "personaje_1": { "posicion": [0, 0, 0],  "vida": 100, "mana": 50 },
-        "personaje_2": { "posicion": [50, 0, 0], "vida": 100, "mana": 50 }
+      "players": {
+        "player_1": { "position": [-20, 0, -20], "rotation": [0, 0.000, 0], "state": "alive" },
+        "player_2": { "position": [20, 0, 20],   "rotation": [0, 3.927, 0], "state": "alive" }
       },
-      "assets": {
-        "arbol_01": "perfecto",
-        "muro_01": "perfecto",
-        "arbusto_01": "perfecto"
-      },
-      "hechizos": []
+      "spells": [],
+      "mapstate": [
+        { "burns": [], "freezed": [], "poisoned": [], "wet": [] }
+      ]
     },
     {
       "t": 1,
-      "personajes": {
-        "personaje_1": { "posicion": [2, 0, 0],  "vida": 100, "mana": 50 },
-        "personaje_2": { "posicion": [48, 0, 0], "vida": 100, "mana": 50 }
+      "players": {
+        "player_1": { "position": [-19, 0, -17], "rotation": [0, 0.500, 0], "state": "alive" },
+        "player_2": { "position": [17, 0, 19],   "rotation": [0, 4.500, 0], "state": "alive" }
       },
-      "assets": {
-        "arbol_01": "perfecto",
-        "muro_01": "perfecto",
-        "arbusto_01": "perfecto"
-      },
-      "hechizos": []
+      "spells": [],
+      "mapstate": [
+        { "burns": [], "freezed": [], "poisoned": [], "wet": [] }
+      ]
     },
     {
       "t": 2,
-      "personajes": {
-        "personaje_1": { "posicion": [4, 0, 0],  "vida": 100, "mana": 37 },
-        "personaje_2": { "posicion": [46, 0, 0], "vida": 100, "mana": 50 }
+      "players": {
+        "player_1": { "position": [-16, 0, -12], "rotation": [0, 1.000, 0], "state": "alive" },
+        "player_2": { "position": [13, 0, 17],   "rotation": [0, 5.000, 0], "state": "alive" }
       },
-      "assets": {
-        "arbol_01": "perfecto",
-        "muro_01": "perfecto",
-        "arbusto_01": "perfecto"
-      },
-      "hechizos": [
+      "spells": [
         {
-          "idHechizo": "h_001",
-          "lanzador": "personaje_1",
-          "tipo": "bola_fuego",
-          "costeMana": 15,
-          "origen": [4, 1, 0],
-          "destino": [46, 1, 0],
-          "objetivo": "personaje_2"
+          "0": {
+            "name": "fire_ball",
+            "origin": [-16, 1, -12],
+            "position": [-16, 1, -12],
+            "destination": [13, 1, 17],
+            "rotation": [0, 0.822, 0]
+          }
         }
+      ],
+      "mapstate": [
+        { "burns": [], "freezed": [], "poisoned": [], "wet": [] }
       ]
     },
     {
       "t": 3,
-      "personajes": {
-        "personaje_1": { "posicion": [6, 0, 0],  "vida": 100, "mana": 39 },
-        "personaje_2": { "posicion": [44, 0, 0], "vida": 80,  "mana": 50 }
+      "players": {
+        "player_1": { "position": [-12, 0, -8], "rotation": [0, 1.500, 0], "state": "alive" },
+        "player_2": { "position": [10, 0, 14],  "rotation": [0, 4.200, 0], "state": "alive" }
       },
-      "assets": {
-        "arbol_01": "perfecto",
-        "muro_01": "perfecto",
-        "arbusto_01": "perfecto"
-      },
-      "hechizos": []
+      "spells": [
+        {
+          "0": {
+            "name": "fire_ball",
+            "origin": [-16, 1, -12],
+            "position": [-6, 1, -2],
+            "destination": [13, 1, 17],
+            "rotation": [0, 0.822, 0]
+          }
+        }
+      ],
+      "mapstate": [
+        { "burns": [[-6, 0, -2]], "freezed": [], "poisoned": [], "wet": [] }
+      ]
     },
     {
       "t": 4,
-      "personajes": {
-        "personaje_1": { "posicion": [8, 0, 0],  "vida": 100, "mana": 41 },
-        "personaje_2": { "posicion": [42, 0, 0], "vida": 80,  "mana": 42 }
+      "players": {
+        "player_1": { "position": [-8, 0, -5], "rotation": [0, 2.000, 0], "state": "alive" },
+        "player_2": { "position": [8, 0, 11],  "rotation": [0, 3.500, 0], "state": "alive" }
       },
-      "assets": {
-        "arbol_01": "perfecto",
-        "muro_01": "perfecto",
-        "arbusto_01": "perfecto"
-      },
-      "hechizos": [
+      "spells": [
         {
-          "idHechizo": "h_002",
-          "lanzador": "personaje_2",
-          "tipo": "rayo_arcano",
-          "costeMana": 10,
-          "origen": [42, 1, 0],
-          "destino": [8, 1, 0],
-          "objetivo": "personaje_1"
+          "0": {
+            "name": "lightning_bolt",
+            "origin": [8, 1, 11],
+            "position": [8, 1, 11],
+            "destination": [-8, 1, -5],
+            "rotation": [0, 4.000, 0]
+          }
         }
+      ],
+      "mapstate": [
+        { "burns": [[-6, 0, -2], [8, 0, 11]], "freezed": [], "poisoned": [], "wet": [] }
       ]
     },
     {
       "t": 5,
-      "personajes": {
-        "personaje_1": { "posicion": [10, 0, 0], "vida": 88, "mana": 43 },
-        "personaje_2": { "posicion": [40, 0, 0], "vida": 80, "mana": 44 }
+      "players": {
+        "player_1": { "position": [-4, 0, -3], "rotation": [0, 2.500, 0], "state": "alive" },
+        "player_2": { "position": [7, 0, 7],   "rotation": [0, 2.800, 0], "state": "alive" }
       },
-      "assets": {
-        "arbol_01": "dañado",
-        "muro_01": "perfecto",
-        "arbusto_01": "perfecto"
-      },
-      "hechizos": []
+      "spells": [
+        {
+          "0": {
+            "name": "lightning_bolt",
+            "origin": [8, 1, 11],
+            "position": [-6, 1, -3],
+            "destination": [-8, 1, -5],
+            "rotation": [0, 4.000, 0]
+          }
+        }
+      ],
+      "mapstate": [
+        { "burns": [[-6, 0, -2], [8, 0, 11], [-8, 0, -5]], "freezed": [], "poisoned": [], "wet": [] }
+      ]
     },
     {
       "t": 6,
-      "personajes": {
-        "personaje_1": { "posicion": [10, 0, 4], "vida": 88, "mana": 45 },
-        "personaje_2": { "posicion": [38, 0, 0], "vida": 80, "mana": 46 }
+      "players": {
+        "player_1": { "position": [-1, 0, -2], "rotation": [0, 3.000, 0], "state": "alive" },
+        "player_2": { "position": [6, 0, 4],   "rotation": [0, 2.200, 0], "state": "alive" }
       },
-      "assets": {
-        "arbol_01": "dañado",
-        "muro_01": "perfecto",
-        "arbusto_01": "perfecto"
-      },
-      "hechizos": []
+      "spells": [],
+      "mapstate": [
+        { "burns": [[-6, 0, -2], [8, 0, 11], [-8, 0, -5]], "freezed": [], "poisoned": [], "wet": [] }
+      ]
     },
     {
       "t": 7,
-      "personajes": {
-        "personaje_1": { "posicion": [10, 0, 5], "vida": 88, "mana": 32 },
-        "personaje_2": { "posicion": [36, 0, 0], "vida": 80, "mana": 48 }
+      "players": {
+        "player_1": { "position": [2, 0, -3], "rotation": [0, 3.500, 0], "state": "alive" },
+        "player_2": { "position": [5, 0, 2],  "rotation": [0, 1.600, 0], "state": "alive" }
       },
-      "assets": {
-        "arbol_01": "dañado",
-        "muro_01": "perfecto",
-        "arbusto_01": "perfecto"
-      },
-      "hechizos": [
+      "spells": [
         {
-          "idHechizo": "h_003",
-          "lanzador": "personaje_1",
-          "tipo": "bola_fuego",
-          "costeMana": 15,
-          "origen": [10, 1, 5],
-          "destino": [10, 1, 5],
-          "objetivo": "arbol_01"
+          "0": {
+            "name": "ice_lance",
+            "origin": [2, 1, -3],
+            "position": [2, 1, -3],
+            "destination": [5, 1, 2],
+            "rotation": [0, 1.030, 0]
+          },
+          "1": {
+            "name": "fire_ball",
+            "origin": [5, 1, 2],
+            "position": [5, 1, 2],
+            "destination": [2, 1, -3],
+            "rotation": [0, 4.171, 0]
+          }
         }
+      ],
+      "mapstate": [
+        { "burns": [[-6, 0, -2], [8, 0, 11], [-8, 0, -5]], "freezed": [[2, 0, -3]], "poisoned": [], "wet": [] }
       ]
     },
     {
       "t": 8,
-      "personajes": {
-        "personaje_1": { "posicion": [10, 0, 5], "vida": 88, "mana": 34 },
-        "personaje_2": { "posicion": [34, 0, 0], "vida": 80, "mana": 35 }
+      "players": {
+        "player_1": { "position": [4, 0, -5], "rotation": [0, 4.000, 0], "state": "alive" },
+        "player_2": { "position": [3, 0, 1],  "rotation": [0, 0.900, 0], "state": "alive" }
       },
-      "assets": {
-        "muro_01": "perfecto",
-        "arbusto_01": "perfecto"
-      },
-      "hechizos": [
+      "spells": [
         {
-          "idHechizo": "h_004",
-          "lanzador": "personaje_2",
-          "tipo": "bola_fuego",
-          "costeMana": 15,
-          "origen": [34, 1, 0],
-          "destino": [10, 1, 5],
-          "objetivo": "personaje_1"
+          "0": {
+            "name": "ice_lance",
+            "origin": [2, 1, -3],
+            "position": [4, 1, 1],
+            "destination": [5, 1, 2],
+            "rotation": [0, 1.030, 0]
+          },
+          "1": {
+            "name": "fire_ball",
+            "origin": [5, 1, 2],
+            "position": [3, 1, 0],
+            "destination": [2, 1, -3],
+            "rotation": [0, 4.171, 0]
+          }
         }
+      ],
+      "mapstate": [
+        { "burns": [[-6, 0, -2], [8, 0, 11], [-8, 0, -5], [5, 0, 2]], "freezed": [[2, 0, -3], [5, 0, 2]], "poisoned": [], "wet": [] }
       ]
     },
     {
       "t": 9,
-      "personajes": {
-        "personaje_1": { "posicion": [10, 0, 5], "vida": 68, "mana": 36 },
-        "personaje_2": { "posicion": [32, 0, 0], "vida": 80, "mana": 37 }
+      "players": {
+        "player_1": { "position": [5, 0, -7], "rotation": [0, 4.500, 0], "state": "alive" },
+        "player_2": { "position": [2, 0, 1],  "rotation": [0, 0.400, 0], "state": "alive" }
       },
-      "assets": {
-        "muro_01": "perfecto",
-        "arbusto_01": "dañado"
-      },
-      "hechizos": []
+      "spells": [],
+      "mapstate": [
+        { "burns": [[-6, 0, -2], [8, 0, 11], [-8, 0, -5], [5, 0, 2]], "freezed": [[2, 0, -3], [5, 0, 2]], "poisoned": [], "wet": [] }
+      ]
     },
     {
       "t": 10,
-      "personajes": {
-        "personaje_1": { "posicion": [12, 0, 5], "vida": 68, "mana": 38 },
-        "personaje_2": { "posicion": [30, 0, 0], "vida": 80, "mana": 39 }
+      "players": {
+        "player_1": { "position": [4, 0, -4], "rotation": [0, 5.000, 0], "state": "alive" },
+        "player_2": { "position": [1, 0, 0],  "rotation": [0, 6.000, 0], "state": "alive" }
       },
-      "assets": {
-        "muro_01": "perfecto",
-        "arbusto_01": "dañado"
-      },
-      "hechizos": []
+      "spells": [
+        {
+          "0": {
+            "name": "meteor",
+            "origin": [4, 5, -4],
+            "position": [4, 5, -4],
+            "destination": [4, 0, -4],
+            "rotation": [0, 0, 0]
+          }
+        }
+      ],
+      "mapstate": [
+        { "burns": [[-6, 0, -2], [8, 0, 11], [-8, 0, -5], [5, 0, 2]], "freezed": [[2, 0, -3], [5, 0, 2]], "poisoned": [], "wet": [] }
+      ]
     },
     {
       "t": 11,
-      "personajes": {
-        "personaje_1": { "posicion": [14, 0, 5], "vida": 68, "mana": 40 },
-        "personaje_2": { "posicion": [28, 0, 0], "vida": 80, "mana": 16 }
+      "players": {
+        "player_1": { "position": [2, 0, -1], "rotation": [0, 5.500, 0], "state": "alive" },
+        "player_2": { "position": [1, 0, -1], "rotation": [0, 5.500, 0], "state": "alive" }
       },
-      "assets": {
-        "muro_01": "perfecto",
-        "arbusto_01": "dañado"
-      },
-      "hechizos": [
-        {
-          "idHechizo": "h_005",
-          "lanzador": "personaje_2",
-          "tipo": "explosión",
-          "costeMana": 25,
-          "origen": [28, 1, 0],
-          "destino": [14, 1, 5],
-          "objetivo": "personaje_1"
-        }
+      "spells": [],
+      "mapstate": [
+        { "burns": [[-6, 0, -2], [8, 0, 11], [-8, 0, -5], [5, 0, 2], [4, 0, -4]], "freezed": [[2, 0, -3], [5, 0, 2]], "poisoned": [], "wet": [] }
       ]
     },
     {
       "t": 12,
-      "personajes": {
-        "personaje_1": { "posicion": [14, 0, 5], "vida": 38, "mana": 42 },
-        "personaje_2": { "posicion": [28, 0, 0], "vida": 80, "mana": 18 }
+      "players": {
+        "player_1": { "position": [0, 0, 0], "rotation": [0, 6.000, 0], "state": "alive" },
+        "player_2": { "position": [2, 0, -2], "rotation": [0, 5.000, 0], "state": "alive" }
       },
-      "assets": {
-        "muro_01": "dañado",
-        "arbusto_01": "dañado"
-      },
-      "hechizos": []
+      "spells": [
+        {
+          "0": {
+            "name": "poison_cloud",
+            "origin": [2, 1, -2],
+            "position": [2, 1, -2],
+            "destination": [0, 1, 0],
+            "rotation": [0, 5.498, 0]
+          }
+        }
+      ],
+      "mapstate": [
+        { "burns": [[-6, 0, -2], [8, 0, 11], [-8, 0, -5], [5, 0, 2], [4, 0, -4]], "freezed": [[2, 0, -3], [5, 0, 2]], "poisoned": [], "wet": [] }
+      ]
     },
     {
       "t": 13,
-      "personajes": {
-        "personaje_1": { "posicion": [16, 0, 5], "vida": 38, "mana": 44 },
-        "personaje_2": { "posicion": [26, 0, 0], "vida": 80, "mana": 20 }
+      "players": {
+        "player_1": { "position": [-3, 0, 1], "rotation": [0, 6.500, 0], "state": "alive" },
+        "player_2": { "position": [4, 0, -1],  "rotation": [0, 4.500, 0], "state": "alive" }
       },
-      "assets": {
-        "muro_01": "dañado",
-        "arbusto_01": "dañado"
-      },
-      "hechizos": []
+      "spells": [
+        {
+          "0": {
+            "name": "poison_cloud",
+            "origin": [2, 1, -2],
+            "position": [0, 1, 0],
+            "destination": [0, 1, 0],
+            "rotation": [0, 5.498, 0]
+          }
+        }
+      ],
+      "mapstate": [
+        { "burns": [[-6, 0, -2], [8, 0, 11], [-8, 0, -5], [5, 0, 2], [4, 0, -4]], "freezed": [[2, 0, -3], [5, 0, 2]], "poisoned": [[0, 0, 0]], "wet": [] }
+      ]
     },
     {
       "t": 14,
-      "personajes": {
-        "personaje_1": { "posicion": [18, 0, 5], "vida": 0,  "mana": 46 },
-        "personaje_2": { "posicion": [24, 0, 0], "vida": 80, "mana": 22 }
+      "players": {
+        "player_1": { "position": [-6, 0, 0], "rotation": [0, 7.000, 0], "state": "alive" },
+        "player_2": { "position": [6, 0, 0],  "rotation": [0, 3.927, 0], "state": "alive" }
       },
-      "assets": {
-        "muro_01": "dañado",
-        "arbusto_01": "dañado"
-      },
-      "hechizos": [
-        {
-          "idHechizo": "h_006",
-          "lanzador": "personaje_2",
-          "tipo": "explosión",
-          "costeMana": 25,
-          "origen": [24, 1, 0],
-          "destino": [18, 1, 5],
-          "objetivo": "personaje_1"
-        }
+      "spells": [],
+      "mapstate": [
+        { "burns": [[-6, 0, -2], [8, 0, 11], [-8, 0, -5], [5, 0, 2], [4, 0, -4]], "freezed": [[2, 0, -3], [5, 0, 2]], "poisoned": [[0, 0, 0]], "wet": [] }
       ]
     }
   ]

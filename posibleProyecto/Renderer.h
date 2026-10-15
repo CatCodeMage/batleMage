@@ -1,0 +1,25 @@
+#pragma once
+#include "Mesh.h"
+#include "MeshLibrary.h"
+
+struct Light {
+    glm::vec3 pos;   float radius;      // hasta donde llega la luz
+    glm::vec3 color; float intensity;
+};
+
+static_assert(sizeof(Light) == 32, "Light debe ser 2 vec4 contiguos");
+
+constexpr int MAX_LIGHTS = 16; 
+
+class Renderer {
+public:
+    Renderer();
+    void init(GLuint program);
+    void submit(MeshId id, const glm::mat4& model, const glm::vec4& color, int kind = 0);
+    void flush(const MeshLibrary& lib, const glm::mat4& viewProj);
+    void submitLight(const Light& light);
+private:
+    std::vector<Light> w_lights;
+    std::vector<std::vector<InstanceData>> w_batches;     // un lote por MeshId
+    GLint w_locViewProj, w_locNumLights, w_locLights;
+};
