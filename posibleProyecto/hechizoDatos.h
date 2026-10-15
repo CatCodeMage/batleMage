@@ -4,49 +4,52 @@
 #include <vector>
 #include <cmath>
 #include <memory>
+#include <GLFW/glfw3.h>
+#include <glm/glm.hpp>
 
 // estructura 3D
-struct Vector3 {
-    float x = 0.0f;
-    float y = 0.0f;
-    float z = 0.0f;
+// nueva estructura
 
-    // Constructores
-    Vector3() = default;
-    Vector3(float _x, float _y, float _z) : x(_x), y(_y), z(_z) {}
-
-    // --- OPERACIONES MATEMÁTICAS CLAVE ---
-
-    // Suma de vectores (ej: Posición + Velocidad)
-    Vector3 operator+(const Vector3& o) const { 
-        return Vector3(x + o.x, y + o.y, z + o.z); 
-    }
-
-    // Resta de vectores (ej: Objetivo - Origen para hallar la dirección)
-    Vector3 operator-(const Vector3& o) const { 
-        return Vector3(x - o.x, y - o.y, z - o.z); 
-    }
-
-    // Multiplicación por escalar (ej: Dirección * Velocidad * deltaTime)
-    Vector3 operator*(float scalar) const { 
-        return Vector3(x * scalar, y * scalar, z * scalar); 
-    }
-
-    // Módulo / Magnitud (Longitud real del vector en el mundo)
-    float Length() const { 
-        return std::sqrt(x * x + y * y + z * z); 
-    }
-
-    // Normalización: convierte el vector en un "Vector Unitario" (longitud 1)
-    // Útil para representar solo la DIRECCIÓN sin importar la distancia.
-    Vector3 Normalized() const {
-        float len = Length();
-        return (len > 0.0001f) ? Vector3(x / len, y / len, z / len) : Vector3(0, 0, 0);
-    }
+// 1. Definimos el enum tipado para los elementos
+enum class ElementType {
+    None,
+    Fire,
+    Ice,
+    water,
+    earth,
+    wind,
+    Lightning,
+    Arcane,
+    Poison
 };
 
+enum class CastType { Projectile, AreaOfEffect, Cone, Raycast, Self };
+enum class MovementPattern { Linear, Homing, Parabolic, Orbiting, Static };
 
-enum class ElementType { Physical, Fire, Water, Earth, Air, Lightning };
+// 2. El componente aloja el enum junto al resto de datos estáticos
+// he sacado del anterior struct los que cambia
+struct SpellDefinitionComponent {
+    int id;
+    std::string name;
+    ElementType element; 
+    CastType casteo;
+    MovementPattern formaMovimiento;
+    float cost;
+    float damage;
+    float cooldown;
+};
+
+// Componentes de estado dinámico
+struct ProjectileComponent {
+    glm::vec3 translacio;
+    glm::vec3 rotacio;
+    glm::vec3 scale;
+    glm::vec3 direction;
+    float speed;
+    float radius;
+};
+
+//-----------------------------------------***
 
 struct ElementBonus {
     float damageMultiplier = 1.0f; // Ej: 1.2f = +20% de daño
@@ -64,15 +67,15 @@ inline ElementBonus GetElementBonus(ElementType type){
             // El fuego pega más fuerte y puede quemar
             return { 1.25f, 1.0f, 0.0f, 0.4f, "burned" };
 
-        case ElementType::Air:
+        case ElementType::Ice:
             // El aire es muy rápido y reduce el cooldown
             return { 0.9f, 1.5f, 0.5f, 0.1f, "knockback" };
 
-        case ElementType::Water:
+        case ElementType::Poison:
             // El agua aplica estado empapado para combos
             return { 1.0f, 1.1f, 0.0f, 1.0f, "wet" };
 
-        case ElementType::Earth:
+        case ElementType::None:
             // La tierra pega duro pero es lenta
             return { 1.4f, 0.7f, -0.2f, 0.2f, "stunt" };
 
@@ -80,7 +83,8 @@ inline ElementBonus GetElementBonus(ElementType type){
             // El rayo es instantáneo / muy rápido con alto crítico
             return { 1.1f, 2.0f, 0.2f, 0.3f, "shocked" };
 
-        case ElementType::Physical:
+        case ElementType::Arcane:
+            return { 1.1f, 2.0f, 0.2f, 0.3f, "shocked" };
         default:
             return { 1.0f, 1.0f, 0.0f, 0.0f, "none" };
     }
@@ -89,17 +93,16 @@ inline ElementBonus GetElementBonus(ElementType type){
 //bonificación contra elementos o estados
 inline float GetElementalMultiplier(ElementType attacker, ElementType defender) {
     // [Atacante][Defensor]
-    if (attacker == ElementType::Water && defender == ElementType::Fire) return 2.0f; // Agua apaga Fuego
-    if (attacker == ElementType::Fire && defender == ElementType::Earth) return 1.5f; // Fuego quema Tierra
-    if (attacker == ElementType::Lightning && defender == ElementType::Water) return 2.0f; // Rayo electrocuta Agua
-    if (attacker == ElementType::Fire && defender == ElementType::Water) return 0.5f; // Fuego contra agua hace menos
+    if (attacker == ElementType::Arcane && defender == ElementType::Fire) return 2.0f; // Agua apaga Fuego
+    if (attacker == ElementType::Fire && defender == ElementType::Arcane) return 1.5f; // Fuego quema Tierra
+    if (attacker == ElementType::Lightning && defender == ElementType::Arcane) return 2.0f; // Rayo electrocuta Agua
+    if (attacker == ElementType::Fire && defender == ElementType::Arcane) return 0.5f; // Fuego contra agua hace menos
     
     return 1.0f; // Daño normal por defecto
 }
 
-enum class CastType { Projectile, AreaOfEffect, Cone, Raycast, Self };
-enum class MovementPattern { Linear, Homing, Parabolic, Orbiting, Static };
 
+// este es el viejo, he hecho uno nuevo he quitado algunos, de momento lo dejo para que no me salte rojo las demás cosas de este .h
 struct SpellData {
     std::string id = "spell_base";
     std::string name = "Base Spell";
@@ -123,18 +126,6 @@ enum class estadosElementos{vapor,quemado,mud,electrificado};
 enum class combos{magma,tornado,mud,electroBoom};
 
 
-// ============================================================================
-// CONTEXTO DE COLISIÓN (Soluciona el error 'identifier CollisionContext is undefined') //solo para usado para probar
-// ============================================================================
-// solo para mi imaginarme como podria ser, creado por chat 
-struct CollisionContext {
-    Vector3 hitPoint;
-    Vector3 hitNormal;
-    ElementType objectElement = ElementType::Physical;
-    std::string objectState = "none"; // Ej: "burned", "wet", "frozen"
-    void* hitCollider = nullptr;      // Puntero genérico al objeto impactado
-};
-
 void ApplyElementBonus(SpellData& data) {
     ElementBonus bonus = GetElementBonus(data.element);
 
@@ -156,7 +147,7 @@ inline ReactionResult EvaluateElementalInteraction(ElementType attackElement, es
     ReactionResult result;
 
     // --- REACCIONES DE AGUA ---
-    if (attackElement == ElementType::Water) {
+    if (attackElement == ElementType::Arcane) {
         if (currentState == estadosElementos::quemado) {
             // Agua + Quemado -> Crea Vapor (Extingue el fuego, causa daño extra de vaporización)
             result.nextState = estadosElementos::vapor;
@@ -188,7 +179,7 @@ inline ReactionResult EvaluateElementalInteraction(ElementType attackElement, es
         }
     }
     // --- REACCIONES DE TIERRA ---
-    else if (attackElement == ElementType::Earth) {
+    else if (attackElement == ElementType::Arcane) {
         if (currentState == estadosElementos::vapor || currentState == estadosElementos::mud) {
             // Tierra + Humedad/Vapor -> Barro
             result.nextState = estadosElementos::mud;
@@ -210,3 +201,5 @@ inline ReactionResult EvaluateElementalInteraction(ElementType attackElement, es
 
     return result;
 }
+
+

@@ -44,12 +44,12 @@ public:
     void moverse(const Vector3& desplazamiento);
     void rotar(const Vector3& deltaRotacion);
     void lanzarHechizo();
-    void recibirDaño(float cantidadDaño);
+    void recibirDano(float cantidadDano);
     void aumentarVida(float cantidad);
     void disminuirMana(float cantidad);
     void aumentarMana(float cantidad);
 
-    void añadirEstado(EstadoPersonaje nuevoEstado);
+    void anadirEstado(EstadoPersonaje nuevoEstado);
     void borrarEstado(EstadoPersonaje estado);
     bool yaTieneEstado(EstadoPersonaje estado);
     std::vector<EstadoPersonaje> getEstados() const;
