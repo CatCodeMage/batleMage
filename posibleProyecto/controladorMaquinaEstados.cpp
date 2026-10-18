@@ -3,17 +3,17 @@
 #include <iostream>
 
 ControladorMaquinaEstados::ControladorMaquinaEstados(Personaje* objetivo, float distanciaAtaque, float distanciaSegura,
-    float velocidadMovimiento, float costeManaHechizo, float cooldownAtaque, float regeneracionManaSeg) : 
-                m_objetivo(objetivo),
-                m_estadoIA(EstadoIA::ESPERANDO),
-                m_distanciaAtaque(distanciaAtaque),
-                m_distanciaSegura(distanciaSegura),
-                m_velocidadMovimiento(velocidadMovimiento),
-                m_costeManaHechizo(costeManaHechizo),
-                m_cooldownAtaque(cooldownAtaque),
-                m_tiempoDesdeUltAtaque(cooldownAtaque),
-                m_regenMana(regeneracionManaSeg)
+    float velocidadMovimiento, float costeManaHechizo, float cooldownAtaque, float regeneracionManaSeg)
 {
+    m_objetivo = objetivo;
+    m_estadoIA = EstadoIA::ESPERANDO;
+    m_distanciaSegura = distanciaSegura;
+    m_distanciaAtaque = distanciaAtaque;
+    m_velocidadMovimiento = velocidadMovimiento;
+    m_costeManaHechizo = costeManaHechizo;
+    m_cooldownAtaque = cooldownAtaque;
+    m_regenMana = regeneracionManaSeg;
+    m_tiempoDesdeUltAtaque = cooldownAtaque;
 }
 
 void ControladorMaquinaEstados::actualizar(Personaje& personaje, float deltaTime)
