@@ -31,6 +31,8 @@ void Renderer::flush(const MeshLibrary& lib, const glm::mat4& viewProj) {
     if (!w_lights.empty())
         glUniform4fv(w_locLights, (GLsizei)(w_lights.size() * 2), (const GLfloat*)w_lights.data());
 
+
+
     for (MeshId i = 0; i < w_batches.size(); ++i) {
         lib.get(i).drawInstances(w_batches[i]);
         w_batches[i].clear();

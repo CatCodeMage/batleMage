@@ -1,4 +1,7 @@
 {
+    "map0": {
+        "path": "./posibleProyecto/assets/map0.obj"
+    },
     "tree": {
         "path": "./posibleProyecto/assets/tree.obj",
         "hitbox": "cilinder"

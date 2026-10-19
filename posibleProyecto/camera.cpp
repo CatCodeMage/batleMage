@@ -41,10 +41,7 @@ void Camera::update(const Input& input,const SystemInfo& sysInfo) {
 
 	float dt = sysInfo.getDeltaTime();
 
-	float fwd, strafe, turn; 
-
-	const float speed = 1.f;
-	const float rotSpeed = 10.f;
+	float fwd, strafe, turn;
 
 	float x_mov, y_mov, z_mov;
 

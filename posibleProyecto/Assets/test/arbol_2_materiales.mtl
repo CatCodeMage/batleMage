@@ -1,0 +1,10 @@
+# TEST: materiales del arbol
+newmtl corteza
+Kd 0.45 0.30 0.18
+Ks 0.0 0.0 0.0
+Ns 10
+
+newmtl hojas
+Kd 0.20 0.55 0.20
+Ks 0.0 0.0 0.0
+Ns 10

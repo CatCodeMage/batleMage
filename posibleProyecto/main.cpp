@@ -11,6 +11,8 @@
 #include "Entidad.h"
 #include "drawObjects.h"
 #include "Paths.h"
+#include "AssetLoadData.h"
+#include "MapData.h"
 
 int shouldContinue(GLFWwindow* window) {
     return glfwWindowShouldClose(window) == 0;
@@ -53,24 +55,23 @@ void createMeshes(MeshLibrary& lib) {
     lib.add("floor",
         std::vector<float>(std::begin(floorVertices), std::end(floorVertices)),
         std::vector<unsigned>(std::begin(floorIndices), std::end(floorIndices)));
+
+    lib.add("missing",
+        std::vector<float>(std::begin(vertices), std::end(vertices)),
+        std::vector<unsigned>(std::begin(indices), std::end(indices)));
 }
 
 void buclePrincipaLTiempoReal(GLFWwindow* window, SystemInfo& sysInfo) {
     // Entidades
     MeshLibrary libMesh;    
     createMeshes(libMesh);
-    MeshId cubeId = libMesh.find("cube");
-    MeshId floorId = libMesh.find("floor");
 
-    Entidad suelo;
-    suelo.mesh = floorId;
-    suelo.kind = 1;
+    loadAssetManifest(dataPath("db/assets.json"), libMesh);
 
-    Entidad cubo;
-    cubo.mesh = cubeId;
-    cubo.transform.pos = glm::vec3(0.0f, 1.0f, 0.0f);
-    cubo.color = glm::vec4(0.9f, 0.4f, 0.2f, 1.0f);
+    MapData map;
 
+    map.load(dataPath("db/map.json"), libMesh);
+     
     // Luces
     std::vector<Light> luces = {
         { glm::vec3(0.0f),              8.0f, glm::vec3(1.0f, 0.8f, 0.5f), 2.0f },   // la que orbita
@@ -100,13 +101,8 @@ void buclePrincipaLTiempoReal(GLFWwindow* window, SystemInfo& sysInfo) {
         viewCamera.update(keysInput, sysInfo);
 
         glm::mat4 vp = viewCamera.get_proj() * viewCamera.get_view();
-
-        // Entidades
-        cubo.transform.rot.y = time;
-        cubo.transform.rot.z = time;
-        
-        submitEntidad(renderer, suelo);
-        submitEntidad(renderer, cubo);
+         
+        submitEntidades(renderer, map.entities);
 
         // Light
         luces[0].pos = glm::vec3(3.0f * cos(time), 3.0f, 3.0f * sin(time));    // UPDATE
@@ -120,7 +116,6 @@ void buclePrincipaLTiempoReal(GLFWwindow* window, SystemInfo& sysInfo) {
 
     libMesh.destroy();
 }
-
 
 int guranteWindowCreated(GLFWwindow* window) {
     if (!window) {

@@ -25,6 +25,9 @@ private:
 
 	const float w_far = 100.f;
 	const float w_near = 0.1f;
+
+	const float speed = 10.f;
+	const float rotSpeed = 40.f;
 };
 
  

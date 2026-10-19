@@ -15,5 +15,6 @@ public:
     MeshId find(const std::string& name) const;      // INVALID_MESH si no existe, corta ejecucion
     const Mesh& get(MeshId id) const; // Si se excede de rango corta ejecucion
     size_t count() const { return w_meshes.size(); }
+    bool has(const std::string& name) const { return w_byName.count(name) != 0; }
     void destroy();                                   
 };
