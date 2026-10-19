@@ -8,6 +8,14 @@
 #define TINYOBJLOADER_IMPLEMENTATION
 #include <tiny_obj_loader.h>
 
+// Constantes y definiciones para calcular las normales cuando no estan en .obj
+constexpr int       CORNERS_PER_TRIANGLE = 3;
+constexpr float     MIN_CROSS_LENGTH = 1e-12f;              // por debajo, el triangulo no tiene area
+const     glm::vec3 DEGENERATE_NORMAL = glm::vec3(0, 1, 0);  // para no dividir por cero al normalizar
+
+using TriangleCorners = std::array<tinyobj::index_t, CORNERS_PER_TRIANGLE>;
+
+// Constantes y definiciones necesarias para leer todos los .obj
 using json = nlohmann::json;
 
 constexpr int      FLOATS_PER_VERTEX = 6;     // posicion 3 + normal 3
@@ -19,6 +27,10 @@ using VertexByCornerKey = std::unordered_map<uint64_t, unsigned>;
 
 static std::runtime_error objError(const std::filesystem::path& file, const std::string& reason) {
     return std::runtime_error(file.string() + ": " + reason);
+}
+
+static glm::vec3 readVec3(const std::vector<tinyobj::real_t>& floats, int index) {
+    return glm::vec3(floats[3 * index + 0], floats[3 * index + 1], floats[3 * index + 2]);
 }
 
 static void parseObjFile(const std::filesystem::path& file, tinyobj::ObjReader& reader) {
@@ -57,10 +69,30 @@ static void checkCornerIsInRange(const tinyobj::index_t& corner, const tinyobj::
     if (hasNormal) checkIndex(corner.normal_index, attrib.normals.size(), 3, "normal (vn)", file);
 }
 
-// TEMPORAL hasta L2, que calculara la normal plana de la cara
-static void checkCornerHasNormal(const tinyobj::index_t& corner, const std::filesystem::path& file) {
-    if (corner.normal_index == MISSING_INDEX)
-        throw objError(file, "una cara no tiene normal (vn)");
+static bool triangleHasAllNormals(const TriangleCorners& triangle) {
+    for (const tinyobj::index_t& corner : triangle)
+        if (corner.normal_index == MISSING_INDEX) return false;
+    return true;
+}
+
+// El orden antihorario de las esquinas (el del OBJ) hace que la normal apunte hacia fuera
+static glm::vec3 computeFaceNormal(const TriangleCorners& triangle, const std::vector<tinyobj::real_t>& positions) {
+    const glm::vec3 a = readVec3(positions, triangle[0].vertex_index);
+    const glm::vec3 b = readVec3(positions, triangle[1].vertex_index);
+    const glm::vec3 c = readVec3(positions, triangle[2].vertex_index);
+    const glm::vec3 perpendicular = glm::cross(b - a, c - a);
+
+    const bool isDegenerate = glm::length(perpendicular) < MIN_CROSS_LENGTH;
+    if (isDegenerate) return DEGENERATE_NORMAL;
+    return glm::normalize(perpendicular);
+}
+
+static void assignFlatNormal(TriangleCorners& triangle, const std::vector<tinyobj::real_t>& positions,
+    std::vector<tinyobj::real_t>& normals) {
+    const glm::vec3 faceNormal = computeFaceNormal(triangle, positions);
+    const int faceNormalIndex = (int)(normals.size() / 3);
+    normals.insert(normals.end(), { faceNormal.x, faceNormal.y, faceNormal.z });
+    for (tinyobj::index_t& corner : triangle) corner.normal_index = faceNormalIndex;
 }
 
 // Se suma 1 a cada indice para que 0 signifique "falta" (tinyobj usa -1)
@@ -71,33 +103,25 @@ static uint64_t makeCornerKey(const tinyobj::index_t& corner) {
     return (position << (2 * BITS_PER_INDEX)) | (texCoord << BITS_PER_INDEX) | normal;
 }
 
-static glm::vec3 readVec3(const std::vector<tinyobj::real_t>& floats, int index) {
-    return glm::vec3(floats[3 * index + 0], floats[3 * index + 1], floats[3 * index + 2]);
-}
-
-static unsigned findOrAddVertex(const tinyobj::index_t& corner, const tinyobj::attrib_t& attrib,
-    std::vector<float>& verts, VertexByCornerKey& vertexByCornerKey) {
+static unsigned findOrAddVertex(const tinyobj::index_t& corner, const std::vector<tinyobj::real_t>& positions,
+    const std::vector<tinyobj::real_t>& normals, std::vector<float>& verts, VertexByCornerKey& vertexByCornerKey) {
     const uint64_t key = makeCornerKey(corner);
     VertexByCornerKey::const_iterator alreadyCreated = vertexByCornerKey.find(key);
+    if (alreadyCreated != vertexByCornerKey.end()) return alreadyCreated->second;
 
-    unsigned vertexID;
-    if (alreadyCreated == vertexByCornerKey.end()) {
-        vertexID = (unsigned)(verts.size() / FLOATS_PER_VERTEX);
-        const glm::vec3 position = readVec3(attrib.vertices, corner.vertex_index);
-        const glm::vec3 normal = readVec3(attrib.normals, corner.normal_index);
-        verts.insert(verts.end(), { position.x, position.y, position.z, normal.x, normal.y, normal.z });
-        vertexByCornerKey.emplace(key, vertexID); 
-    }
-    else
-        vertexID = alreadyCreated->second;
-    
-    return vertexID;
+    const unsigned  newVertex = (unsigned)(verts.size() / FLOATS_PER_VERTEX);
+    const glm::vec3 position = readVec3(positions, corner.vertex_index);
+    const glm::vec3 normal = readVec3(normals, corner.normal_index);
+    verts.insert(verts.end(), { position.x, position.y, position.z, normal.x, normal.y, normal.z });
+    vertexByCornerKey.emplace(key, newVertex);
+    return newVertex;
 }
 
 void loadObj(const std::filesystem::path& file, std::vector<float>& verts, std::vector<unsigned>& idx) {
     tinyobj::ObjReader reader;
     parseObjFile(file, reader);
     const tinyobj::attrib_t& attrib = reader.GetAttrib();
+    std::vector<tinyobj::real_t> normals = attrib.normals;   // copia: aqui se anaden las normales planas
 
     verts.clear();
     idx.clear();
@@ -105,10 +129,15 @@ void loadObj(const std::filesystem::path& file, std::vector<float>& verts, std::
 
     // L1: todos los shapes van a un solo mesh; en L3 cada (shape, material) sera una pieza
     for (const tinyobj::shape_t& shape : reader.GetShapes()) {
-        for (const tinyobj::index_t& corner : shape.mesh.indices) {
-            checkCornerIsInRange(corner, attrib, file);
-            checkCornerHasNormal(corner, file);
-            idx.push_back(findOrAddVertex(corner, attrib, verts, vertexByCornerKey));
+        const std::vector<tinyobj::index_t>& corners = shape.mesh.indices;   // triangulate = true: de 3 en 3
+        for (size_t first = 0; first < corners.size(); first += CORNERS_PER_TRIANGLE) {
+            TriangleCorners triangle = { corners[first], corners[first + 1], corners[first + 2] };
+            for (const tinyobj::index_t& corner : triangle) checkCornerIsInRange(corner, attrib, file);
+
+            if (!triangleHasAllNormals(triangle)) assignFlatNormal(triangle, attrib.vertices, normals);
+
+            for (const tinyobj::index_t& corner : triangle)
+                idx.push_back(findOrAddVertex(corner, attrib.vertices, normals, verts, vertexByCornerKey));
         }
     }
 
@@ -141,3 +170,4 @@ int loadAssetManifest(const std::filesystem::path& manifest, MeshLibrary& lib) {
     }
     return cargados;
 }
+

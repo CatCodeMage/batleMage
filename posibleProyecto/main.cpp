@@ -162,6 +162,31 @@ GLFWwindow* createWindow() {
     return window;
 }
 
+// TEMPORAL (L1): se borra cuando el cargador este comprobado
+void testObjLoader() {
+    const std::vector<std::string> testFiles = {
+        "posibleProyecto/assets/test/cubo_quads_vt_vn.obj",
+        "posibleProyecto/assets/test/cubo_quads_v_vn.obj",
+        "posibleProyecto/assets/test/cubo_quads_sin_vn.obj",
+        "posibleProyecto/assets/test/arbol_2_materiales.obj",
+        "posibleProyecto/assets/test/malo_dos_vertices.obj",
+        "posibleProyecto/assets/test/malo_indice_negativo.obj",
+        "posibleProyecto/assets/test/malo_fuera_de_rango.obj",
+    };
+    for (const std::string& testFile : testFiles) {
+        try {
+            std::vector<float> verts;
+            std::vector<unsigned> idx;
+            loadObj(dataPath(testFile), verts, idx);
+            std::cout << "[TEST] " << testFile << ": " << verts.size() / 6
+                << " vertices / " << idx.size() << " indices\n";
+        }
+        catch (const std::exception& ex) {
+            std::cout << "[TEST] ERROR " << ex.what() << "\n";
+        }
+    }
+}
+
 int main()
 {
     GLFWwindow* window = createWindow();
@@ -177,6 +202,8 @@ int main()
 
     if (guranteWindowCreated(window) != 0) 
         return -1;
+
+    testObjLoader();
 
     buclePrincipaLTiempoReal(window, sysInfo);
 
