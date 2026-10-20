@@ -3,6 +3,12 @@
 #include "controladorPersonaje.h"
 #include "personaje.h"
 
+struct InfoHechizo {
+    int id;
+    float costeMana;
+    float alcance; //distancia max
+};
+
 enum class EstadoIA 
 {
     ESPERANDO,
@@ -16,6 +22,10 @@ class ControladorMaquinaEstados : public ControladorPersonaje
     private:
         Personaje* m_objetivo;
         EstadoIA m_estadoIA;
+
+        std::vector<InfoHechizo> m_catalogoHechizos;
+
+        std::vector<InfoHechizo> m_hechizosLanzables;
 
         float m_distanciaAtaque;
         float m_distanciaSegura;
