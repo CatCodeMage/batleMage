@@ -7,6 +7,7 @@ struct InfoHechizo {
     int id;
     float costeMana;
     float alcance; //distancia max
+    float cooldown;
 };
 
 enum class EstadoIA 
@@ -47,15 +48,16 @@ class ControladorMaquinaEstados : public ControladorPersonaje
             float velocidadMovimiento = 4.0f,
             float cooldownAtaque = 1.5f,
             float regeneracionManaSeg = 3.0f
-    );
+        );
+        void cargarCatalogoDesdeGestor(const HechizosGestor& gestor);
 
-    virtual ~ControladorMaquinaEstados() = default;
+        virtual ~ControladorMaquinaEstados() = default;
 
-    void actualizar(Personaje& personaje, float deltaTime) override;
-    void setcatalogoHechizos(const std::vector<InfoHechizo>& catalogo);
-    void setObjetivo(Personaje* nuevoObjetivo);
-    Personaje* getObjetivo() const;
-    EstadoIA getEstadoIA() const;
+        void actualizar(Personaje& personaje, float deltaTime) override;
+        void setcatalogoHechizos(const std::vector<InfoHechizo>& catalogo);
+        void setObjetivo(Personaje* nuevoObjetivo);
+        Personaje* getObjetivo() const;
+        EstadoIA getEstadoIA() const;
 
 };
 #endif
