@@ -126,7 +126,7 @@ enum class estadosElementos{vapor,quemado,mud,electrificado};
 enum class combos{magma,tornado,mud,electroBoom};
 
 
-void ApplyElementBonus(SpellData& data) {
+inline void ApplyElementBonus(SpellData& data) {
     ElementBonus bonus = GetElementBonus(data.element);
 
     data.baseDamage *= bonus.damageMultiplier;
