@@ -29,9 +29,14 @@ class Personaje //personaje es bolita pasar datos de cuanto mide y tal
 private:
     int m_id;
     float m_vida;
-    float m_mana; 
+    float m_vidaMax;
+    float m_mana;
+    float m_manaMax; 
     float m_capacidadMagia; //estadistica del personaje como las del noita 
                         //(ej: veloc recarga mana, num hechizos lanzar a la vez...)
+    float m_tiempoQuemado;
+    float m_tiempoCongelado;
+    float m_danoQuemadura;
     Vector3 m_posicion;
     Vector3 m_rotacion;
     float m_radio;
@@ -51,7 +56,7 @@ public:
     void disminuirMana(float cantidad);
     void aumentarMana(float cantidad);
 
-    void anadirEstado(EstadoPersonaje nuevoEstado);
+    void anadirEstado(EstadoPersonaje nuevoEstado, float duracion = 3.0f);
     void borrarEstado(EstadoPersonaje estado);
     bool yaTieneEstado(EstadoPersonaje estado);
     std::vector<EstadoPersonaje> getEstados() const;
@@ -65,8 +70,6 @@ public:
     void setPosicion(const Vector3& nuevaPosicion);
     void setRotacion(const Vector3& nuevaRotacion);
     void setRadio(float radio);
-    EstadoPersonaje getEstado() const;
-    void setEstado(EstadoPersonaje nuevoEstado);
     void setControlador(ControladorPersonaje* nuevoControlador);
 
     DatosRenderPersonaje obtenerDatosParaGraficar();

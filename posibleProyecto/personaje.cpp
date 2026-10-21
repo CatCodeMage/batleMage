@@ -9,14 +9,27 @@ Personaje::Personaje(int id, Vector3 posicionInicial, float radio)
     this->m_rotacion = Vector3(1.0f,1.0f,1.0f);
     this->m_radio = radio;
     this->m_margenCasteo = 0.5f;
-    this->m_vida = 100.0f;
-    this->m_mana = 50.0f;
+    this->m_vidaMax = 100.0f;
+    this->m_vida = this->m_vidaMax;
+    this->m_manaMax = 50.0f;
+    this->m_mana = this->m_manaMax;
+    this->m_tiempoQuemado = 0.0f;
+    this->m_tiempoCongelado = 0.0f;
+    this->m_danoQuemadura = 5.0f;
     anadirEstado(EstadoPersonaje::IDLE);
     m_controlador = nullptr;
 }
 
-void Personaje::anadirEstado(EstadoPersonaje nuevoEstado)
+void Personaje::anadirEstado(EstadoPersonaje nuevoEstado, float duracion)
 {
+    if(nuevoEstado == EstadoPersonaje::QUEMADO)
+    {
+        m_tiempoQuemado = duracion;
+    }
+    else if(nuevoEstado == EstadoPersonaje::CONGELADO)
+    {
+        m_tiempoCongelado = duracion;
+    }
     if(!yaTieneEstado(nuevoEstado))
     {
         m_estadosActuales.push_back(nuevoEstado);
@@ -25,6 +38,9 @@ void Personaje::anadirEstado(EstadoPersonaje nuevoEstado)
 
 void Personaje::borrarEstado(EstadoPersonaje estado)
 {
+    if(estado == EstadoPersonaje::QUEMADO) m_tiempoQuemado = 0.0f;
+    if(estado == EstadoPersonaje::CONGELADO) m_tiempoCongelado = 0.0f;
+
     auto it = std::find(m_estadosActuales.begin(), m_estadosActuales.end(), estado);
     if(it != m_estadosActuales.end())
     {
@@ -39,7 +55,34 @@ bool Personaje::yaTieneEstado(EstadoPersonaje estado)
 
 void Personaje::update(float deltaTime)
 {
-    if(yaTieneEstado(EstadoPersonaje::MUERTO) || yaTieneEstado(EstadoPersonaje::CONGELADO))return;
+    if(yaTieneEstado(EstadoPersonaje::MUERTO)) return;
+
+    if(yaTieneEstado(EstadoPersonaje::QUEMADO))
+    {
+        recibirDano(m_danoQuemadura * deltaTime);
+        m_tiempoQuemado -= deltaTime;
+        
+        if(yaTieneEstado(EstadoPersonaje::MUERTO)) return;
+
+        if(m_tiempoQuemado <= 0.0f)
+        {
+            borrarEstado(EstadoPersonaje::QUEMADO);
+        }
+    }
+
+    if(yaTieneEstado(EstadoPersonaje::CONGELADO))
+    {
+        m_tiempoCongelado -= deltaTime;
+        if(m_tiempoCongelado <= 0.0f)
+        {
+            borrarEstado(EstadoPersonaje::CONGELADO);
+        }
+        else
+        {
+            return;
+        }
+    }
+    
     if(m_controlador != nullptr)
     {
         m_controlador->actualizar(*this, deltaTime);
@@ -81,11 +124,13 @@ void Personaje::recibirDano(float cantidadDano)
 void Personaje::aumentarVida(float cantidad)
 {
     m_vida += cantidad;
+    if(m_vida > m_vidaMax) m_vida = m_vidaMax;
 }
 
 void Personaje::aumentarMana(float cantidad)
 {
     m_mana += cantidad;
+    if(m_mana > m_manaMax) m_mana = m_manaMax;
 }
 
 void Personaje::disminuirMana(float cantidad)

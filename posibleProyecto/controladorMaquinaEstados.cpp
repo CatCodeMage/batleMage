@@ -2,18 +2,22 @@
 #include <cmath>
 #include <iostream>
 
-ControladorMaquinaEstados::ControladorMaquinaEstados(Personaje* objetivo, float distanciaAtaque, float distanciaSegura,
-    float velocidadMovimiento, float costeManaHechizo, float cooldownAtaque, float regeneracionManaSeg)
+ControladorMaquinaEstados::ControladorMaquinaEstados(Personaje* objetivo,
+    const std::vector<InfoHechizo>& catalogoHechizos, float distanciaSegura,
+    float velocidadMovimiento, float cooldownAtaque, float regeneracionManaSeg)
 {
     m_objetivo = objetivo;
+    m_catalogoHechizos = catalogoHechizos; 
     m_estadoIA = EstadoIA::ESPERANDO;
     m_distanciaSegura = distanciaSegura;
-    m_distanciaAtaque = distanciaAtaque;
     m_velocidadMovimiento = velocidadMovimiento;
-    m_costeManaHechizo = costeManaHechizo;
     m_cooldownAtaque = cooldownAtaque;
     m_regenMana = regeneracionManaSeg;
     m_tiempoDesdeUltAtaque = cooldownAtaque;
+}
+void ControladorMaquinaEstados::setcatalogoHechizos(const std::vector<InfoHechizo>& catalogo)
+{
+    m_catalogoHechizos = catalogo;
 }
 
 void ControladorMaquinaEstados::actualizar(Personaje& personaje, float deltaTime)

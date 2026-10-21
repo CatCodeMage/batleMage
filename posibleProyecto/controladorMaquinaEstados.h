@@ -1,4 +1,4 @@
-#ifndef CONTROLADOR_MAQUINA_ESTADOS
+#ifndef CONTROLADOR_MAQUINA_ESTADOS_H
 #define CONTROLADOR_MAQUINA_ESTADOS_H
 #include "controladorPersonaje.h"
 #include "personaje.h"
@@ -42,18 +42,17 @@ class ControladorMaquinaEstados : public ControladorPersonaje
     public:
         ControladorMaquinaEstados(
             Personaje* objetivo = nullptr,
-            float distanciaAtaque = 15.0f,
+            const std::vector<InfoHechizo>& catalogoHechizos = {},
             float distanciaSegura = 5.0f,
             float velocidadMovimiento = 4.0f,
-            float costeManaHechizo = 10.0f,
-        float cooldownAtaque = 1.5f,
-        float regeneracionManaSeg = 3.0f
+            float cooldownAtaque = 1.5f,
+            float regeneracionManaSeg = 3.0f
     );
 
     virtual ~ControladorMaquinaEstados() = default;
 
     void actualizar(Personaje& personaje, float deltaTime) override;
-
+    void setcatalogoHechizos(const std::vector<InfoHechizo>& catalogo);
     void setObjetivo(Personaje* nuevoObjetivo);
     Personaje* getObjetivo() const;
     EstadoIA getEstadoIA() const;
