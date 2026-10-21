@@ -113,7 +113,7 @@
       <PreprocessorDefinitions>GLEW_STATIC;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(ProjectDir)libs\tinyobjloader\;$(ProjectDir)libs\glm-master;$(ProjectDir)libs\glew-2.3.1\include;$(ProjectDir)libs\glfw-3.5.1\include;$(ProjectDir)libs\soil2\include;$(ProjectDir)libs\json\</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)libs\glm-master;$(ProjectDir)libs\glew-2.3.1\include;$(ProjectDir)libs\glfw-3.5.1\include;$(ProjectDir)libs\soil2\include;$(ProjectDir)libs\json\</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -134,7 +134,7 @@
       <PreprocessorDefinitions>GLEW_STATIC;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(ProjectDir)libs\tinyobjloader\;$(ProjectDir)libs\glm-master;$(ProjectDir)libs\glew-2.3.1\include;$(ProjectDir)libs\glfw-3.5.1\include;$(ProjectDir)libs\soil2\include;$(ProjectDir)libs\json\</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)libs\glm-master;$(ProjectDir)libs\glew-2.3.1\include;$(ProjectDir)libs\glfw-3.5.1\include;$(ProjectDir)libs\soil2\include;$(ProjectDir)libs\json\</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -148,14 +148,15 @@
     </Manifest>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="AssetLoadData.cpp" />
     <ClCompile Include="camera.cpp" />
     <ClCompile Include="cubo.cpp" />
     <ClCompile Include="drawObjects.cpp" />
     <ClCompile Include="Entidad.cpp" />
+    <ClCompile Include="hechizos.cpp" />
+    <ClCompile Include="hechizosGestor.cpp" />
     <ClCompile Include="Input.cpp" />
+    <ClCompile Include="jsonManager.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="MapData.cpp" />
     <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="MeshLibrary.cpp" />
     <ClCompile Include="Paths.cpp" />
@@ -164,16 +165,19 @@
     <ClCompile Include="suelo.cpp" />
     <ClCompile Include="systemInfo.cpp" />
     <ClCompile Include="Transform.cpp" />
+    <ClCompile Include="webPage.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="AssetLoadData.h" />
     <ClInclude Include="camera.h" />
     <ClInclude Include="cubo.h" />
     <ClInclude Include="drawObjects.h" />
     <ClInclude Include="Entidad.h" />
     <ClInclude Include="global.h" />
+    <ClInclude Include="hechizoDatos.h" />
+    <ClInclude Include="hechizos.h" />
+    <ClInclude Include="hechizosGestor.h" />
     <ClInclude Include="Input.h" />
-    <ClInclude Include="MapData.h" />
+    <ClInclude Include="jsonManager.h" />
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="MeshLibrary.h" />
     <ClInclude Include="Paths.h" />
@@ -183,6 +187,7 @@
     <ClInclude Include="suelo.h" />
     <ClInclude Include="systemInfo.h" />
     <ClInclude Include="Transform.h" />
+    <ClInclude Include="webPage.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="posibleProyecto.rc" />
