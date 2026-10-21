@@ -40,6 +40,7 @@ private:
     float m_danoQuemadura;
     glm::vec3 m_posicion;
     glm::vec3 m_rotacion;
+    glm::vec3 m_direccion;
     float m_radio;
     float m_margenCasteo;
     std::vector<EstadoPersonaje> m_estadosActuales;
@@ -69,8 +70,10 @@ public:
     float getRadio() const;
     glm::vec3 getPosicion() const;
     glm::vec3 getRotacion() const;
+    glm::vec3 getDireccion() const;
     void setPosicion(const glm::vec3& nuevaPosicion);
     void setRotacion(const glm::vec3& nuevaRotacion);
+    void setDireccion(const glm::vec3& nuevaDireccion);
     void setRadio(float radio);
     void setControlador(ControladorPersonaje* nuevoControlador);
 

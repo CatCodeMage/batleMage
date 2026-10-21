@@ -177,7 +177,13 @@ void ControladorMaquinaEstados::cargarCatalogoDesdeGestor(const HechizosGestor& 
 
 void ControladorMaquinaEstados::apuntarHacia(Personaje& personaje, const glm::vec3& direccion)
 {
-    personaje.setRotacion(direccion);
+    personaje.setDireccion(direccion);
+
+    float anguloY = std::atan2(direccion.x, direccion.z);
+    if (anguloY < 0.0f) {
+        anguloY += 2.0f * 3.14159265f;
+    }
+    personaje.setRotacion(glm::vec3(0.0f, anguloY, 0.0f));
 }
 
 void ControladorMaquinaEstados::setObjetivo(Personaje* nuevoObjetivo)

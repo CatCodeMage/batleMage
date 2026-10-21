@@ -7,6 +7,7 @@ Personaje::Personaje(int id, glm::vec3 posicionInicial, float radio, HechizosGes
     this->m_id = id;
     this->m_posicion = posicionInicial;
     this->m_rotacion = glm::vec3(1.0f,1.0f,1.0f);
+    this->m_direccion = glm::vec3(0.0f, 0.0f, 1.0f);
     this->m_radio = radio;
     this->m_margenCasteo = 0.5f;
     this->m_vidaMax = 100.0f;
@@ -152,12 +153,12 @@ void Personaje::lanzarHechizo(int idHechizo) //tener en cuenta que puede lanzar 
     anadirEstado(EstadoPersonaje::CASTEANDO);
     
     //direccion normalizada donde mira el pj
-    float longitud = std::sqrt(m_rotacion.x * m_rotacion.x + m_rotacion.y * m_rotacion.y + m_rotacion.z * m_rotacion.z);
+    float longitud = std::sqrt(m_direccion.x * m_direccion.x + m_direccion.y * m_direccion.y + m_direccion.z * m_direccion.z);
 
-    glm::vec3 direccionDisparo(1.0f, 0.0f, 0.0f); //por defecto si rotacion es 0,0,0
-    if(longitud > 0.0001f)
+    glm::vec3 direccionDisparo(0.0f, 0.0f, 1.0f);
+    if (longitud > 0.0001f)
     {
-        direccionDisparo = glm::vec3(m_rotacion.x / longitud, m_rotacion.y / longitud, m_rotacion.z / longitud);
+        direccionDisparo = glm::vec3(m_direccion.x / longitud, m_direccion.y / longitud, m_direccion.z / longitud);
     }
     float distanciaSeparacion = m_radio + m_margenCasteo;
 
@@ -189,9 +190,11 @@ float Personaje::getRadio() const { return m_radio; }
 
 glm::vec3 Personaje::getPosicion() const { return m_posicion; }
 glm::vec3 Personaje::getRotacion() const { return m_rotacion; }
+glm::vec3 Personaje::getDireccion() const { return m_direccion; }
 
 void Personaje::setPosicion(const glm::vec3& nuevaPosicion) { m_posicion = nuevaPosicion; }
 void Personaje::setRotacion(const glm::vec3& nuevaRotacion) { m_rotacion = nuevaRotacion; }
+void Personaje::setDireccion(const glm::vec3& nuevaDireccion) { m_direccion = nuevaDireccion; }
 void Personaje::setRadio(float radio) { m_radio = radio; }
 
 std::vector<EstadoPersonaje> Personaje::getEstados() const
