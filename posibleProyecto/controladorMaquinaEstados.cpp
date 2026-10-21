@@ -36,16 +36,16 @@ void ControladorMaquinaEstados::actualizar(Personaje& personaje, float deltaTime
         personaje.anadirEstado(EstadoPersonaje::IDLE);
         return;
     }
-    Vector3 posPropia = personaje.getPosicion();
-    Vector3 posObj = m_objetivo->getPosicion();
-    Vector3 diff(posObj.x - posPropia.x, 
+    glm::vec3 posPropia = personaje.getPosicion();
+    glm::vec3 posObj = m_objetivo->getPosicion();
+    glm::vec3 diff(posObj.x - posPropia.x, 
                 posObj.y - posPropia.y, 
                 posObj.z - posPropia.z);
     float distancia = std::sqrt(diff.x * diff.x + diff.y * diff.y + diff.z * diff.z);
-    Vector3 direccion(0.0f, 0.0f, 0.0f);
+    glm::vec3 direccion(0.0f, 0.0f, 0.0f);
     if(distancia > 0.0001f)
     {
-        direccion = Vector3(diff.x / distancia, diff.y / distancia, diff.z / distancia);
+        direccion = glm::vec3(diff.x / distancia, diff.y / distancia, diff.z / distancia);
     }
     evaluarTransiciones(personaje, distancia);
     ejecutarEstado(personaje, direccion, distancia, deltaTime);
@@ -89,7 +89,7 @@ void ControladorMaquinaEstados::evaluarTransiciones(const Personaje& personaje, 
     }
 }
 
-void ControladorMaquinaEstados::ejecutarEstado(Personaje& personaje,const Vector3& direccionHaciaObjetivo,
+void ControladorMaquinaEstados::ejecutarEstado(Personaje& personaje,const glm::vec3& direccionHaciaObjetivo,
     float distancia, float deltaTime)
 {
     switch (m_estadoIA) 
@@ -105,7 +105,7 @@ void ControladorMaquinaEstados::ejecutarEstado(Personaje& personaje,const Vector
             personaje.borrarEstado(EstadoPersonaje::CASTEANDO);
             apuntarHacia(personaje, direccionHaciaObjetivo);
 
-            Vector3 desplazamiento(
+            glm::vec3 desplazamiento(
                 direccionHaciaObjetivo.x * m_velocidadMovimiento * deltaTime,
                 direccionHaciaObjetivo.y * m_velocidadMovimiento * deltaTime,
                 direccionHaciaObjetivo.z * m_velocidadMovimiento * deltaTime
@@ -119,7 +119,7 @@ void ControladorMaquinaEstados::ejecutarEstado(Personaje& personaje,const Vector
             personaje.borrarEstado(EstadoPersonaje::CASTEANDO);
             apuntarHacia(personaje, direccionHaciaObjetivo); // Sigue mirando al enemigo mientras retrocede
 
-            Vector3 desplazamientoHuida(
+            glm::vec3 desplazamientoHuida(
                 -direccionHaciaObjetivo.x * m_velocidadMovimiento * deltaTime,
                 -direccionHaciaObjetivo.y * m_velocidadMovimiento * deltaTime,
                 -direccionHaciaObjetivo.z * m_velocidadMovimiento * deltaTime
@@ -141,6 +141,7 @@ void ControladorMaquinaEstados::ejecutarEstado(Personaje& personaje,const Vector
                 InfoHechizo hechizoElegido = m_hechizosLanzables[indiceRandom];
                 personaje.disminuirMana(hechizoElegido.costeMana);
                 personaje.lanzarHechizo(hechizoElegido.id);
+                m_cooldownAtaque = hechizoElegido.cooldown;
                 m_tiempoDesdeUltAtaque = 0.0f;
             } else {
                 if (m_tiempoDesdeUltAtaque > 0.3f) 
@@ -154,7 +155,27 @@ void ControladorMaquinaEstados::ejecutarEstado(Personaje& personaje,const Vector
     }
 }
 
-void ControladorMaquinaEstados::apuntarHacia(Personaje& personaje, const Vector3& direccion)
+void ControladorMaquinaEstados::cargarCatalogoDesdeGestor(const HechizosGestor& gestor)
+{
+    m_catalogoHechizos.clear();
+    const auto& catalogo = gestor.getCatalogoHechizos();
+
+    for(const auto& par : catalogo)
+    {
+        int id = par.first;
+        const hechizosTemplate& temp = par.second;
+
+        InfoHechizo info;
+        info.id = id;
+        info.costeMana = temp.definition.cost;
+        info.alcance = temp.speed * temp.defaultLifeTime;
+        info.cooldown = temp.definition.cooldown;
+
+        m_catalogoHechizos.push_back(info);
+    }
+}
+
+void ControladorMaquinaEstados::apuntarHacia(Personaje& personaje, const glm::vec3& direccion)
 {
     personaje.setRotacion(direccion);
 }

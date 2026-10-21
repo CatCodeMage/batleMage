@@ -2,11 +2,11 @@
 #include <iostream>
 using namespace std;
 
-Personaje::Personaje(int id, Vector3 posicionInicial, float radio)
+Personaje::Personaje(int id, glm::vec3 posicionInicial, float radio, HechizosGestor* gestorHechizos)
 {
     this->m_id = id;
     this->m_posicion = posicionInicial;
-    this->m_rotacion = Vector3(1.0f,1.0f,1.0f);
+    this->m_rotacion = glm::vec3(1.0f,1.0f,1.0f);
     this->m_radio = radio;
     this->m_margenCasteo = 0.5f;
     this->m_vidaMax = 100.0f;
@@ -18,6 +18,7 @@ Personaje::Personaje(int id, Vector3 posicionInicial, float radio)
     this->m_danoQuemadura = 5.0f;
     anadirEstado(EstadoPersonaje::IDLE);
     m_controlador = nullptr;
+    m_gestorHechizos = gestorHechizos;
 }
 
 void Personaje::anadirEstado(EstadoPersonaje nuevoEstado, float duracion)
@@ -89,7 +90,7 @@ void Personaje::update(float deltaTime)
     }
 }
 
-void Personaje::moverse(const Vector3& desplazamiento)
+void Personaje::moverse(const glm::vec3& desplazamiento)
 {
     if (yaTieneEstado(EstadoPersonaje::MUERTO) || yaTieneEstado(EstadoPersonaje::CONGELADO)) return;
 
@@ -99,7 +100,7 @@ void Personaje::moverse(const Vector3& desplazamiento)
     anadirEstado(EstadoPersonaje::VOLANDO);
 }
 
-void Personaje::rotar(const Vector3& rotacion)
+void Personaje::rotar(const glm::vec3& rotacion)
 {
     if (yaTieneEstado(EstadoPersonaje::MUERTO) || yaTieneEstado(EstadoPersonaje::CONGELADO)) return;
 
@@ -153,22 +154,24 @@ void Personaje::lanzarHechizo(int idHechizo) //tener en cuenta que puede lanzar 
     //direccion normalizada donde mira el pj
     float longitud = std::sqrt(m_rotacion.x * m_rotacion.x + m_rotacion.y * m_rotacion.y + m_rotacion.z * m_rotacion.z);
 
-    Vector3 direccionDisparo(1.0f, 0.0f, 0.0f); //por defecto si rotacion es 0,0,0
+    glm::vec3 direccionDisparo(1.0f, 0.0f, 0.0f); //por defecto si rotacion es 0,0,0
     if(longitud > 0.0001f)
     {
-        direccionDisparo = Vector3(m_rotacion.x / longitud, m_rotacion.y / longitud, m_rotacion.z / longitud);
+        direccionDisparo = glm::vec3(m_rotacion.x / longitud, m_rotacion.y / longitud, m_rotacion.z / longitud);
     }
     float distanciaSeparacion = m_radio + m_margenCasteo;
 
-    Vector3 posicionOrigenHechizo(
+    glm::vec3 posicionOrigenHechizo(
         m_posicion.x + direccionDisparo.x * distanciaSeparacion,
         m_posicion.y + direccionDisparo.y * distanciaSeparacion,
         m_posicion.z + direccionDisparo.z * distanciaSeparacion
     );
-    cout << "Personaje " << m_id << " lanza el hechizo ID [" << idHechizo << "] desde origen (" << posicionOrigenHechizo.x
-        <<", " << posicionOrigenHechizo.y << ", " << posicionOrigenHechizo.z << ")" << endl;
+
+    if(m_gestorHechizos != nullptr)
+    {
+        m_gestorHechizos->spawnSpell(idHechizo, posicionOrigenHechizo, direccionDisparo);
+    }
     
-    //Comunicación con modulo hechizos
 }
 
 void Personaje::setControlador(ControladorPersonaje* nuevoControlador)
@@ -184,11 +187,11 @@ float Personaje::getMana() const { return m_mana; }
 
 float Personaje::getRadio() const { return m_radio; }
 
-Vector3 Personaje::getPosicion() const { return m_posicion; }
-Vector3 Personaje::getRotacion() const { return m_rotacion; }
+glm::vec3 Personaje::getPosicion() const { return m_posicion; }
+glm::vec3 Personaje::getRotacion() const { return m_rotacion; }
 
-void Personaje::setPosicion(const Vector3& nuevaPosicion) { m_posicion = nuevaPosicion; }
-void Personaje::setRotacion(const Vector3& nuevaRotacion) { m_rotacion = nuevaRotacion; }
+void Personaje::setPosicion(const glm::vec3& nuevaPosicion) { m_posicion = nuevaPosicion; }
+void Personaje::setRotacion(const glm::vec3& nuevaRotacion) { m_rotacion = nuevaRotacion; }
 void Personaje::setRadio(float radio) { m_radio = radio; }
 
 std::vector<EstadoPersonaje> Personaje::getEstados() const
@@ -196,6 +199,15 @@ std::vector<EstadoPersonaje> Personaje::getEstados() const
     return m_estadosActuales;
 }
 
+void Personaje::setGestorHechizos(HechizosGestor* gestor) 
+{
+    m_gestorHechizos = gestor;
+}
+
+HechizosGestor* Personaje::getGestorHechizos() const
+{
+    return m_gestorHechizos;
+}
 DatosRenderPersonaje Personaje::obtenerDatosParaGraficar()
 {
     return DatosRenderPersonaje 

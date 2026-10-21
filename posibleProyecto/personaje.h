@@ -4,7 +4,8 @@
 #include "controladorPersonaje.h"
 #include <memory>
 #include <vector>
-#include "hechizoDatos.h"
+#include "hechizosGestor.h"
+#include <glm/glm.hpp>
 
 enum class EstadoPersonaje {
     IDLE,      //en la esfera esta siempre en idle
@@ -18,8 +19,8 @@ enum class EstadoPersonaje {
 struct DatosRenderPersonaje
 {
     int idPersonaje;
-    Vector3 m_posicion;
-    Vector3 m_rotacion;
+    glm::vec3 m_posicion;
+    glm::vec3 m_rotacion;
     float m_radio;
     std::vector<EstadoPersonaje> m_estadosActuales;
 };
@@ -37,19 +38,20 @@ private:
     float m_tiempoQuemado;
     float m_tiempoCongelado;
     float m_danoQuemadura;
-    Vector3 m_posicion;
-    Vector3 m_rotacion;
+    glm::vec3 m_posicion;
+    glm::vec3 m_rotacion;
     float m_radio;
     float m_margenCasteo;
     std::vector<EstadoPersonaje> m_estadosActuales;
     ControladorPersonaje* m_controlador;
+    HechizosGestor* m_gestorHechizos;
 
 public:
-    Personaje(int id, Vector3 posicionInicial, float radio = 1.0f);
+    Personaje(int id, glm::vec3 posicionInicial, float radio = 1.0f, HechizosGestor* gestorHechizos = nullptr);
     void update(float deltaTime);
 
-    void moverse(const Vector3& desplazamiento);
-    void rotar(const Vector3& deltaRotacion);
+    void moverse(const glm::vec3& desplazamiento);
+    void rotar(const glm::vec3& deltaRotacion);
     void lanzarHechizo(int idHechizo);
     void recibirDano(float cantidadDano);
     void aumentarVida(float cantidad);
@@ -65,12 +67,15 @@ public:
     float getVida() const;
     float getMana() const;
     float getRadio() const;
-    Vector3 getPosicion() const;
-    Vector3 getRotacion() const;
-    void setPosicion(const Vector3& nuevaPosicion);
-    void setRotacion(const Vector3& nuevaRotacion);
+    glm::vec3 getPosicion() const;
+    glm::vec3 getRotacion() const;
+    void setPosicion(const glm::vec3& nuevaPosicion);
+    void setRotacion(const glm::vec3& nuevaRotacion);
     void setRadio(float radio);
     void setControlador(ControladorPersonaje* nuevoControlador);
+
+    void setGestorHechizos(HechizosGestor* gestor);
+    HechizosGestor* getGestorHechizos() const;
 
     DatosRenderPersonaje obtenerDatosParaGraficar();
 };

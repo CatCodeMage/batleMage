@@ -36,8 +36,8 @@ class ControladorMaquinaEstados : public ControladorPersonaje
         float m_regenMana;
 
         void evaluarTransiciones(const Personaje& personaje, float distObjetivo);
-        void ejecutarEstado(Personaje& personaje, const Vector3& direccionHaciaObjetivo, float distancia, float deltaTime);
-        void apuntarHacia(Personaje& personaje, const Vector3& direccion);
+        void ejecutarEstado(Personaje& personaje, const glm::vec3& direccionHaciaObjetivo, float distancia, float deltaTime);
+        void apuntarHacia(Personaje& personaje, const glm::vec3& direccion);
 
     public:
         ControladorMaquinaEstados(
