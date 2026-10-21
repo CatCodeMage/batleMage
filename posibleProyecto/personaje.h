@@ -6,6 +6,8 @@
 #include <vector>
 #include "hechizosGestor.h"
 #include <glm/glm.hpp>
+#include "json.hpp" 
+using json = nlohmann::json;
 
 enum class EstadoPersonaje {
     IDLE,      //en la esfera esta siempre en idle
@@ -28,6 +30,8 @@ struct DatosRenderPersonaje
 class Personaje //personaje es bolita pasar datos de cuanto mide y tal
 {
 private:
+    std::string m_tipoPersonaje;
+    glm::vec3 m_escala;
     int m_id;
     float m_vida;
     float m_vidaMax;
@@ -61,7 +65,7 @@ public:
 
     void anadirEstado(EstadoPersonaje nuevoEstado, float duracion = 3.0f);
     void borrarEstado(EstadoPersonaje estado);
-    bool yaTieneEstado(EstadoPersonaje estado);
+    bool yaTieneEstado(EstadoPersonaje estado) const;
     std::vector<EstadoPersonaje> getEstados() const;
 
     int getId() const;
@@ -79,7 +83,13 @@ public:
 
     void setGestorHechizos(HechizosGestor* gestor);
     HechizosGestor* getGestorHechizos() const;
+    std::string getEstadoPrincipalString() const;
 
     DatosRenderPersonaje obtenerDatosParaGraficar();
+
+    bool cargarDesdeJson(const std::string& rutaArchivoPlayers, const std::string& tipoPersonaje);
+
+    json exportarCabeceraJson() const; 
+    json exportarFrameJson() const;
 };
 #endif 

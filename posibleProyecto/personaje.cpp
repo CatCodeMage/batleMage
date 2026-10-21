@@ -1,5 +1,6 @@
 #include "personaje.h"
 #include <iostream>
+#include <fstream>
 using namespace std;
 
 Personaje::Personaje(int id, glm::vec3 posicionInicial, float radio, HechizosGestor* gestorHechizos)
@@ -50,7 +51,7 @@ void Personaje::borrarEstado(EstadoPersonaje estado)
     }
 }
 
-bool Personaje::yaTieneEstado(EstadoPersonaje estado)
+bool Personaje::yaTieneEstado(EstadoPersonaje estado) const
 {
     return std::find(m_estadosActuales.begin(), m_estadosActuales.end(), estado) != m_estadosActuales.end();
 }
@@ -223,3 +224,91 @@ DatosRenderPersonaje Personaje::obtenerDatosParaGraficar()
     };
 }
 
+std::string Personaje::getEstadoPrincipalString() const
+{
+    if (yaTieneEstado(EstadoPersonaje::MUERTO))    return "dead";
+    if (yaTieneEstado(EstadoPersonaje::CONGELADO)) return "frozen";
+    if (yaTieneEstado(EstadoPersonaje::QUEMADO))   return "burned";
+    if (yaTieneEstado(EstadoPersonaje::CASTEANDO)) return "casting";
+    if (yaTieneEstado(EstadoPersonaje::VOLANDO))   return "flying";
+    return "alive";
+}
+
+bool Personaje::cargarDesdeJson(const std::string& rutaArchivoPlayers, const std::string& tipoPersonaje)
+{
+    std::ifstream archivo(rutaArchivoPlayers);
+    if (!archivo.is_open())
+    {
+        std::cerr << "Error: No se pudo abrir el archivo " << rutaArchivoPlayers << std::endl;
+        return false;
+    }
+
+    json datosJson;
+    archivo >> datosJson;
+
+    if (!datosJson.contains(tipoPersonaje))
+    {
+        std::cerr << "Error: El tipo '" << tipoPersonaje << "' no existe en " << rutaArchivoPlayers << std::endl;
+        return false;
+    }
+
+    m_tipoPersonaje = tipoPersonaje;
+    const json& info = datosJson[tipoPersonaje];
+
+    if (info.contains("radious"))
+    {
+        m_radio = info["radious"].get<float>();
+    }
+
+    if (info.contains("scale") && info["scale"].is_array() && info["scale"].size() == 3)
+    {
+        m_escala = glm::vec3(
+            info["scale"][0].get<float>(),
+            info["scale"][1].get<float>(),
+            info["scale"][2].get<float>()
+        );
+    }
+
+    if (info.contains("stats"))
+    {
+        const json& stats = info["stats"];
+        if (stats.contains("maxHealth"))
+        {
+            m_vidaMax = stats["maxHealth"].get<float>();
+            m_vida = m_vidaMax;
+        }
+        if (stats.contains("maxMana"))
+        {
+            m_manaMax = stats["maxMana"].get<float>();
+            m_mana = m_manaMax;
+        }
+        if (stats.contains("castMargin"))
+        {
+            m_margenCasteo = stats["castMargin"].get<float>();
+        }
+        if (stats.contains("burnDamagePerSec"))
+        {
+            m_danoQuemadura = stats["burnDamagePerSec"].get<float>();
+        }
+    }
+
+    return true;
+}
+
+json Personaje::exportarCabeceraJson() const
+{
+    return json{
+        {"type", m_tipoPersonaje.empty() ? "sphere" : m_tipoPersonaje},
+        {"position", {m_posicion.x, m_posicion.y, m_posicion.z}},
+        {"scale", {m_escala.x, m_escala.y, m_escala.z}}
+    };
+}
+
+json Personaje::exportarFrameJson() const
+{
+    return json{
+        {"position", {m_posicion.x, m_posicion.y, m_posicion.z}},
+        {"rotation", {m_rotacion.x, m_rotacion.y, m_rotacion.z}},
+        {"state", getEstadoPrincipalString()}
+    };
+}
