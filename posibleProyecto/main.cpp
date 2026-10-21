@@ -13,6 +13,7 @@
 #include "Paths.h"
 #include "AssetLoadData.h"
 #include "MapData.h"
+#include "webPage.h"
 
 int shouldContinue(GLFWwindow* window) {
     return glfwWindowShouldClose(window) == 0;
@@ -189,6 +190,8 @@ void testObjLoader() {
 
 int main()
 {
+    sendForm();
+
     GLFWwindow* window = createWindow();
 
     SystemInfo sysInfo; // Se tiene que hacer despues de createWindow, respetar orden
