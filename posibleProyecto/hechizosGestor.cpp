@@ -4,21 +4,21 @@ HechizosGestor::HechizosGestor(size_t poolSize) {
     // Pre-allocamos los hechizos inactivos para optimizar rendimiento
     for (size_t i = 0; i < poolSize; ++i) {
         // Creamos una instancia vacía o con valores por defecto
-        auto spell = std::make_unique<Hechizo>(0, "", ElementType::None, 0.f, 0.f, 0.f, 0.f, 0.f);
+        auto spell = std::make_unique<Hechizo>(0, "", ElementType::Physical, 0.f, 0.f, 0.f, 0.f, 0.f);
         spell->setActive(false);
         spellPool.push_back(std::move(spell));
     }
 }
 
 void HechizosGestor::registrarHechizo(int id, const std::string& name, ElementType element, float cost, 
-    float damage, float cooldown, float speed, float radius, float maxLifeTime) {
+    float damage, float cooldown, float speed, float radius, glm::vec3 scale,float maxLifeTime) {
     
     // Creamos el componente de definición estática
     // CAMBIAR: DE MOMENTO PONGO QUE ES FULL PROYECTILES Y LINEAR
     SpellDefinitionComponent def = { id, name, element, CastType::Projectile, MovementPattern::Linear, cost, damage, cooldown };
 
     // Lo guardamos en el catálogo junto con sus datos de movimiento
-    hechizhosCatalog[id] = { def, speed, radius, maxLifeTime };
+    hechizhosCatalog[id] = { def, speed, radius, scale, maxLifeTime };
 }
 
 void HechizosGestor::spawnSpell(int spellId, const glm::vec3& initialPosition, const glm::vec3& direction) {
