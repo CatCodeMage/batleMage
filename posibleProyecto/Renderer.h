@@ -9,6 +9,12 @@ struct Light {
 
 static_assert(sizeof(Light) == 32, "Light debe ser 2 vec4 contiguos");
 
+// Configuracion adicional de cada luz. Para poder añadir información sin modificar el flush
+struct SceneLight {
+    Light light;
+    bool castsShadow = false;
+};
+
 constexpr int MAX_LIGHTS = 16; 
 
 class Renderer {
@@ -17,6 +23,7 @@ public:
     void init(GLuint program);
     void submit(MeshId id, const glm::mat4& model, const glm::vec4& color, int kind = 0);
     void flush(const MeshLibrary& lib, const glm::mat4& viewProj);
+    void drawShadowGeometry(const MeshLibrary& lib) const;
     void submitLight(const Light& light);
 private:
     std::vector<Light> w_lights;

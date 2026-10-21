@@ -162,6 +162,8 @@
     <ClCompile Include="suelo.cpp" />
     <ClCompile Include="systemInfo.cpp" />
     <ClCompile Include="Transform.cpp" />
+    <ClCompile Include="PointShadowMap.cpp" />
+    <ClCompile Include="ShadowSystem.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="camera.h" />
@@ -179,6 +181,8 @@
     <ClInclude Include="suelo.h" />
     <ClInclude Include="systemInfo.h" />
     <ClInclude Include="Transform.h" />
+    <ClInclude Include="PointShadowMap.h" />
+    <ClInclude Include="ShadowSystem.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="posibleProyecto.rc" />

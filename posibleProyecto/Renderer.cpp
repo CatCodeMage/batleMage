@@ -23,6 +23,12 @@ void Renderer::submit(MeshId id, const glm::mat4& model, const glm::vec4& color,
     w_batches[id].push_back({ model, color, (float)kind });
 }
 
+void Renderer::drawShadowGeometry(const MeshLibrary& lib) const {
+    for (MeshId i = 0; i < w_batches.size(); ++i) {
+        lib.get(i).drawInstances(w_batches[i]);
+    }
+}
+
 void Renderer::flush(const MeshLibrary& lib, const glm::mat4& viewProj) {
 
     glUniformMatrix4fv(w_locViewProj, 1, GL_FALSE, glm::value_ptr(viewProj));
