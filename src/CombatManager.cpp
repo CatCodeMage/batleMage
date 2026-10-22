@@ -64,6 +64,15 @@ bool CombatManager::procesarImpacto(
         damage.getAmount()
     );
 
+    if (damage.getEffect() != EffectType::None)
+    {
+        personaje.aplicarEfecto(
+            damage.getEffect(),
+            damage.getEffectValue(),
+            damage.getDuration()
+        );
+    }
+
     return true;
 }
 
