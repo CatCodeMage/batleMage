@@ -4,6 +4,7 @@
 #include "Damage.h"
 #include "hechizos.h"
 #include "personaje.h"
+#include "map.h"
 
 class CombatManager
 {
@@ -27,6 +28,11 @@ public:
 
     CylinderCollider crearColliderPersonaje(
         const Personaje& personaje
+    );
+
+    void procesarImpacto(
+        const Hechizo& hechizo,
+        Asset
     );
 
 };

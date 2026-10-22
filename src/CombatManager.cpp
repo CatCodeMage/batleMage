@@ -60,7 +60,7 @@ bool CombatManager::procesarImpacto(
 
     Damage damage = crearDamage(hechizo);
 
-    personaje.recibirDaño(
+    personaje.recibirDano(
         damage.getAmount()
     );
 
@@ -102,4 +102,11 @@ CylinderCollider CombatManager::crearColliderPersonaje(
     collider.halfHeight = 1.0f;
 
     return collider;
+}
+
+void CombatManager::procesarImpactoMapa(
+    const Hechizo& hechizo,
+    Map& mapa
+) {
+
 }
