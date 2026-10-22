@@ -152,7 +152,10 @@
     <ClCompile Include="camera.cpp" />
     <ClCompile Include="drawObjects.cpp" />
     <ClCompile Include="Entidad.cpp" />
+    <ClCompile Include="hechizos.cpp" />
+    <ClCompile Include="hechizosGestor.cpp" />
     <ClCompile Include="Input.cpp" />
+    <ClCompile Include="jsonManager.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MapData.cpp" />
     <ClCompile Include="Mesh.cpp" />
@@ -165,6 +168,9 @@
     <ClCompile Include="systemInfo.cpp" />
     <ClCompile Include="TextureLibrary.cpp" />
     <ClCompile Include="Transform.cpp" />
+    <ClCompile Include="PointShadowMap.cpp" />
+    <ClCompile Include="ShadowSystem.cpp" />
+    <ClCompile Include="webPage.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AssetLoadData.h" />
@@ -172,7 +178,11 @@
     <ClInclude Include="drawObjects.h" />
     <ClInclude Include="Entidad.h" />
     <ClInclude Include="global.h" />
+    <ClInclude Include="hechizoDatos.h" />
+    <ClInclude Include="hechizos.h" />
+    <ClInclude Include="hechizosGestor.h" />
     <ClInclude Include="Input.h" />
+    <ClInclude Include="jsonManager.h" />
     <ClInclude Include="MapData.h" />
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="MeshLibrary.h" />
@@ -183,6 +193,9 @@
     <ClInclude Include="systemInfo.h" />
     <ClInclude Include="TextureLibrary.h" />
     <ClInclude Include="Transform.h" />
+    <ClInclude Include="PointShadowMap.h" />
+    <ClInclude Include="ShadowSystem.h" />
+    <ClInclude Include="webPage.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="posibleProyecto.rc" />

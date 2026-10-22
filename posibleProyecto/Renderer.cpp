@@ -32,6 +32,12 @@ void Renderer::submit(MeshId id, GLuint albedoTexture, const glm::mat4& model, c
     w_batchTextures[id] = albedoTexture;
 }
 
+void Renderer::drawShadowGeometry(const MeshLibrary& lib) const {
+    for (MeshId i = 0; i < w_batches.size(); ++i) {
+        lib.get(i).drawInstances(w_batches[i]);
+    }
+}
+
 void Renderer::flushLigth() {
     glUniform1i(w_locNumLights, (GLint)w_lights.size());
     if (!w_lights.empty())
@@ -46,6 +52,8 @@ void Renderer::flush(const MeshLibrary& lib, const glm::mat4& viewProj) {
     getActualViewProj(viewProj);
 
     flushLigth();
+
+    drawShadowGeometry(lib);
     
     glActiveTexture(GL_TEXTURE0 + ALBEDO_TEXTURE_UNIT);
     for (MeshId i = 0; i < w_batches.size(); ++i) {

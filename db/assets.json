@@ -16,5 +16,9 @@
   },
   "kenney_tree": { "path": "./posibleProyecto/assets/kenney_nature/tree_default.obj" },
   "kenney_rock": { "path": "./posibleProyecto/assets/kenney_nature/rock_largeA.obj" },
-  "kenney_bush": { "path": "./posibleProyecto/assets/kenney_nature/plant_bush.obj" }
+  "kenney_bush": { "path": "./posibleProyecto/assets/kenney_nature/plant_bush.obj" },
+  "spirit": {
+    "path": "./posibleProyecto/assets/tree.obj",
+    "hitbox": "sphere"
+  }
 }

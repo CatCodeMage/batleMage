@@ -1,0 +1,26 @@
+{
+    "frames": "",
+    "map": "../db/map.json",
+    "metadata": {
+        "combatType": "1v1"
+    },
+    "players": {
+        "player_1": {
+            "position": [
+                -20,
+                0,
+                -20
+            ],
+            "type": "sphere"
+        },
+        "player_2": {
+            "position": [
+                20,
+                0,
+                20
+            ],
+            "type": "sphere"
+        }
+    },
+    "spells": "../db/spells.json"
+}

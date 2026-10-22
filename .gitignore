@@ -369,3 +369,6 @@ FodyWeavers.xsd
 # Assets (modelos .obj, .mtl y texturas): fuera de git por tamano; se comparten aparte.
 # [Aa] porque la carpeta se llama Assets en disco y assets en las rutas de los JSON.
 posibleProyecto/[Aa]ssets/
+
+#compilació
+build
