@@ -126,7 +126,7 @@ void buclePrincipaLTiempoReal(GLFWwindow* window, SystemInfo& sysInfo) {
 
     keysInput.init(window);
 
-    std::vector<std::vector <Entidad>> combat = generateCombat();
+    std::vector<std::vector <Entidad>> combat = generateCombat(libModel);
 
     while (shouldContinue(window)) {
         clearLastFrame();

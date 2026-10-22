@@ -6,17 +6,17 @@
   "asset": "map0",
   "entities": {
     "kenney_tree_01": {
-      "asset": "kenney_tree",
+      "asset": "tree",
       "position": [ -3, 0, 0 ],
       "scale": [ 3, 3, 3 ]
     },
     "kenney_rock_01": {
-      "asset": "kenney_rock",
+      "asset": "rock",
       "position": [ 3, 0, -2 ],
       "scale": [ 3, 3, 3 ]
     },
     "kenney_bush_01": {
-      "asset": "kenney_bush",
+      "asset": "bush",
       "position": [ 0, 0, 2 ],
       "scale": [ 3, 3, 3 ]
     }

@@ -1,8 +1,14 @@
 #pragma once
-#include <nlohmann/json.hpp>
-#include <fstream>
+#include "global.h"
 #include "hechizosGestor.h"
 #include "Entidad.h"
+#include "MeshLibrary.h"
+#include "ModelLibrary.h"
+
+struct EntityInfo {
+	std::string asset;
+	std::vector<float> scale;
+};
 
 ElementType parseElement(std::string element);
 
@@ -12,4 +18,9 @@ std::vector<std::string> getPlayers();
 
 void writeCombat();
 
-std::vector<std::vector <Entidad>> generateCombat();
+Entidad generateEntity(const std::vector<float>& position, const std::vector<float>& rotation,
+	const EntityInfo eInfo, const ModelLibrary& lib);
+
+EntityInfo getEntityInfo(const std::string entityName);
+
+std::vector<std::vector <Entidad>> generateCombat(const ModelLibrary& modelLib);
