@@ -8,6 +8,8 @@
 #include <glm/glm.hpp>
 #include "json.hpp" 
 using json = nlohmann::json;
+#include "CombatManager.h"
+
 
 enum class EstadoPersonaje {
     IDLE,      //en la esfera esta siempre en idle
@@ -37,8 +39,7 @@ private:
     float m_vidaMax;
     float m_mana;
     float m_manaMax; 
-    float m_capacidadMagia; //estadistica del personaje como las del noita 
-                        //(ej: veloc recarga mana, num hechizos lanzar a la vez...)
+    float m_capacidadMagia; 
     float m_tiempoQuemado;
     float m_tiempoCongelado;
     float m_danoQuemadura;
@@ -67,6 +68,8 @@ public:
     void borrarEstado(EstadoPersonaje estado);
     bool yaTieneEstado(EstadoPersonaje estado) const;
     std::vector<EstadoPersonaje> getEstados() const;
+    void aplicarEfecto(EffectType efecto, float valor, float duracion);
+
 
     int getId() const;
     float getVida() const;

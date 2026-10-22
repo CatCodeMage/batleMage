@@ -124,6 +124,20 @@ void Personaje::recibirDano(float cantidadDano)
     }
 }
 
+void Personaje::aplicarEfecto(EffectType efecto, float valor, float duracion)
+{
+    if(yaTieneEstado(EstadoPersonaje::MUERTO)) return;
+    if(efecto == EffectType::Burn)
+    {
+        anadirEstado(EstadoPersonaje::QUEMADO, duracion);
+        m_danoQuemadura = valor;
+    }
+    else if(efecto == EffectType::Slow)
+    {
+        anadirEstado(EstadoPersonaje::CONGELADO, duracion);
+    }
+}
+
 void Personaje::aumentarVida(float cantidad)
 {
     m_vida += cantidad;
@@ -142,12 +156,7 @@ void Personaje::disminuirMana(float cantidad)
     if(m_mana < 0) m_mana = 0;
 }
 
-void Personaje::lanzarHechizo(int idHechizo) //tener en cuenta que puede lanzar cualquier hechizo no tiene restricciones, enviar a hechizo q hechizo se manda y tal
-                                //para enviarle a hechizo le tengo que pasar la posicion donde se origina que es la posicion del centro de la 
-                                //bola mas el grosor de la bola mas un espacio para que no salga pegado al personaje
-                                //no tener en cuenta si hay un obstaculo en el origen del hechizo pq se comunicara con hechizo
-                                //si hay un obstaculo hechizo se comunica con histbox y se estampe el hechizo con el obstaculo directamente
-                                //le pasamos el id del hechizo que el personaje puede tirar cualquier id de hechizo y ahi hechizo sabra que hechizo es
+void Personaje::lanzarHechizo(int idHechizo)
 {
     if (yaTieneEstado(EstadoPersonaje::MUERTO) || yaTieneEstado(EstadoPersonaje::CONGELADO)) return;
     
