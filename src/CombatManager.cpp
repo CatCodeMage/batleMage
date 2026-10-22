@@ -1,27 +1,33 @@
 #include "CombatManager.h"
 
-Damage CombatManager::crearDamage(const SpellData& hechizo)
+Damage CombatManager::crearDamage(
+    const Hechizo& hechizo)
 {
-    switch (hechizo.element)
+    switch (hechizo.getElement())
     {
     case ElementType::Physical:
+
         return Damage(
-            hechizo.baseDamage * 1.25f,
+            hechizo.getDamage() * 1.25f,
             ElementType::Physical
         );
 
+
     case ElementType::Fire:
+
         return Damage(
-            hechizo.baseDamage,
+            hechizo.getDamage(),
             ElementType::Fire,
             EffectType::Burn,
             5.0f,
             4.0f
         );
 
+
     case ElementType::ICE:
+
         return Damage(
-            hechizo.baseDamage,
+            hechizo.getDamage(),
             ElementType::ICE,
             EffectType::Slow,
             0.30f,
@@ -30,17 +36,21 @@ Damage CombatManager::crearDamage(const SpellData& hechizo)
     }
 
     return Damage(
-        hechizo.baseDamage,
+        hechizo.getDamage(),
         ElementType::Physical
     );
 }
 
 bool CombatManager::procesarImpacto(
-    const SphereCollider& hechizoCollider,
-    const CylinderCollider& personajeCollider,
-    const SpellData& hechizo,
+    const Hechizo& hechizo,
     Personaje& personaje)
 {
+    SphereCollider hechizoCollider =
+        crearColliderHechizo(hechizo);
+
+    CylinderCollider personajeCollider =
+        crearColliderPersonaje(personaje);
+
     if (!m_collisionManager.checkCollision(
         hechizoCollider,
         personajeCollider))
@@ -55,4 +65,32 @@ bool CombatManager::procesarImpacto(
     );
 
     return true;
+}
+
+SphereCollider CombatManager::crearColliderHechizo(
+    const Hechizo& hechizo)
+{
+    SphereCollider collider;
+
+    collider.center = hechizo.getPosition();
+    collider.radius = hechizo.getRadius();
+
+    return collider;
+}
+
+CylinderCollider CombatManager::crearColliderPersonaje(
+    const Personaje& personaje)
+{
+    CylinderCollider collider;
+
+    collider.center = glm::vec3(
+        personaje.getX(),
+        personaje.getY(),
+        personaje.getZ()
+    );
+
+    collider.radius = 0.5f;
+    collider.halfHeight = 1.0f;
+
+    return collider;
 }

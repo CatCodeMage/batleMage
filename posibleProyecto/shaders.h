@@ -4,4 +4,4 @@
 extern const char* vertexSrc;
 extern const char* fragmentSrc;
 
-GLuint compileShader(GLenum type, const char* src);
+GLuint compileShader(GLenum type, const char* src); 

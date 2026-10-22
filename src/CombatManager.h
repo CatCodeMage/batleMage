@@ -2,7 +2,7 @@
 
 #include "Collision.h"
 #include "Damage.h"
-#include "hechizoDatos.h"
+#include "hechizos.h"
 #include "personaje.h"
 
 class CombatManager
@@ -11,12 +11,22 @@ private:
     CollisionManager m_collisionManager;
 
 public:
-    Damage crearDamage(const SpellData& hechizo);
+
+    SphereCollider crearColliderHechizo(
+        const Hechizo& hechizo
+    );
+
+    Damage crearDamage(
+        const Hechizo& hechizo
+    );
 
     bool procesarImpacto(
-        const SphereCollider& hechizoCollider,
-        const CylinderCollider& personajeCollider,
-        const SpellData& hechizo,
+        const Hechizo& hechizo,
         Personaje& personaje
     );
+
+    CylinderCollider crearColliderPersonaje(
+        const Personaje& personaje
+    );
+
 };
