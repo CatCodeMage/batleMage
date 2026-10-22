@@ -28,10 +28,8 @@ class ControladorMaquinaEstados : public ControladorPersonaje
 
         std::vector<InfoHechizo> m_hechizosLanzables;
 
-        float m_distanciaAtaque;
         float m_distanciaSegura;
         float m_velocidadMovimiento;
-        float m_costeManaHechizo;
         float m_cooldownAtaque;
         float m_tiempoDesdeUltAtaque;
         float m_regenMana;

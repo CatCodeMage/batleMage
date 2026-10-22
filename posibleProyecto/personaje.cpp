@@ -7,7 +7,8 @@ Personaje::Personaje(int id, glm::vec3 posicionInicial, float radio, HechizosGes
 {
     this->m_id = id;
     this->m_posicion = posicionInicial;
-    this->m_rotacion = glm::vec3(1.0f,1.0f,1.0f);
+    this->m_escala = glm::vec3(1.0f,1.0f,1.0f);
+    this->m_rotacion = glm::vec3(0.0f,0.0f,0.0f);
     this->m_direccion = glm::vec3(0.0f, 0.0f, 1.0f);
     this->m_radio = radio;
     this->m_margenCasteo = 0.5f;
@@ -21,6 +22,7 @@ Personaje::Personaje(int id, glm::vec3 posicionInicial, float radio, HechizosGes
     anadirEstado(EstadoPersonaje::IDLE);
     m_controlador = nullptr;
     m_gestorHechizos = gestorHechizos;
+
 }
 
 void Personaje::anadirEstado(EstadoPersonaje nuevoEstado, float duracion)

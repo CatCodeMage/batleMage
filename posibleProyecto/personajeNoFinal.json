@@ -62,5 +62,21 @@
       "attackCooldown": 1.4,
       "burnDamagePerSec": 5.0
     }
+  },
+    "dwarf": {
+    "radious": 1.0,
+    "scale": [0.5, 0.5, 0.5],
+    "slices": 20,
+    "stacks": 20,
+    "stats": {
+      "maxHealth": 50.0,
+      "maxMana": 200.0,
+      "manaRegen": 2.5,
+      "moveSpeed": 7.0,
+      "safeDistance": 9.0,
+      "castMargin": 0.5,
+      "attackCooldown": 1.2,
+      "burnDamagePerSec": 5.0
+    }
   }
 }
