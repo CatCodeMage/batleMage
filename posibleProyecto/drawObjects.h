@@ -3,6 +3,6 @@
 #include "Renderer.h"
 #include "Entidad.h"
 
-void submitEntidad(Renderer& renderer, const Entidad& e);
+void submitEntidad(Renderer& renderer, const ModelLibrary& models, const Entidad& e);
 
-void submitEntidades(Renderer& renderer, const std::vector<Entidad>& entities);
+void submitEntidades(Renderer& renderer, const ModelLibrary& models, const std::vector<Entidad>& entities);

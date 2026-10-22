@@ -4,10 +4,7 @@
 #include <vector>
 #include <cmath>
 #include <memory>
-#include <GL/glew.h>
-#include <GLFW/glfw3.h>
-#include <glm/glm.hpp>
-
+#include "global.h"
 // estructura 3D
 // nueva estructura
 

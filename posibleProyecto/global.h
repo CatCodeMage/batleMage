@@ -19,3 +19,4 @@
 #include <sstream>
 #include <stdexcept>
 #include <array>
+#include <soil2/SOIL2.h>

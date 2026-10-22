@@ -22,12 +22,13 @@ void loadTranformJSON(Entidad& entity, const json& vals) {
     entity.transform.rot = aVec3(vals, "rotation", glm::vec3(0.0f));   // radianes
 }
 
-Entidad loadEntityJSON(const json& vals, const MeshLibrary& lib) {
+Entidad loadEntityJSON(const json& vals, const ModelLibrary& lib) {
     std::string asset = vals.at("asset").get<std::string>();
 
+    if (!lib.has(asset)) throw std::runtime_error("asset desconocido: '" + asset + "'");
+    
     Entidad entity;
-    if (lib.has(asset)) { entity.mesh = lib.find(asset); }
-    else { throw std::runtime_error("\n\n[Asset] Missing asset\n\n"); }
+    entity.model = lib.find(asset);
 
     loadTranformJSON(entity, vals);
 
@@ -36,7 +37,7 @@ Entidad loadEntityJSON(const json& vals, const MeshLibrary& lib) {
     return entity;
 }
 
-bool MapData::load(const std::filesystem::path& file, const MeshLibrary& lib) {
+bool MapData::load(const std::filesystem::path& file, const ModelLibrary& lib) {
     entities.clear();
 
     std::ifstream in(file);

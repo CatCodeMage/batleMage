@@ -365,3 +365,10 @@ FodyWeavers.xsd
 # Keep libs/ in the repo even if it sits inside bin/, Release/ or x64/ folders.
 !**/libs/
 !**/libs/**
+
+# Assets (modelos .obj, .mtl y texturas): fuera de git por tamano; se comparten aparte.
+# [Aa] porque la carpeta se llama Assets en disco y assets en las rutas de los JSON.
+posibleProyecto/[Aa]ssets/
+
+#compilació
+build
