@@ -1,17 +1,20 @@
 {
-    "map0": {
-        "path": "./posibleProyecto/assets/map0.obj"
-    },
-    "tree": {
-        "path": "./posibleProyecto/assets/tree.obj",
-        "hitbox": "cilinder"
-    },
-    "rock": {
-        "path": "./posibleProyecto/assets/rock.obj",
-        "hitbox": "cube"
-    },
-    "bush": {
-        "path": "./posibleProyecto/assets/bush.obj",
-        "hitbox": "sphere"
-    }
+  "map0": {
+    "path": "./posibleProyecto/assets/map0.obj"
+  },
+  "tree": {
+    "path": "./posibleProyecto/assets/tree.obj",
+    "hitbox": "cilinder"
+  },
+  "rock": {
+    "path": "./posibleProyecto/assets/rock.obj",
+    "hitbox": "cube"
+  },
+  "bush": {
+    "path": "./posibleProyecto/assets/bush.obj",
+    "hitbox": "sphere"
+  },
+  "kenney_tree": { "path": "./posibleProyecto/assets/kenney_nature/tree_default.obj" },
+  "kenney_rock": { "path": "./posibleProyecto/assets/kenney_nature/rock_largeA.obj" },
+  "kenney_bush": { "path": "./posibleProyecto/assets/kenney_nature/plant_bush.obj" }
 }

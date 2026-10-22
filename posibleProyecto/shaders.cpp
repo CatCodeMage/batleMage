@@ -4,18 +4,21 @@ const char* vertexSrc = R"(
 #version 330 core
 layout (location = 0) in vec3 aPos;
 layout (location = 1) in vec3 aNormal;
-layout (location = 2) in mat4 iModel;     // ocupa las locations 2, 3, 4 y 5
-layout (location = 6) in vec4 iColor;
-layout (location = 7) in float iKind;
+layout (location = 2) in vec2 aUV;
+layout (location = 3) in mat4 iModel;     // ocupa las locations 3, 4, 5 y 6
+layout (location = 7) in vec4 iColor;
+layout (location = 8) in float iKind;
 uniform mat4 uViewProj;
 out vec3 vWorldPos;
 out vec3 vNormal;
+out vec2 vUV;
 out vec4 vColor;
 flat out float vKind;
 void main() {
     vec4 world = iModel * vec4(aPos, 1.0);
     vWorldPos = world.xyz;
     vNormal = mat3(iModel) * aNormal;
+    vUV = aUV;
     vColor = iColor;
     vKind = iKind;
     gl_Position = uViewProj * world;
@@ -27,7 +30,9 @@ const char* fragmentSrc = R"(
 in vec3 vWorldPos;
 in vec3 vNormal;
 in vec4 vColor;
+in vec2 vUV;
 flat in float vKind;
+uniform sampler2D uAlbedo;
 uniform int  uNumLights;
 uniform vec4 uLights[2 * MAX_LIGHTS];   // [2*i] = pos.xyz + alcance ; [2*i+1] = color.rgb + intensidad
 out vec4 FragColor;
@@ -36,8 +41,8 @@ void main() {
     if (vKind > 0.5) {
         float c = mod(floor(vWorldPos.x) + floor(vWorldPos.z), 2.0);
         base = vec3(mix(0.25, 0.6, c));
-    } else {
-        base = vColor.rgb;
+     } else {
+        base = texture(uAlbedo, vUV).rgb * vColor.rgb;
     }
     vec3 n   = normalize(vNormal);
     // Luces ambiente

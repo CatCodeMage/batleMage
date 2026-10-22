@@ -1,10 +1,8 @@
 #include "global.h"
 #include "shaders.h"
-#include "cubo.h"
 #include "systemInfo.h"
 #include "camera.h"
 #include "MeshLibrary.h"
-#include "suelo.h"
 #include "Input.h"
 #include "Renderer.h"
 #include "Transform.h"
@@ -45,33 +43,19 @@ void clearLastFrame() {
 void updateFrame(GLFWwindow* window) {
     glfwSwapBuffers(window);
     glfwPollEvents();
-}
-
-void createMeshes(MeshLibrary& lib) {
-    lib.add("cube",
-        std::vector<float>(std::begin(vertices), std::end(vertices)),
-        std::vector<unsigned>(std::begin(indices), std::end(indices)));
-
-    lib.add("floor",
-        std::vector<float>(std::begin(floorVertices), std::end(floorVertices)),
-        std::vector<unsigned>(std::begin(floorIndices), std::end(floorIndices)));
-
-    lib.add("missing",
-        std::vector<float>(std::begin(vertices), std::end(vertices)),
-        std::vector<unsigned>(std::begin(indices), std::end(indices)));
-}
+} 
 
 void buclePrincipaLTiempoReal(GLFWwindow* window, SystemInfo& sysInfo) {
     // Entidades
-    MeshLibrary libMesh;    
-    createMeshes(libMesh);
+    MeshLibrary libMesh;
+    ModelLibrary libModel; 
+    TextureLibrary textures;
 
-    loadAssetManifest(dataPath("db/assets.json"), libMesh);
+    textures.init();
+    loadAssetManifest(dataPath("db/assets.json"), libMesh, libModel, textures);
 
     MapData map;
-
-    map.load(dataPath("db/map.json"), libMesh);
-     
+    map.load(dataPath("db/map.json"), libModel); 
     // Luces
     std::vector<Light> luces = {
         { glm::vec3(0.0f),              8.0f, glm::vec3(1.0f, 0.8f, 0.5f), 2.0f },   // la que orbita
@@ -102,7 +86,7 @@ void buclePrincipaLTiempoReal(GLFWwindow* window, SystemInfo& sysInfo) {
 
         glm::mat4 vp = viewCamera.get_proj() * viewCamera.get_view();
          
-        submitEntidades(renderer, map.entities);
+        submitEntidades(renderer, libModel, map.entities);
 
         // Light
         luces[0].pos = glm::vec3(3.0f * cos(time), 3.0f, 3.0f * sin(time));    // UPDATE
@@ -115,6 +99,7 @@ void buclePrincipaLTiempoReal(GLFWwindow* window, SystemInfo& sysInfo) {
     }
 
     libMesh.destroy();
+    textures.destroy();
 }
 
 int guranteWindowCreated(GLFWwindow* window) {
@@ -172,14 +157,21 @@ void testObjLoader() {
         "posibleProyecto/assets/test/malo_dos_vertices.obj",
         "posibleProyecto/assets/test/malo_indice_negativo.obj",
         "posibleProyecto/assets/test/malo_fuera_de_rango.obj",
+        "posibleProyecto/assets/test/dos_objetos.obj",
+        "posibleProyecto/assets/test/cubo_textura.obj"
     };
+
     for (const std::string& testFile : testFiles) {
         try {
-            std::vector<float> verts;
-            std::vector<unsigned> idx;
-            loadObj(dataPath(testFile), verts, idx);
-            std::cout << "[TEST] " << testFile << ": " << verts.size() / 6
-                << " vertices / " << idx.size() << " indices\n";
+            const std::vector<ObjPiece> pieces = loadObj(dataPath(testFile));
+            std::cout << "[TEST] " << testFile << ": " << pieces.size() << " piezas\n";
+            for (const ObjPiece& piece : pieces) {
+                const glm::vec4& color = piece.material.color;
+                std::cout << "    shape '" << piece.shapeName << "', material '" << piece.material.name
+                    << "' color " << color.r << " " << color.g << " " << color.b
+                    << " textura '" << piece.material.albedoTexture.string() << "': "
+                    << piece.verts.size() / FLOATS_PER_VERTEX << " vertices / " << piece.idx.size() << " indices\n";
+            }
         }
         catch (const std::exception& ex) {
             std::cout << "[TEST] ERROR " << ex.what() << "\n";
@@ -202,8 +194,6 @@ int main()
 
     if (guranteWindowCreated(window) != 0) 
         return -1;
-
-    testObjLoader();
 
     buclePrincipaLTiempoReal(window, sysInfo);
 

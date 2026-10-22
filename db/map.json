@@ -5,131 +5,20 @@
   "kind": 1,
   "asset": "map0",
   "entities": {
-    "tree_01": {
-      "asset": "tree",
-      "position": [ -40, 4.8, -46 ],
-      "scale": [ 1.0, 1.2, 1.0 ],
-      "rotation": [ 0, 0.785, 0 ]
+    "kenney_tree_01": {
+      "asset": "kenney_tree",
+      "position": [ -3, 0, 0 ],
+      "scale": [ 3, 3, 3 ]
     },
-    "tree_02": {
-      "asset": "tree",
-      "position": [ -35, 5.6, -28 ],
-      "scale": [ 1.1, 1.4, 1.1 ],
-      "rotation": [ 0, 1.571, 0 ]
+    "kenney_rock_01": {
+      "asset": "kenney_rock",
+      "position": [ 3, 0, -2 ],
+      "scale": [ 3, 3, 3 ]
     },
-    "tree_03": {
-      "asset": "tree",
-      "position": [ -20, 4.4, -42 ],
-      "scale": [ 0.9, 1.1, 0.9 ],
-      "rotation": [ 0, 2.356, 0 ]
-    },
-    "tree_04": {
-      "asset": "tree",
-      "position": [ 5, 6, -10 ],
-      "scale": [ 1.2, 1.5, 1.2 ],
-      "rotation": [ 0, 3.142, 0 ]
-    },
-    "tree_05": {
-      "asset": "tree",
-      "position": [ 20, 5.2, -38 ],
-      "scale": [ 1.0, 1.3, 1.0 ],
-      "rotation": [ 0, 3.927, 0 ]
-    },
-    "tree_06": {
-      "asset": "tree",
-      "position": [ 38, 6.4, 10 ],
-      "scale": [ 1.3, 1.6, 1.3 ],
-      "rotation": [ 0, 4.712, 0 ]
-    },
-    "rock_01": {
-      "asset": "rock",
-      "position": [ -45, 2, -35 ],
-      "scale": [ 1.5, 1.0, 1.2 ],
-      "rotation": [ 0.2, 0.3, 0.1 ]
-    },
-    "rock_02": {
-      "asset": "rock",
-      "position": [ -30, 1.8, -15 ],
-      "scale": [ 1.2, 0.9, 1.4 ],
-      "rotation": [ 0.1, 1.1, 0.3 ]
-    },
-    "rock_03": {
-      "asset": "rock",
-      "position": [ -8, 2.6, -40 ],
-      "scale": [ 1.8, 1.3, 1.6 ],
-      "rotation": [ 0.3, 2.0, 0.2 ]
-    },
-    "rock_04": {
-      "asset": "rock",
-      "position": [ 10, 1.6, 5 ],
-      "scale": [ 1.0, 0.8, 1.0 ],
-      "rotation": [ 0.15, 2.7, 0.25 ]
-    },
-    "rock_05": {
-      "asset": "rock",
-      "position": [ 25, 2.2, -20 ],
-      "scale": [ 1.4, 1.1, 1.3 ],
-      "rotation": [ 0.25, 3.5, 0.15 ]
-    },
-    "rock_06": {
-      "asset": "rock",
-      "position": [ 42, 3, 30 ],
-      "scale": [ 2.0, 1.5, 1.8 ],
-      "rotation": [ 0.35, 4.2, 0.4 ]
-    },
-    "rock_07": {
-      "asset": "rock",
-      "position": [ -25, 1.4, 20 ],
-      "scale": [ 1.1, 0.7, 1.0 ],
-      "rotation": [ 0.1, 5.0, 0.2 ]
-    },
-    "bush_01": {
-      "asset": "bush",
-      "position": [ -42, 1, -20 ],
-      "scale": [ 1.0, 1.0, 1.0 ],
-      "rotation": [ 0, 0.5, 0 ]
-    },
-    "bush_02": {
-      "asset": "bush",
-      "position": [ -32, 1.1, 0 ],
-      "scale": [ 1.2, 1.1, 1.2 ],
-      "rotation": [ 0, 1.2, 0 ]
-    },
-    "bush_03": {
-      "asset": "bush",
-      "position": [ -15, 0.9, -25 ],
-      "scale": [ 0.8, 0.9, 0.8 ],
-      "rotation": [ 0, 2.0, 0 ]
-    },
-    "bush_04": {
-      "asset": "bush",
-      "position": [ -2, 1, 15 ],
-      "scale": [ 1.1, 1.0, 1.1 ],
-      "rotation": [ 0, 2.8, 0 ]
-    },
-    "bush_05": {
-      "asset": "bush",
-      "position": [ 13, 1.2, -32 ],
-      "scale": [ 1.0, 1.2, 1.0 ],
-      "rotation": [ 0, 3.6, 0 ]
-    },
-    "bush_06": {
-      "asset": "bush",
-      "position": [ 30, 1.1, -5 ],
-      "scale": [ 1.3, 1.1, 1.3 ],
-      "rotation": [ 0, 4.4, 0 ]
-    },
-    "bush_07": {
-      "asset": "bush",
-      "position": [ 45, 1, -30 ],
-      "scale": [ 0.9, 1.0, 0.9 ],
-      "rotation": [ 0, 5.2, 0 ]
-    },
-    "bush_08": {
-      "asset": "bush",
-      "position": [ -38, 1.3, 35 ],
-      "scale": [ 1.1, 1.3, 1.1 ],
-      "rotation": [ 0, 6.0, 0 ]
+    "kenney_bush_01": {
+      "asset": "kenney_bush",
+      "position": [ 0, 0, 2 ],
+      "scale": [ 3, 3, 3 ]
     }
   }
 }

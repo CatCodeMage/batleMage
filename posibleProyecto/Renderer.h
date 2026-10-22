@@ -15,11 +15,14 @@ class Renderer {
 public:
     Renderer();
     void init(GLuint program);
-    void submit(MeshId id, const glm::mat4& model, const glm::vec4& color, int kind = 0);
+    void submit(MeshId id, GLuint albedoTexture, const glm::mat4& model, const glm::vec4& color, int kind = 0);
     void flush(const MeshLibrary& lib, const glm::mat4& viewProj);
     void submitLight(const Light& light);
 private:
+    void getActualViewProj(const glm::mat4& viewProj);
+    void flushLigth();
     std::vector<Light> w_lights;
-    std::vector<std::vector<InstanceData>> w_batches;     // un lote por MeshId
-    GLint w_locViewProj, w_locNumLights, w_locLights;
+    std::vector<std::vector<InstanceData>> w_batches;      
+    std::vector<GLuint> w_batchTextures;   
+    GLint w_locViewProj, w_locNumLights, w_locLights, w_locAlbedo;
 };

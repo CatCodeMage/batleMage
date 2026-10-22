@@ -5,6 +5,6 @@
 struct MapData {
     std::vector<Entidad> entities;
 
-    bool load(const std::filesystem::path& file, const MeshLibrary& lib);
+    bool load(const std::filesystem::path& file, const ModelLibrary& lib);
 };
 

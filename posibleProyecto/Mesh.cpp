@@ -1,5 +1,13 @@
 #include "Mesh.h"
 
+constexpr GLuint LOC_POSITION = 0;
+constexpr GLuint LOC_NORMAL = 1;
+constexpr GLuint LOC_UV = 2;
+constexpr GLuint LOC_INSTANCE_MODEL = 3;   // mat4: ocupa 3, 4, 5 y 6
+constexpr GLuint LOC_INSTANCE_COLOR = 7;
+constexpr GLuint LOC_INSTANCE_KIND = 8;
+constexpr int    MAT4_COLUMNS = 4;
+
 void Mesh::create(const std::vector<float>& verts, const std::vector<unsigned>& idx) {
     // Crear los objetos de OpenGL
     glGenVertexArrays(1, &w_vao);
@@ -9,38 +17,43 @@ void Mesh::create(const std::vector<float>& verts, const std::vector<unsigned>& 
 
     glBindVertexArray(w_vao);
 
-    // --- Datos por vértice: posición (3) + normal (3) ---
+    // --- Datos por vertice: posicion (3) + normal (3) + uv (2) ---
     glBindBuffer(GL_ARRAY_BUFFER, w_vbo);
     glBufferData(GL_ARRAY_BUFFER, verts.size() * sizeof(float), verts.data(), GL_STATIC_DRAW);
 
-    const GLsizei stride = 6 * sizeof(float);
-
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, stride, (void*)0);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, stride, (void*)(3 * sizeof(float)));
-    glEnableVertexAttribArray(1);
+    const GLsizei stride = FLOATS_PER_VERTEX * sizeof(float);
+    glVertexAttribPointer(LOC_POSITION, 3, GL_FLOAT, GL_FALSE, stride, (void*)0);
+    glEnableVertexAttribArray(LOC_POSITION);
+    glVertexAttribPointer(LOC_NORMAL, 3, GL_FLOAT, GL_FALSE, stride, (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(LOC_NORMAL);
+    glVertexAttribPointer(LOC_UV, 2, GL_FLOAT, GL_FALSE, stride, (void*)(6 * sizeof(float)));
+    glEnableVertexAttribArray(LOC_UV);
 
     // --- Datos por instancia: modelo (mat4), color (vec4), kind (float) ---
     // Este bind tiene que ir ANTES de los glVertexAttribPointer de abajo:
-    // cada uno recuerda el buffer que esté enlazado en ese momento.
+    // cada uno recuerda el buffer que este enlazado en ese momento.
     glBindBuffer(GL_ARRAY_BUFFER, w_instanceVbo);
 
-    for (int i = 0; i < 4; ++i) {                       // un mat4 son 4 columnas vec4
-        glEnableVertexAttribArray(2 + i);                
-        glVertexAttribPointer(2 + i, 4, GL_FLOAT, GL_FALSE, sizeof(InstanceData),
-            (void*)(sizeof(glm::vec4) * i));
-        glVertexAttribDivisor(2 + i, 1);                // avanza por instancia, no por vértice
+    // Guarda los InstanceData dentro del buffer
+    for (int column = 0; column < MAT4_COLUMNS; ++column) {
+        const GLuint location = LOC_INSTANCE_MODEL + column;
+        glEnableVertexAttribArray(location);
+        glVertexAttribPointer(location, 4, GL_FLOAT, GL_FALSE, sizeof(InstanceData),
+            (void*)(sizeof(glm::vec4) * column));
+        glVertexAttribDivisor(location, 1);              // avanza por instancia 
     }
 
-    glEnableVertexAttribArray(6);                       // color
-    glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, sizeof(InstanceData),
+    // Explicamos como leer color y donde esta el siguiente,
+    glEnableVertexAttribArray(LOC_INSTANCE_COLOR);
+    glVertexAttribPointer(LOC_INSTANCE_COLOR, 4, GL_FLOAT, GL_FALSE, sizeof(InstanceData),
         (void*)offsetof(InstanceData, color));
-    glVertexAttribDivisor(6, 1);
+    glVertexAttribDivisor(LOC_INSTANCE_COLOR, 1);
 
-    glEnableVertexAttribArray(7);                       // kind
-    glVertexAttribPointer(7, 1, GL_FLOAT, GL_FALSE, sizeof(InstanceData),
+    // Explicamos como leer kind y donde esta el siguiente,
+    glEnableVertexAttribArray(LOC_INSTANCE_KIND);
+    glVertexAttribPointer(LOC_INSTANCE_KIND, 1, GL_FLOAT, GL_FALSE, sizeof(InstanceData),
         (void*)offsetof(InstanceData, kind));
-    glVertexAttribDivisor(7, 1);
+    glVertexAttribDivisor(LOC_INSTANCE_KIND, 1);
 
     // --- Índices ---
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, w_ebo);

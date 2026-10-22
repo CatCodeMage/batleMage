@@ -150,7 +150,6 @@
   <ItemGroup>
     <ClCompile Include="AssetLoadData.cpp" />
     <ClCompile Include="camera.cpp" />
-    <ClCompile Include="cubo.cpp" />
     <ClCompile Include="drawObjects.cpp" />
     <ClCompile Include="Entidad.cpp" />
     <ClCompile Include="Input.cpp" />
@@ -158,17 +157,18 @@
     <ClCompile Include="MapData.cpp" />
     <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="MeshLibrary.cpp" />
+    <ClCompile Include="ModelLibrary.cpp" />
+    <ClInclude Include="ModelLibrary.h" />
     <ClCompile Include="Paths.cpp" />
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="shaders.cpp" />
-    <ClCompile Include="suelo.cpp" />
     <ClCompile Include="systemInfo.cpp" />
+    <ClCompile Include="TextureLibrary.cpp" />
     <ClCompile Include="Transform.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AssetLoadData.h" />
     <ClInclude Include="camera.h" />
-    <ClInclude Include="cubo.h" />
     <ClInclude Include="drawObjects.h" />
     <ClInclude Include="Entidad.h" />
     <ClInclude Include="global.h" />
@@ -180,8 +180,8 @@
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="shaders.h" />
-    <ClInclude Include="suelo.h" />
     <ClInclude Include="systemInfo.h" />
+    <ClInclude Include="TextureLibrary.h" />
     <ClInclude Include="Transform.h" />
   </ItemGroup>
   <ItemGroup>

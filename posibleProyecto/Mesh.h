@@ -7,6 +7,8 @@ struct InstanceData {
     float     kind;
 };
 
+constexpr int FLOATS_PER_VERTEX = 8;
+
 struct Mesh {
     GLuint w_vao = 0, w_vbo = 0, w_ebo = 0, w_instanceVbo = 0;
     GLsizei w_indexCount = 0;

@@ -1,10 +1,10 @@
 #pragma once
 #include "Transform.h"
-#include "MeshLibrary.h"      
+#include "ModelLibrary.h"
 
 struct Entidad {
-    MeshId    mesh = INVALID_MESH;
+    ModelId   model = INVALID_MODEL;
     Transform transform;
-    glm::vec4 color = glm::vec4(1.0f);
-    int       kind = 0;                // 0 = liso, 1 = tablero
+    glm::vec4 color = glm::vec4(1.0f);   // tinte: se multiplica por el color de cada parte
+    int       kind = 0;                  // 0 = liso, 1 = tablero
 };

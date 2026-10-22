@@ -8,6 +8,8 @@
 #define TINYOBJLOADER_IMPLEMENTATION
 #include <tiny_obj_loader.h>
 
+constexpr int NO_MATERIAL = -1;
+
 // Constantes y definiciones para calcular las normales cuando no estan en .obj
 constexpr int       CORNERS_PER_TRIANGLE = 3;
 constexpr float     MIN_CROSS_LENGTH = 1e-12f;              // por debajo, el triangulo no tiene area
@@ -18,16 +20,25 @@ using TriangleCorners = std::array<tinyobj::index_t, CORNERS_PER_TRIANGLE>;
 // Constantes y definiciones necesarias para leer todos los .obj
 using json = nlohmann::json;
 
-constexpr int      FLOATS_PER_VERTEX = 6;     // posicion 3 + normal 3
 constexpr int      MISSING_INDEX = -1;    // asi marca tinyobj un vt o vn que falta
 constexpr int      BITS_PER_INDEX = 21;    // la clave del dedup guarda 3 indices en 64 bits
 constexpr uint64_t MAX_INDEX_IN_KEY = (1ull << BITS_PER_INDEX) - 1;
 
 using VertexByCornerKey = std::unordered_map<uint64_t, unsigned>;
 
+const glm::vec2 MISSING_UV = glm::vec2(0.0f);   // sin vt: la textura blanca da igual donde se muestree
+
+// La v del OBJ crece hacia arriba y las filas de una imagen hacia abajo: se invierte aqui, una sola vez
+static glm::vec2 readTexCoord(const std::vector<tinyobj::real_t>& texcoords, int index) {
+    if (index == MISSING_INDEX) return MISSING_UV;
+    return glm::vec2(texcoords[2 * index + 0], 1.0f - texcoords[2 * index + 1]);
+}
+
 static std::runtime_error objError(const std::filesystem::path& file, const std::string& reason) {
     return std::runtime_error(file.string() + ": " + reason);
 }
+
+
 
 static glm::vec3 readVec3(const std::vector<tinyobj::real_t>& floats, int index) {
     return glm::vec3(floats[3 * index + 0], floats[3 * index + 1], floats[3 * index + 2]);
@@ -103,48 +114,115 @@ static uint64_t makeCornerKey(const tinyobj::index_t& corner) {
     return (position << (2 * BITS_PER_INDEX)) | (texCoord << BITS_PER_INDEX) | normal;
 }
 
-static unsigned findOrAddVertex(const tinyobj::index_t& corner, const std::vector<tinyobj::real_t>& positions,
+static unsigned findOrAddVertex(const tinyobj::index_t& corner, const tinyobj::attrib_t& attrib,
     const std::vector<tinyobj::real_t>& normals, std::vector<float>& verts, VertexByCornerKey& vertexByCornerKey) {
     const uint64_t key = makeCornerKey(corner);
     VertexByCornerKey::const_iterator alreadyCreated = vertexByCornerKey.find(key);
     if (alreadyCreated != vertexByCornerKey.end()) return alreadyCreated->second;
 
     const unsigned  newVertex = (unsigned)(verts.size() / FLOATS_PER_VERTEX);
-    const glm::vec3 position = readVec3(positions, corner.vertex_index);
+    const glm::vec3 position = readVec3(attrib.vertices, corner.vertex_index);
     const glm::vec3 normal = readVec3(normals, corner.normal_index);
-    verts.insert(verts.end(), { position.x, position.y, position.z, normal.x, normal.y, normal.z });
+    const glm::vec2 uv = readTexCoord(attrib.texcoords, corner.texcoord_index);
+    verts.insert(verts.end(), { position.x, position.y, position.z, normal.x, normal.y, normal.z, uv.x, uv.y });
     vertexByCornerKey.emplace(key, newVertex);
     return newVertex;
 }
 
-void loadObj(const std::filesystem::path& file, std::vector<float>& verts, std::vector<unsigned>& idx) {
+struct PieceBuilder {
+    ObjPiece          piece;
+    VertexByCornerKey vertexByCornerKey;   
+};
+
+using PieceBuilderByMaterial = std::map<int, PieceBuilder>;
+
+static TriangleCorners readTriangle(const std::vector<tinyobj::index_t>& corners, size_t triangleIndex) {
+    const size_t first = triangleIndex * CORNERS_PER_TRIANGLE;
+    return { corners[first], corners[first + 1], corners[first + 2] };
+}
+
+static void addTriangle(TriangleCorners triangle, const tinyobj::attrib_t& attrib,
+    std::vector<tinyobj::real_t>& normals, PieceBuilder& builder, const std::filesystem::path& file) {
+    for (const tinyobj::index_t& corner : triangle) checkCornerIsInRange(corner, attrib, file);
+
+    if (!triangleHasAllNormals(triangle)) assignFlatNormal(triangle, attrib.vertices, normals);
+
+    for (const tinyobj::index_t& corner : triangle)
+        builder.piece.idx.push_back(findOrAddVertex(corner, attrib, normals,
+            builder.piece.verts, builder.vertexByCornerKey));
+}
+
+static void splitShapeByMaterial(const tinyobj::shape_t& shape, const tinyobj::attrib_t& attrib,
+    std::vector<tinyobj::real_t>& normals, const std::filesystem::path& file, std::vector<ObjPiece>& pieces) {
+    PieceBuilderByMaterial builderByMaterial;
+    const size_t triangleCount = shape.mesh.indices.size() / CORNERS_PER_TRIANGLE;
+    for (size_t triangleIndex = 0; triangleIndex < triangleCount; ++triangleIndex) {
+        const int materialId = shape.mesh.material_ids[triangleIndex];
+        addTriangle(readTriangle(shape.mesh.indices, triangleIndex), attrib, normals,
+            builderByMaterial[materialId], file);
+    }
+
+    for (std::pair<const int, PieceBuilder>& entry : builderByMaterial) {
+        entry.second.piece.shapeName = shape.name;
+        entry.second.piece.materialId = entry.first;
+        pieces.push_back(std::move(entry.second.piece));
+    }
+}
+
+// Las rutas del .mtl son relativas a su carpeta, que es la del .obj (mtl_search_path vacio).
+// Si Blender escribio una ruta absoluta, el operador / se queda con ella tal cual.
+static ObjMaterial describeMaterial(int materialId, const std::vector<tinyobj::material_t>& materials,
+    const std::filesystem::path& objFolder) {
+    const bool hasMaterial = materialId != NO_MATERIAL;
+    if (!hasMaterial) return ObjMaterial();
+
+    const tinyobj::material_t& source = materials[materialId];
+    ObjMaterial material;
+    material.name = source.name;
+    material.color = glm::vec4(source.diffuse[0], source.diffuse[1], source.diffuse[2], 1.0f);
+
+    const bool hasAlbedoTexture = !source.diffuse_texname.empty();
+    if (hasAlbedoTexture) material.albedoTexture = objFolder / source.diffuse_texname;
+    return material;
+}
+
+std::vector<ObjPiece> loadObj(const std::filesystem::path& file) {
     tinyobj::ObjReader reader;
     parseObjFile(file, reader);
     const tinyobj::attrib_t& attrib = reader.GetAttrib();
     std::vector<tinyobj::real_t> normals = attrib.normals;   // copia: aqui se anaden las normales planas
 
-    verts.clear();
-    idx.clear();
-    VertexByCornerKey vertexByCornerKey;
+    std::vector<ObjPiece> pieces;
+    for (const tinyobj::shape_t& shape : reader.GetShapes())
+        splitShapeByMaterial(shape, attrib, normals, file, pieces);
 
-    // L1: todos los shapes van a un solo mesh; en L3 cada (shape, material) sera una pieza
-    for (const tinyobj::shape_t& shape : reader.GetShapes()) {
-        const std::vector<tinyobj::index_t>& corners = shape.mesh.indices;   // triangulate = true: de 3 en 3
-        for (size_t first = 0; first < corners.size(); first += CORNERS_PER_TRIANGLE) {
-            TriangleCorners triangle = { corners[first], corners[first + 1], corners[first + 2] };
-            for (const tinyobj::index_t& corner : triangle) checkCornerIsInRange(corner, attrib, file);
+    if (pieces.empty()) throw objError(file, "no tiene caras");
 
-            if (!triangleHasAllNormals(triangle)) assignFlatNormal(triangle, attrib.vertices, normals);
+    for (ObjPiece& piece : pieces)
+        piece.material = describeMaterial(piece.materialId, reader.GetMaterials(), file.parent_path());
 
-            for (const tinyobj::index_t& corner : triangle)
-                idx.push_back(findOrAddVertex(corner, attrib.vertices, normals, verts, vertexByCornerKey));
-        }
-    }
-
-    if (idx.empty()) throw objError(file, "no tiene caras");
+    return pieces;
 }
 
-int loadAssetManifest(const std::filesystem::path& manifest, MeshLibrary& lib) {
+static GLuint loadAlbedoTexture(const ObjMaterial& material, TextureLibrary& textures) {
+    const bool hasAlbedoTexture = !material.albedoTexture.empty();
+    return hasAlbedoTexture ? textures.load(material.albedoTexture) : textures.white();
+}
+
+static Model registerPieces(const std::string& assetName, const std::vector<ObjPiece>& pieces, MeshLibrary& meshes, TextureLibrary& textures) {
+    Model model;
+    for (size_t pieceIndex = 0; pieceIndex < pieces.size(); ++pieceIndex) {
+        const ObjPiece& piece = pieces[pieceIndex];
+        const std::string meshName = assetName + "#" + std::to_string(pieceIndex);
+        const MeshId mesh = meshes.add(meshName, piece.verts, piece.idx);
+        model.parts.push_back({ mesh, piece.material.color, loadAlbedoTexture(piece.material, textures) });
+    }
+    return model;
+}
+
+int loadAssetManifest(const std::filesystem::path& manifest, MeshLibrary& meshes, ModelLibrary& models,
+    TextureLibrary& textures) {
+
     std::ifstream in(manifest);
     if (!in) throw std::runtime_error("no se puede abrir " + std::filesystem::absolute(manifest).string());
 
@@ -153,15 +231,11 @@ int loadAssetManifest(const std::filesystem::path& manifest, MeshLibrary& lib) {
     for (json::const_iterator it = root.begin(); it != root.end(); ++it) {
         const std::string& name = it.key();
         try {
-            if (lib.has(name)) throw std::runtime_error("nombre repetido");
+            if (models.has(name)) throw std::runtime_error("nombre repetido");
             std::string path = it.value().at("path").get<std::string>();
 
-            std::vector<float> verts;
-            std::vector<unsigned> idx;
-            loadObj(dataPath(path), verts, idx);
-            std::cout << "[L1] " << name << ": " << verts.size() / FLOATS_PER_VERTEX
-                << " vertices / " << idx.size() << " indices\n";   // TEMPORAL
-            lib.add(name, verts, idx);
+            const std::vector<ObjPiece> pieces = loadObj(dataPath(path));
+            models.add(name, registerPieces(name, pieces, meshes, textures));
             ++cargados;
         }
         catch (const std::exception& ex) {
@@ -171,3 +245,6 @@ int loadAssetManifest(const std::filesystem::path& manifest, MeshLibrary& lib) {
     return cargados;
 }
 
+ObjPiece::ObjPiece() {
+    this->materialId = NO_MATERIAL;
+}
