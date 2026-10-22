@@ -29,7 +29,7 @@ struct DatosRenderPersonaje
     std::vector<EstadoPersonaje> m_estadosActuales;
 };
 
-class Personaje //personaje es bolita pasar datos de cuanto mide y tal
+class Personaje
 {
 private:
     std::string m_tipoPersonaje;
