@@ -1,0 +1,10 @@
+{
+    "players": {
+        "scale": [2, 2, 2],
+        "asset": "spirit"
+    },
+    "spell": {
+        "scale": [2, 2, 2],
+        "asset": "spirit"
+    }
+}

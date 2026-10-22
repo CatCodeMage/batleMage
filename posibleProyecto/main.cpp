@@ -14,6 +14,7 @@
 #include "AssetLoadData.h"
 #include "MapData.h"
 #include "webPage.h"
+#include "jsonManager.h"
 
 int shouldContinue(GLFWwindow* window) {
     return glfwWindowShouldClose(window) == 0;
@@ -90,6 +91,8 @@ void buclePrincipaLTiempoReal(GLFWwindow* window, SystemInfo& sysInfo) {
     Input keysInput;
 
     keysInput.init(window);
+
+    std::vector<std::vector <Entidad>> combat = generateCombat();
 
     while (shouldContinue(window)) {
         clearLastFrame();
@@ -190,7 +193,7 @@ void testObjLoader() {
 
 int main()
 {
-    sendForm();
+    // sendForm();
 
     GLFWwindow* window = createWindow();
 
