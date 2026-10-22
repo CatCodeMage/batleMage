@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="18.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CustomBuild Include="D:\Documents\UAB 3r\VGI\Projecte\battleMage\build\CMakeFiles\2d2ec5b0ed5e9c3b4534670df91089c4\INSTALL_force.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="CMake Rules">
+      <UniqueIdentifier>{4EEDFFBA-0939-3237-B936-FB2B15041605}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

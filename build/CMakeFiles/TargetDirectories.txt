@@ -1,0 +1,8 @@
+D:/Documents/UAB 3r/VGI/Projecte/battleMage/build/CMakeFiles/uninstall.dir
+D:/Documents/UAB 3r/VGI/Projecte/battleMage/build/CMakeFiles/PACKAGE.dir
+D:/Documents/UAB 3r/VGI/Projecte/battleMage/build/CMakeFiles/INSTALL.dir
+D:/Documents/UAB 3r/VGI/Projecte/battleMage/build/CMakeFiles/ALL_BUILD.dir
+D:/Documents/UAB 3r/VGI/Projecte/battleMage/build/CMakeFiles/ZERO_CHECK.dir
+D:/Documents/UAB 3r/VGI/Projecte/battleMage/build/glm/CMakeFiles/glm.dir
+D:/Documents/UAB 3r/VGI/Projecte/battleMage/build/glm/CMakeFiles/PACKAGE.dir
+D:/Documents/UAB 3r/VGI/Projecte/battleMage/build/glm/CMakeFiles/INSTALL.dir

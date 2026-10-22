@@ -1,0 +1,110 @@
+{
+	"backtraceGraph" : 
+	{
+		"commands" : 
+		[
+			"install"
+		],
+		"files" : 
+		[
+			"CMakeLists.txt"
+		],
+		"nodes" : 
+		[
+			{
+				"file" : 0
+			},
+			{
+				"command" : 0,
+				"file" : 0,
+				"line" : 233,
+				"parent" : 0
+			},
+			{
+				"command" : 0,
+				"file" : 0,
+				"line" : 234,
+				"parent" : 0
+			},
+			{
+				"command" : 0,
+				"file" : 0,
+				"line" : 239,
+				"parent" : 0
+			},
+			{
+				"command" : 0,
+				"file" : 0,
+				"line" : 250,
+				"parent" : 0
+			}
+		]
+	},
+	"codemodelVersion" : 
+	{
+		"major" : 2,
+		"minor" : 10
+	},
+	"installers" : 
+	[
+		{
+			"backtrace" : 1,
+			"component" : "Unspecified",
+			"destination" : "lib",
+			"paths" : 
+			[
+				"glm/RelWithDebInfo/glm.lib"
+			],
+			"targetId" : "glm::@fa0cdaa9020ff8f602ac",
+			"targetIndex" : 2,
+			"type" : "target"
+		},
+		{
+			"backtrace" : 2,
+			"component" : "Unspecified",
+			"destination" : "include",
+			"paths" : 
+			[
+				"glm"
+			],
+			"type" : "directory"
+		},
+		{
+			"backtrace" : 3,
+			"component" : "Unspecified",
+			"destination" : "share/glm",
+			"exportName" : "glm",
+			"exportTargets" : 
+			[
+				{
+					"id" : "glm-header-only::@fa0cdaa9020ff8f602ac",
+					"index" : 0
+				},
+				{
+					"id" : "glm::@fa0cdaa9020ff8f602ac",
+					"index" : 2
+				}
+			],
+			"paths" : 
+			[
+				"CMakeFiles/Export/b5cfde51c75c86f20e779cf9e61c2ee3/glmConfig.cmake"
+			],
+			"type" : "export"
+		},
+		{
+			"backtrace" : 4,
+			"component" : "Unspecified",
+			"destination" : "share/glm",
+			"paths" : 
+			[
+				"D:/Documents/UAB 3r/VGI/Projecte/battleMage/build/glmConfigVersion.cmake"
+			],
+			"type" : "file"
+		}
+	],
+	"paths" : 
+	{
+		"build" : ".",
+		"source" : "."
+	}
+}

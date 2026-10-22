@@ -1,0 +1,8 @@
+{
+	"InstallScripts" : 
+	[
+		"D:/Documents/UAB 3r/VGI/Projecte/battleMage/build/cmake_install.cmake",
+		"D:/Documents/UAB 3r/VGI/Projecte/battleMage/build/glm/cmake_install.cmake"
+	],
+	"Parallel" : false
+}
