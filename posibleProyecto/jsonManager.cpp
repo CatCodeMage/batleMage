@@ -133,13 +133,15 @@ std::vector<std::vector <Entidad>> generateCombat(const ModelLibrary& modelLib) 
 		json simulationData;
 
 		std::vector<std::vector <Entidad>> combatSequence;
-		std::vector<Entidad> entities;
 
 		simulationFile >> simulationData;
 
 		json jsonCombat = simulationData["frames"];
 
 		for (auto& frame : jsonCombat) {
+
+			std::vector<Entidad> entities;
+			
 			for (auto& entity : frame)
 			{
 				EntityInfo eInfo = getEntityInfo(entity[2]);

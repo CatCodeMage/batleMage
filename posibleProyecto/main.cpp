@@ -140,6 +140,7 @@ void buclePrincipaLTiempoReal(GLFWwindow* window, SystemInfo& sysInfo) {
         if (frame >= combat.size()) {
             frame = 0;
         }
+
         clearLastFrame();
 
         // System
@@ -151,7 +152,7 @@ void buclePrincipaLTiempoReal(GLFWwindow* window, SystemInfo& sysInfo) {
 
         glm::mat4 vp = viewCamera.get_proj() * viewCamera.get_view();
          
-        submitEntidades(renderer, libModel, map.entities);
+        // submitEntidades(renderer, libModel, map.entities);
 
         submitEntidades(renderer, libModel, combat[frame]);
 
