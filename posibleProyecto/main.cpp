@@ -128,7 +128,18 @@ void buclePrincipaLTiempoReal(GLFWwindow* window, SystemInfo& sysInfo) {
 
     std::vector<std::vector <Entidad>> combat = generateCombat(libModel);
 
+    int frame = 0;
+    int lessFrames = 0;
+
     while (shouldContinue(window)) {
+        // if temporal para ver que funciona
+        if (lessFrames >= 20) {
+            frame++;
+            lessFrames = 0;
+        }
+        if (frame >= combat.size()) {
+            frame = 0;
+        }
         clearLastFrame();
 
         // System
@@ -141,6 +152,8 @@ void buclePrincipaLTiempoReal(GLFWwindow* window, SystemInfo& sysInfo) {
         glm::mat4 vp = viewCamera.get_proj() * viewCamera.get_view();
          
         submitEntidades(renderer, libModel, map.entities);
+
+        submitEntidades(renderer, libModel, combat[frame]);
 
         updateShadowInput(window, shadows, luces);
 
@@ -156,6 +169,8 @@ void buclePrincipaLTiempoReal(GLFWwindow* window, SystemInfo& sysInfo) {
         renderer.flush(libMesh, vp);
 
         updateFrame(window);
+
+        lessFrames++;
     }
 
     shadows.destroy();

@@ -17,5 +17,9 @@
   "spirit": {
     "path": "./posibleProyecto/assets/tree.obj",
     "hitbox": "sphere"
+  },
+  "ball": {
+    "path": "./posibleProyecto/assets/bush.obj",
+    "hitbox": "sphere"
   }
 }
