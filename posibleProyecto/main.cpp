@@ -20,17 +20,14 @@ int shouldContinue(GLFWwindow* window) {
     return glfwWindowShouldClose(window) == 0;
 }
 
-void clearLastFrame() {
-    glClearColor(0.1f, 0.2f, 0.4f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-}
-
 void updateFrame(GLFWwindow* window) {
     glfwSwapBuffers(window);
     glfwPollEvents();
 } 
 
-// Comprueba las teclas que controlan las sombras
+// Comprueba las teclas que controlan las sombras, es un ejemplo, lo dejamos por si en algun momento lo 
+// usamos de base
+/*
 void updateShadowInput(GLFWwindow* window, ShadowSystem& shadows, std::vector<SceneLight>& luces) {
     static bool f5PreviouslyPressed = false;
     static bool f6PreviouslyPressed = false;
@@ -52,7 +49,7 @@ void updateShadowInput(GLFWwindow* window, ShadowSystem& shadows, std::vector<Sc
     f5PreviouslyPressed = f5Pressed;
     f6PreviouslyPressed = f6Pressed;
     f7PreviouslyPressed = f7Pressed;
-}
+}*/
  
 std::vector<SceneLight> setLights() {
     std::vector<SceneLight> lights = {
@@ -94,36 +91,11 @@ void buclePrincipaLTiempoReal(GLFWwindow* window, SystemInfo& sysInfo) {
             simData.framesInfo.frame = 0;
         }
 
-        clearLastFrame();
-
-        // System
-        sysInfo.getCurrentState(window);
-        float time = sysInfo.getTimeStored();
-
-        // Camara
-        simData.viewCamera.update(simData.keysInput, sysInfo);
-
-        glm::mat4 vp = simData.viewCamera.get_proj() * simData.viewCamera.get_view();
-         
-        submitEntidades(simData.renderer, simData.libModel, simData.map.entities);
-
-        submitEntidades(simData.renderer, simData.libModel, simData.framesInfo.combat[simData.framesInfo.frame]);
-
-        simData.renderer.submitLights(simData.lights, time);
-
-        updateShadowInput(window, simData.shadows, simData.lights);
-
-        //renderizar sombras
-        simData.shadows.render(simData.lights, [&]() { simData.renderer.drawShadowGeometry(simData.libMesh);});
-        simData.shadows.bindForLighting(simData.program);
-
-        // Pintar
-        simData.renderer.flush(simData.libMesh, vp);
-
-        updateFrame(window);
-
+        simData.procesMainBodyLoopRealTime(window, sysInfo);
+        
         simData.framesInfo.lessFrames++;
     }
+
     simData.destroy();
 }
 

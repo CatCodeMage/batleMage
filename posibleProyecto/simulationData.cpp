@@ -29,3 +29,41 @@ void simulationData::destroy() {
 	libMesh.destroy();
 	textures.destroy();
 }
+
+void simulationData::clearLastFrame() {
+	glClearColor(0.1f, 0.2f, 0.4f, 1.0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+}
+
+void simulationData::updateFrame(GLFWwindow* window) {
+	glfwSwapBuffers(window);
+	glfwPollEvents();
+}
+
+void simulationData::procesMainBodyLoopRealTime(GLFWwindow* window, SystemInfo& sysInfo) {
+	clearLastFrame();
+
+	// System
+	sysInfo.getCurrentState(window);
+	float time = sysInfo.getTimeStored();
+
+	// Camara
+	viewCamera.update(keysInput, sysInfo);
+
+	glm::mat4 vp = viewCamera.get_proj() * viewCamera.get_view();
+
+	submitEntidades(renderer, libModel, map.entities);
+
+	submitEntidades(renderer, libModel, framesInfo.combat[framesInfo.frame]);
+
+	renderer.submitLights(lights, time);
+
+	//renderizar sombras
+	shadows.render(lights, [&]() { renderer.drawShadowGeometry(libMesh);});
+	shadows.bindForLighting(program);
+
+	// Pintar
+	renderer.flush(libMesh, vp);
+
+	updateFrame(window);
+}

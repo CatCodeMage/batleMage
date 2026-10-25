@@ -30,6 +30,13 @@ struct simulationData
     void init(GLFWwindow* window);
 
     void changeLights(std::vector<SceneLight>& newLights);
+
+    void clearLastFrame(); 
+    
+    void updateFrame(GLFWwindow* window);
+
+    void procesMainBodyLoopRealTime(GLFWwindow* window, SystemInfo& sysInfo);
+
     void destroy();
     
     // Data
