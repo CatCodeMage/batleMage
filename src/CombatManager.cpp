@@ -1,18 +1,18 @@
 #include "CombatManager.h"
 
-Damage CombatManager::crearDamage(const SpellData& hechizo)
+Damage CombatManager::crearDamage(const SpellDefinitionComponent& hechizo)
 {
     switch (hechizo.element)
     {
     case ElementType::Physical:
         return Damage(
-            hechizo.baseDamage * 1.25f,
+            hechizo.damage * 1.25f,
             ElementType::Physical
         );
 
     case ElementType::Fire:
         return Damage(
-            hechizo.baseDamage,
+            hechizo.damage,
             ElementType::Fire,
             EffectType::Burn,
             5.0f,
@@ -21,7 +21,7 @@ Damage CombatManager::crearDamage(const SpellData& hechizo)
 
     case ElementType::ICE:
         return Damage(
-            hechizo.baseDamage,
+            hechizo.damage,
             ElementType::ICE,
             EffectType::Slow,
             0.30f,
@@ -30,7 +30,7 @@ Damage CombatManager::crearDamage(const SpellData& hechizo)
     }
 
     return Damage(
-        hechizo.baseDamage,
+        hechizo.damage,
         ElementType::Physical
     );
 }
@@ -38,7 +38,7 @@ Damage CombatManager::crearDamage(const SpellData& hechizo)
 bool CombatManager::procesarImpacto(
     const SphereCollider& hechizoCollider,
     const CylinderCollider& personajeCollider,
-    const SpellData& hechizo,
+    const SpellDefinitionComponent& hechizo,
     Personaje& personaje)
 {
     if (!m_collisionManager.checkCollision(
@@ -50,7 +50,7 @@ bool CombatManager::procesarImpacto(
 
     Damage damage = crearDamage(hechizo);
 
-    personaje.recibirDaño(
+    personaje.recibirDano(
         damage.getAmount()
     );
 

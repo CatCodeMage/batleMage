@@ -4,17 +4,8 @@
 #include <vector>
 #include <cmath>
 #include <memory>
-#include "global.h"
-// estructura 3D
-// nueva estructura
-
-//fisico fuego y hielo
-// 1. Definimos el enum tipado para los elementos
-enum class ElementType {
-    Physical,
-    Fire,
-    Ice
-};
+#include "global.h" 
+#include "CombatTypes.h"
 
 enum class CastType { Projectile, AreaOfEffect, Cone, Raycast, Self };
 enum class MovementPattern { Linear, Homing, Parabolic, Orbiting, Static };

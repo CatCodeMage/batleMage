@@ -1,11 +1,13 @@
 {
     "cilinder": {
-
+        "radius": 0.5,
+        "halfHeight": 0.5
     },
     "cube": {
-
+        "halfSize": [0.5, 0.5, 0.5]
     },
     "sphere": {
-        
-    }
+        "radius": 0.5
+    },
+    "spellSpawnMargin": 0.1
 }

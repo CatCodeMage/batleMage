@@ -11,12 +11,12 @@ private:
     CollisionManager m_collisionManager;
 
 public:
-    Damage crearDamage(const SpellData& hechizo);
+    Damage crearDamage(const SpellDefinitionComponent& hechizo);
 
     bool procesarImpacto(
         const SphereCollider& hechizoCollider,
         const CylinderCollider& personajeCollider,
-        const SpellData& hechizo,
+        const SpellDefinitionComponent& hechizo,
         Personaje& personaje
     );
 };

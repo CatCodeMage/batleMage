@@ -5,6 +5,10 @@
 #include <memory>
 #include <vector>
 #include "hechizoDatos.h"
+#include <glm/glm.hpp>
+
+// Personaje y la IA solo usan x, y, z y el constructor (x, y, z): glm::vec3 encaja tal cual
+using Vector3 = glm::vec3;
 
 enum class EstadoPersonaje {
     IDLE,      //en la esfera esta siempre en idle

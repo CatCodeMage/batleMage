@@ -15,6 +15,7 @@
 #include "webPage.h"
 #include "jsonManager.h"
 #include "simulationData.h"
+#include "CombatSimulation.h"
 
 int shouldContinue(GLFWwindow* window) {
     return glfwWindowShouldClose(window) == 0;
@@ -78,6 +79,8 @@ std::vector<SceneLight> setLights() {
 void buclePrincipaLTiempoReal(GLFWwindow* window, SystemInfo& sysInfo) {
     simulationData simData;
     simData.init(window);
+
+    // Parte temporar, cuando leamos el JSON de luces deberia hacerse en el init de simData
     std::vector<SceneLight> data = setLights();
     simData.changeLights(data);
 
@@ -200,7 +203,19 @@ int createSimulation() {
 
 int main()
 {
+    // TEMPORAL (S4): combate completo sin graficos, un informe por segundo
+    CombatSimulation simulation;
+    simulation.setup(dataPath("db/combat.json"));
+    simulation.printState();
+    while (!simulation.isFinished()) {
+        simulation.step();
+        const bool isWholeSecond = simulation.getTick() % CombatSimulation::TICKS_PER_SECOND == 0;
+        if (isWholeSecond) simulation.printState();
+    }
+    simulation.printResult();
     //sendForm();
 
-    return createSimulation();
+    //return createSimulation();
+
+    return 0;
 }

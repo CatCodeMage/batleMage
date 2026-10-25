@@ -65,6 +65,10 @@ void HechizosGestor::destroySpell(Hechizo* spell) {
     }
 }
 
+const std::unordered_map<int, hechizosTemplate>& HechizosGestor::getCatalogoHechizos() const {
+    return hechizhosCatalog;
+}
+
 const std::vector<std::unique_ptr<Hechizo>>& HechizosGestor::getActiveHechizos() const {
     return spellPool;
 }

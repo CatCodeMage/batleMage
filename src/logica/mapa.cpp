@@ -5,7 +5,7 @@
 #include <stdexcept>
 
 Map::Map(tipoMapa tipo, glm::vec3 dimensiones, skybox cielo,
-         llumAmbient luz, float alturaSuelo)
+         LlumAmbient luz, float alturaSuelo)
     : m_tipo(tipo),
       m_dimensiones(dimensiones),
       m_alturaSuelo(alturaSuelo),
@@ -43,7 +43,7 @@ skybox Map::getSkyBox() const
     return m_skybox;
 }
 
-llumAmbient Map::getLuzAmbiental() const
+LlumAmbient Map::getLuzAmbiental() const
 {
     return m_llumAmbient;
 }

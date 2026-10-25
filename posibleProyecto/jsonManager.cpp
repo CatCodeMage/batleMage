@@ -1,4 +1,3 @@
-#pragma once
 #include "jsonManager.h"
 
 
@@ -11,12 +10,14 @@ const std::string ENTITIES_PATH = "../db/entities.json";
 
 ElementType parseElement(std::string element) {
 	if (element == "fire")      return ElementType::Fire;
-	if (element == "ice")       return ElementType::Ice;
+	if (element == "ice")       return ElementType::ICE;
 	if (element == "physical") return ElementType::Physical;
 	return ElementType::Fire;
 }
 
 void readSpells(HechizosGestor& spellManager) {
+	constexpr float DEFAULT_SPELL_COST = 10.0f;
+
 	std::ifstream spells(SPELLS_PATH);
 
 	if (spells.is_open())
@@ -39,7 +40,7 @@ void readSpells(HechizosGestor& spellManager) {
 				id,
 				name,
 				elem,
-				spell["cost"].get<float>(),
+				spell.value<float>("cost", DEFAULT_SPELL_COST),
 				spell["damage"].get<float>(),
 				spell["cooldown"].get<float>(),
 				spell["speed"].get<float>(),
