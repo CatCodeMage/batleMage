@@ -14,28 +14,10 @@
 #include "MapData.h"
 #include "webPage.h"
 #include "jsonManager.h"
+#include "simulationData.h"
 
 int shouldContinue(GLFWwindow* window) {
     return glfwWindowShouldClose(window) == 0;
-}
-
-GLuint setShaders() { // Set shaders
-    GLuint vs = compileShader(GL_VERTEX_SHADER, vertexSrc);
-    GLuint fs = compileShader(GL_FRAGMENT_SHADER, fragmentSrc);
-
-    GLuint program = glCreateProgram();
-    glAttachShader(program, vs);
-    glAttachShader(program, fs);
-    glLinkProgram(program);
-
-    glDeleteShader(vs);
-    glDeleteShader(fs);
-
-    glEnable(GL_DEPTH_TEST); // Z-Buffer
-
-    glUseProgram(program);
-
-    return program;
 }
 
 void clearLastFrame() {
@@ -71,21 +53,9 @@ void updateShadowInput(GLFWwindow* window, ShadowSystem& shadows, std::vector<Sc
     f6PreviouslyPressed = f6Pressed;
     f7PreviouslyPressed = f7Pressed;
 }
-
-void buclePrincipaLTiempoReal(GLFWwindow* window, SystemInfo& sysInfo) {
-    // Entidades
-    MeshLibrary libMesh;
-    ModelLibrary libModel; 
-    TextureLibrary textures;
-
-    textures.init();
-    loadAssetManifest(dataPath("db/assets.json"), libMesh, libModel, textures);
-
-    MapData map;
-    map.load(dataPath("db/map.json"), libModel); 
-    // Luces
-    
-    std::vector<SceneLight> luces = {
+ 
+std::vector<SceneLight> setLights() {
+    std::vector<SceneLight> lights = {
         {
             {
                 glm::vec3(0.0f),
@@ -105,40 +75,23 @@ void buclePrincipaLTiempoReal(GLFWwindow* window, SystemInfo& sysInfo) {
             false // Luz fija: no proyecta sombras
         }
     };
+    return lights;
+}
 
-
-    // Camara y pantalla
-    Camera viewCamera;
-
-    GLuint program = setShaders();
-    Renderer renderer;
-    renderer.init(program);
-
-    // Sistema de sombras.
-    ShadowSystem shadows;
-
-    if (!shadows.initialize()) {
-        std::cerr << "No se pudo inicializar ShadowSystem. " << "La escena continuara sin sombras.\n";
-    }
-
-    // Input
-    Input keysInput;
-
-    keysInput.init(window);
-
-    std::vector<std::vector <Entidad>> combat = generateCombat(libModel);
-
-    int frame = 0;
-    int lessFrames = 0;
+void buclePrincipaLTiempoReal(GLFWwindow* window, SystemInfo& sysInfo) {
+    simulationData simData;
+    simData.init(window);
+    std::vector<SceneLight> data = setLights();
+    simData.changeLights(data);
 
     while (shouldContinue(window)) {
         // if temporal para ver que funciona
-        if (lessFrames >= 20) {
-            frame++;
-            lessFrames = 0;
+        if (simData.framesInfo.lessFrames >= 20) {
+            simData.framesInfo.frame++;
+            simData.framesInfo.lessFrames = 0;
         }
-        if (frame >= combat.size()) {
-            frame = 0;
+        if (simData.framesInfo.frame >= simData.framesInfo.combat.size()) {
+            simData.framesInfo.frame = 0;
         }
 
         clearLastFrame();
@@ -148,35 +101,32 @@ void buclePrincipaLTiempoReal(GLFWwindow* window, SystemInfo& sysInfo) {
         float time = sysInfo.getTimeStored();
 
         // Camara
-        viewCamera.update(keysInput, sysInfo);
+        simData.viewCamera.update(simData.keysInput, sysInfo);
 
-        glm::mat4 vp = viewCamera.get_proj() * viewCamera.get_view();
+        glm::mat4 vp = simData.viewCamera.get_proj() * simData.viewCamera.get_view();
          
-        submitEntidades(renderer, libModel, map.entities);
+        submitEntidades(simData.renderer, simData.libModel, simData.map.entities);
 
-        submitEntidades(renderer, libModel, combat[frame]);
+        submitEntidades(simData.renderer, simData.libModel, simData.framesInfo.combat[simData.framesInfo.frame]);
 
-        updateShadowInput(window, shadows, luces);
+        updateShadowInput(window, simData.shadows, simData.lights);
 
         // Light
-        luces[0].light.pos = glm::vec3(3.0f * cos(time), 3.0f, 3.0f * sin(time));    // UPDATE
-        for (const SceneLight& l : luces) renderer.submitLight(l.light);
+        simData.lights[0].light.pos = glm::vec3(3.0f * cos(time), 3.0f, 3.0f * sin(time));    // UPDATE
+        for (const SceneLight& l : simData.lights) simData.renderer.submitLight(l.light);
 
         //renderizar sombras
-        shadows.render(luces, [&]() { renderer.drawShadowGeometry(libMesh);});
-        shadows.bindForLighting(program);
+        simData.shadows.render(simData.lights, [&]() { simData.renderer.drawShadowGeometry(simData.libMesh);});
+        simData.shadows.bindForLighting(simData.program);
 
         // Pintar
-        renderer.flush(libMesh, vp);
+        simData.renderer.flush(simData.libMesh, vp);
 
         updateFrame(window);
 
-        lessFrames++;
+        simData.framesInfo.lessFrames++;
     }
-
-    shadows.destroy();
-    libMesh.destroy();
-    textures.destroy();
+    simData.destroy();
 }
 
 int guranteWindowCreated(GLFWwindow* window) {

@@ -26,10 +26,6 @@ public:
     ShadowSystem(const ShadowSystem&) = delete;
     ShadowSystem& operator=(const ShadowSystem&) = delete;
 
-    // Crear el programa de profundidad.
-    // Llamar despues de inicializar OpenGL.
-    bool initialize();
-
     // Activar o desactivar todas las sombras.
     void setEnabled(bool enabled);
 
@@ -55,7 +51,13 @@ public:
         return m_activeCount;
     }
 
+    void procesInit();
+
 private:
+    // Crear el programa de profundidad.
+    // Llamar despues de inicializar OpenGL.
+    bool initialize();
+
     // Programa OpenGL utilizado para dibujar profundidades.
     GLuint m_depthProgram = 0;
 

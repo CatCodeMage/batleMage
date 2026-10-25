@@ -131,3 +131,21 @@ GLuint compileShader(GLenum type, const char* src)
     return shader;
 }
 
+GLuint setShaders() { // Set shaders
+    GLuint vs = compileShader(GL_VERTEX_SHADER, vertexSrc);
+    GLuint fs = compileShader(GL_FRAGMENT_SHADER, fragmentSrc);
+
+    GLuint program = glCreateProgram();
+    glAttachShader(program, vs);
+    glAttachShader(program, fs);
+    glLinkProgram(program);
+
+    glDeleteShader(vs);
+    glDeleteShader(fs);
+
+    glEnable(GL_DEPTH_TEST); // Z-Buffer
+
+    glUseProgram(program);
+
+    return program;
+}

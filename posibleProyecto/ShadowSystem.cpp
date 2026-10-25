@@ -497,6 +497,11 @@ void ShadowSystem::bindForLighting(GLuint lightingProgram) const
 // Destruir recursos
 // ---------------------------------------------------------
 
+void ShadowSystem::procesInit() {
+    bool resultInit = this->initialize();
+    if (!resultInit) throw std::runtime_error("no se pueden generar las sombras");
+}
+
 void ShadowSystem::destroy()
 {
     clearFrameAssignments();

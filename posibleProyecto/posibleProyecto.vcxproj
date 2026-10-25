@@ -165,6 +165,7 @@
     <ClCompile Include="Paths.cpp" />
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="shaders.cpp" />
+    <ClCompile Include="simulationData.cpp" />
     <ClCompile Include="systemInfo.cpp" />
     <ClCompile Include="TextureLibrary.cpp" />
     <ClCompile Include="Transform.cpp" />
@@ -190,6 +191,7 @@
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="shaders.h" />
+    <ClInclude Include="simulationData.h" />
     <ClInclude Include="systemInfo.h" />
     <ClInclude Include="TextureLibrary.h" />
     <ClInclude Include="Transform.h" />
