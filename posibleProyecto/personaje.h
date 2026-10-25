@@ -4,6 +4,13 @@
 #include "controladorPersonaje.h"
 #include <memory>
 #include <vector>
+#include "hechizosGestor.h"
+#include <glm/glm.hpp>
+#include "json.hpp" 
+using json = nlohmann::json;
+#include "CombatManager.h"
+
+
 
 enum class EstadoPersonaje {
     IDLE,      //en la esfera esta siempre en idle
@@ -11,60 +18,82 @@ enum class EstadoPersonaje {
     CASTEANDO, 
     MUERTO,
     QUEMADO,
-    PARALIZADO,
-    ENVENENADO
-    //se pueden meter mas
+    CONGELADO,
 };
 
 struct DatosRenderPersonaje
 {
     int idPersonaje;
-    float posX, posY, posZ;
-    float rotX, rotY, rotZ;
+    glm::vec3 m_posicion;
+    glm::vec3 m_rotacion;
+    float m_radio;
     std::vector<EstadoPersonaje> m_estadosActuales;
 };
 
 class Personaje
 {
 private:
+    std::string m_tipoPersonaje;
+    glm::vec3 m_escala;
     int m_id;
     float m_vida;
-    float m_mana; 
-    float m_capacidadMagia; //estadistica del personaje como las del noita 
-                        //(ej: veloc recarga mana, num hechizos lanzar a la vez...)
-    float m_x, m_y, m_z;
-    float m_rotX, m_rotY, m_rotZ;
+    float m_vidaMax;
+    float m_mana;
+    float m_manaMax; 
+    float m_capacidadMagia; 
+    float m_tiempoQuemado;
+    float m_tiempoCongelado;
+    float m_danoQuemadura;
+    glm::vec3 m_posicion;
+    glm::vec3 m_rotacion;
+    glm::vec3 m_direccion;
+    float m_radio;
+    float m_margenCasteo;
     std::vector<EstadoPersonaje> m_estadosActuales;
     ControladorPersonaje* m_controlador;
+    HechizosGestor* m_gestorHechizos;
 
 public:
-    Personaje(int id, float x, float y, float z);
+    Personaje(int id, glm::vec3 posicionInicial, float radio = 1.0f, HechizosGestor* gestorHechizos = nullptr);
     void update(float deltaTime);
 
-    void moverse(float deltaX, float deltaY, float deltaZ);
-    void rotar(float deltaRotX, float deltaRotY, float deltaRotZ);
-    void lanzarHechizo();
-    void recibirDaño(float cantidadDaño);
+    void moverse(const glm::vec3& desplazamiento);
+    void rotar(const glm::vec3& deltaRotacion);
+    void lanzarHechizo(int idHechizo);
+    void recibirDano(float cantidadDano);
     void aumentarVida(float cantidad);
     void disminuirMana(float cantidad);
     void aumentarMana(float cantidad);
 
-    void añadirEstado(EstadoPersonaje nuevoEstado);
+    void anadirEstado(EstadoPersonaje nuevoEstado, float duracion = 3.0f);
     void borrarEstado(EstadoPersonaje estado);
-    bool yaTieneEstado(EstadoPersonaje estado);
+    bool yaTieneEstado(EstadoPersonaje estado) const;
     std::vector<EstadoPersonaje> getEstados() const;
+    void aplicarEfecto(EffectType efecto, float valor, float duracion);
+
 
     int getId() const;
     float getVida() const;
     float getMana() const;
-    float getX() const;
-    float getY() const;
-    float getZ() const;
-    EstadoPersonaje getEstado() const;
-    void setEstado(EstadoPersonaje nuevoEstado);
+    float getRadio() const;
+    glm::vec3 getPosicion() const;
+    glm::vec3 getRotacion() const;
+    glm::vec3 getDireccion() const;
+    void setPosicion(const glm::vec3& nuevaPosicion);
+    void setRotacion(const glm::vec3& nuevaRotacion);
+    void setDireccion(const glm::vec3& nuevaDireccion);
+    void setRadio(float radio);
     void setControlador(ControladorPersonaje* nuevoControlador);
 
-    DatosRenderPersonaje obtenerDatosParaGraficar();
-};
+    void setGestorHechizos(HechizosGestor* gestor);
+    HechizosGestor* getGestorHechizos() const;
+    std::string getEstadoPrincipalString() const;
 
+    DatosRenderPersonaje obtenerDatosParaGraficar();
+
+    bool cargarDesdeJson(const std::string& rutaArchivoPlayers, const std::string& tipoPersonaje);
+
+    json exportarCabeceraJson() const; 
+    json exportarFrameJson() const;
+};
 #endif 

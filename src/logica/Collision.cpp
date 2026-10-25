@@ -43,3 +43,15 @@ bool CollisionManager::checkCollision(const BoxCollider& cub, const SphereCollid
 	return false;
 }
 
+bool CollisionManager::checkCollision(const SphereCollider& a, const SphereCollider& b) {
+    float dx = a.center.x - b.center.x;
+    float dy = a.center.y - b.center.y;
+    float dz = a.center.z - b.center.z;
+
+    float radiosum = a.radius + b.radius;
+
+    if (dx * dx + dy * dy + dz * dz <= radiosum * radiosum)
+        return true;
+
+    return false;
+}

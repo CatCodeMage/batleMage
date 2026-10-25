@@ -20,11 +20,11 @@ struct BoxCollider
 	glm::vec3 halfSize;
 };
 
-
 class CollisionManager {
 public:
 	bool checkCollision(const CylinderCollider& a, const CylinderCollider& b);
 	bool checkCollision(const SphereCollider& esfera,const CylinderCollider& cilindre);
 	bool checkCollision(const BoxCollider& cub, const SphereCollider& esfera);
+	bool checkCollision(const SphereCollider& a, const SphereCollider& b);
 	//Gestionar el daño y sus tipos a personajes
 };

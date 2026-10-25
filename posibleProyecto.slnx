@@ -3,5 +3,21 @@
     <Platform Name="x64" />
     <Platform Name="x86" />
   </Configurations>
+  <Folder Name="/Elementos de la solución/">
+    <File Path="posibleProyecto/personaje.cpp" />
+    <File Path="posibleProyecto/personaje.h" />
+    <File Path="src/logica/asset.cpp" />
+    <File Path="src/logica/asset.h" />
+    <File Path="src/logica/Collision.cpp" />
+    <File Path="src/logica/Collision.h" />
+    <File Path="src/logica/CombatManager.cpp" />
+    <File Path="src/logica/CombatManager.h" />
+    <File Path="src/logica/CombatTypes.h" />
+    <File Path="src/logica/Damage.cpp" />
+    <File Path="src/logica/Damage.h" />
+    <File Path="src/logica/luz.h" />
+    <File Path="src/logica/mapa.cpp" />
+    <File Path="src/logica/mapa.h" />
+  </Folder>
   <Project Path="posibleProyecto/posibleProyecto.vcxproj" Id="9c772579-5448-49cb-85bb-91220201d8b2" />
 </Solution>
