@@ -1,4 +1,5 @@
 #pragma once
+#include <cmath>
 #include "Mesh.h"
 #include "MeshLibrary.h"
 
@@ -24,6 +25,7 @@ public:
     void submit(MeshId id, GLuint albedoTexture, const glm::mat4& model, const glm::vec4& color, int kind = 0);
     void flush(const MeshLibrary& lib, const glm::mat4& viewProj);
     void drawShadowGeometry(const MeshLibrary& lib) const;
+    void submitLights(std::vector<SceneLight>& lights, const float time);
     void submitLight(const Light& light);
 private:
     void getActualViewProj(const glm::mat4& viewProj);

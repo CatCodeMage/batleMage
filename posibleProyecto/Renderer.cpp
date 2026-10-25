@@ -17,6 +17,11 @@ void Renderer::init(GLuint program) {
     glUniform1i(w_locAlbedo, ALBEDO_TEXTURE_UNIT);
 }
 
+void Renderer::submitLights(std::vector<SceneLight>& lights, const float time) {
+    lights[0].light.pos = glm::vec3(3.0f * cos(time), 3.0f, 3.0f * sin(time));    // UPDATE
+    for (const SceneLight& l : lights) this->submitLight(l.light);
+}
+
 void Renderer::submitLight(const Light& light) {
     if (w_lights.size() >= MAX_LIGHTS) return;     // de momento se ignoran las que sobran
     w_lights.push_back(light);
@@ -42,7 +47,7 @@ void Renderer::flushLigth() {
     glUniform1i(w_locNumLights, (GLint)w_lights.size());
     if (!w_lights.empty())
         glUniform4fv(w_locLights, (GLsizei)(w_lights.size() * 2), (const GLfloat*)w_lights.data());
-}
+} 
 
 void Renderer::getActualViewProj(const glm::mat4& viewProj) {
     glUniformMatrix4fv(w_locViewProj, 1, GL_FALSE, glm::value_ptr(viewProj));

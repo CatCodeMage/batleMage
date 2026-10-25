@@ -109,11 +109,9 @@ void buclePrincipaLTiempoReal(GLFWwindow* window, SystemInfo& sysInfo) {
 
         submitEntidades(simData.renderer, simData.libModel, simData.framesInfo.combat[simData.framesInfo.frame]);
 
-        updateShadowInput(window, simData.shadows, simData.lights);
+        simData.renderer.submitLights(simData.lights, time);
 
-        // Light
-        simData.lights[0].light.pos = glm::vec3(3.0f * cos(time), 3.0f, 3.0f * sin(time));    // UPDATE
-        for (const SceneLight& l : simData.lights) simData.renderer.submitLight(l.light);
+        updateShadowInput(window, simData.shadows, simData.lights);
 
         //renderizar sombras
         simData.shadows.render(simData.lights, [&]() { simData.renderer.drawShadowGeometry(simData.libMesh);});
