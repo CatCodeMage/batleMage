@@ -40,4 +40,8 @@ public:
         Assets& asset
     );
 
+    bool procesarImpacto(
+        const Hechizo& hechizo,
+        Map& mapa
+    );
 };

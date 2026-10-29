@@ -113,3 +113,79 @@ BoxCollider CombatManager::crearColliderAsset(
     return collider;
 }
 
+bool CombatManager::procesarImpacto(
+    const Hechizo& hechizo,
+    Assets& asset)
+{
+    SphereCollider hechizoCollider =
+        crearColliderHechizo(hechizo);
+
+    BoxCollider assetCollider =
+        crearColliderAsset(asset);
+
+    if (!m_collisionManager.checkCollision(
+        assetCollider,
+        hechizoCollider))
+    {
+        return false;
+    }
+
+    if (asset.esDestruible())
+    {
+        switch (asset.getTipo())
+        {
+        case tipoAsset::ARBOL:
+            asset.setEstado(
+                estadoArbol::DESTRUIDO
+            );
+            break;
+        }
+    }
+
+    return true;
+}
+
+bool CombatManager::procesarImpacto(
+    const Hechizo& hechizo,
+    Map& mapa)
+{
+    glm::vec3 posicion = hechizo.getPosition();
+    float radio = hechizo.getRadius();
+
+    // El hechizo debe encontrarse dentro del mapa
+    if (!mapa.estaDentroDelMapa(posicion))
+    {
+        return false;
+    }
+
+    // Comprobamos si la parte inferior de la esfera toca el suelo
+    if (posicion.y - radio > mapa.getAlturaSuelo())
+    {
+        return false;
+    }
+
+    // Si impacta, generamos una marca según el elemento
+    if (hechizo.getElement() == ElementType::Fire)
+    {
+        marca nuevaMarca;
+
+        nuevaMarca.coordenadas = posicion;
+        nuevaMarca.radio = radio;
+        nuevaMarca.tipo = tipoMarca::FUEGO;
+
+        mapa.addMarca(nuevaMarca);
+    }
+    else if (hechizo.getElement() == ElementType::ICE)
+    {
+        marca nuevaMarca;
+
+        nuevaMarca.coordenadas = posicion;
+        nuevaMarca.radio = radio;
+        nuevaMarca.tipo = tipoMarca::HIELO;
+
+        mapa.addMarca(nuevaMarca);
+    }
+
+    return true;
+}
+
