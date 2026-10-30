@@ -15,11 +15,11 @@
     "hitbox": "sphere"
   },
   "spirit": {
-    "path": "./posibleProyecto/assets/tree.obj",
+    "path": "./posibleProyecto/assets/Spirit.obj",
     "hitbox": "sphere"
   },
   "ball": {
-    "path": "./posibleProyecto/assets/bush.obj",
+    "path": "./posibleProyecto/assets/fireball.obj",
     "hitbox": "sphere"
   }
 }
