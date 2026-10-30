@@ -1,0 +1,24 @@
+# Exercici 8. Copia incremental de nivell 1 (diferencial)
+# BD: FREE (DBID=1517556231) - mode ARCHIVELOG
+# Prerequisits:
+#   - Configuracio RMAN i copia NIVELL0 (exercici8_T1.rman)
+#   - Canvis posteriors al nivell 0 (SQL*Plus, dins de FREEPDB1):
+#       CREATE TABLE "gestorUsuaris".Test_N1 AS SELECT * FROM "gestorUsuaris".Test;
+# Execucio: rman target / cmdfile=exercici8_T2.rman log=exercici8_T2.log
+
+SET ECHO ON;
+
+# 1. Comprovem que es mante la configuracio
+SHOW ALL;
+
+# 2. Copia incremental de nivell 1 diferencial: nomes els blocs canviats
+#    des de l'ultima copia de nivell 0 o 1
+#    (alternativa acumulativa: BACKUP INCREMENTAL LEVEL 1 CUMULATIVE ...)
+BACKUP INCREMENTAL LEVEL 1 TAG 'NIVELL1' DATABASE PLUS ARCHIVELOG;
+
+# 3. Aplicacio de la politica de retencio (REDUNDANCY 1):
+#    s'esborren les copies que ja no calen per recuperar fins ara
+REPORT OBSOLETE;
+DELETE NOPROMPT OBSOLETE;
+
+LIST BACKUP SUMMARY;

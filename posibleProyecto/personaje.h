@@ -1,15 +1,15 @@
-#ifndef PERSONAJE_H
-#define PERSONAJE_H
+#pragma once 
 
 #include "controladorPersonaje.h"
 #include <memory>
 #include <vector>
-#include "hechizoDatos.h"
+#include "hechizosGestor.h"     // HechizosGestor*: el personaje crea sus propios hechizos
 #include <glm/glm.hpp>
+#include <nlohmann/json.hpp>
+using json = nlohmann::json;
 
-// Personaje y la IA solo usan x, y, z y el constructor (x, y, z): glm::vec3 encaja tal cual
+// CombatSimulation aun usa Vector3; se quita al adaptarla a este Personaje
 using Vector3 = glm::vec3;
-
 
 enum class EstadoPersonaje {
     IDLE,      //en la esfera esta siempre en idle
@@ -95,4 +95,3 @@ public:
     json exportarCabeceraJson() const; 
     json exportarFrameJson() const;
 };
-#endif 
