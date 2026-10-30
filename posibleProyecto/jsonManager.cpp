@@ -5,7 +5,7 @@ using json = nlohmann::json;
 
 const std::string SPELLS_PATH = "../db/spells.json";
 const std::string PLAYERS_PATH = "../db/players.json";
-const std::string COMBAT_PATH = "../db/combate_chorras.json";
+const std::string COMBAT_PATH = "../db/combate_generado.json";
 const std::string ENTITIES_PATH = "../db/entities.json";
 
 ElementType parseElement(std::string element) {

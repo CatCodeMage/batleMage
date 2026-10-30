@@ -16,6 +16,7 @@
 #include "jsonManager.h"
 #include "simulationData.h"
 #include "CombatSimulation.h"
+#include <algorithm>
 
 int shouldContinue(GLFWwindow* window) {
     return glfwWindowShouldClose(window) == 0;
@@ -76,6 +77,8 @@ std::vector<SceneLight> setLights() {
     return lights;
 }
 
+constexpr float MAX_SECONDS_PER_SCREEN_FRAME = 0.25f;
+
 void buclePrincipaLTiempoReal(GLFWwindow* window, SystemInfo& sysInfo) {
     simulationData simData;
     simData.init(window);
@@ -84,19 +87,20 @@ void buclePrincipaLTiempoReal(GLFWwindow* window, SystemInfo& sysInfo) {
     std::vector<SceneLight> data = setLights();
     simData.changeLights(data);
 
+    const float secondsPerCombatFrame = CombatSimulation::SECONDS_PER_TICK;   // el replay graba un frame por tick
+    float unplayedSeconds = 0.0f;   // tiempo real que aun no se ha convertido en frames del combate
+
     while (shouldContinue(window)) {
-        // if temporal para ver que funciona
-        if (simData.framesInfo.lessFrames >= 20) {
+        unplayedSeconds += (std::min) (sysInfo.getDeltaTime(), MAX_SECONDS_PER_SCREEN_FRAME);
+        while (unplayedSeconds >= secondsPerCombatFrame) {
             simData.framesInfo.frame++;
-            simData.framesInfo.lessFrames = 0;
+            unplayedSeconds -= secondsPerCombatFrame;
         }
         if (simData.framesInfo.frame >= simData.framesInfo.combat.size()) {
             simData.framesInfo.frame = 0;
         }
 
         simData.procesMainBodyLoopRealTime(window, sysInfo);
-        
-        simData.framesInfo.lessFrames++;
     }
 
     simData.destroy();
@@ -201,21 +205,19 @@ int createSimulation() {
     return 0;
 }
 
-int main()
-{
-    // TEMPORAL (S4): combate completo sin graficos, un informe por segundo
+// Simula el combate entero sin graficos y lo deja grabado para que los graficos lo reproduzcan
+void simulateCombatToReplay() {
     CombatSimulation simulation;
     simulation.setup(dataPath("db/combat.json"));
-    simulation.printState();
-    while (!simulation.isFinished()) {
+    while (!simulation.isFinished())
         simulation.step();
-        const bool isWholeSecond = simulation.getTick() % CombatSimulation::TICKS_PER_SECOND == 0;
-        if (isWholeSecond) simulation.printState();
-    }
     simulation.printResult();
-    //sendForm();
+    simulation.writeReplay(dataPath("db/combate_generado.json"));
+}
 
-    //return createSimulation();
-
-    return 0;
+int main()
+{
+    //sendForm();   // cuando se active: antes de simular, porque es el formulario el que escribe combat.json
+    //simulateCombatToReplay();
+    return createSimulation();
 }

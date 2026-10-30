@@ -1,5 +1,11 @@
 #include "CombatSimulation.h"
 #include "jsonManager.h"   // readSpells
+#include <cmath>
+
+// Nombres de db/entities.json: generateCombat los usa para saber que modelo dibujar
+constexpr const char* REPLAY_PLAYER_ENTITY = "players";
+constexpr const char* REPLAY_SPELL_ENTITY = "spell";
+constexpr const char* REPLAY_FORMAT_VERSION = "1.7";   // la de combate_chorras.json
 
 using json = nlohmann::json;
 
@@ -29,6 +35,20 @@ static CylinderCollider colliderOf(const Personaje& player) {
     return { player.getPosicion(), PLAYER_COLLIDER_RADIUS, PLAYER_COLLIDER_HALF_HEIGHT };
 }
 
+// La IA guarda en la rotacion el vector hacia donde mira, no angulos.
+// El replay quiere el giro en Y en radianes, con 0 mirando a +Z
+static float yawOf(const Vector3& facingDirection) {
+    return std::atan2(facingDirection.x, facingDirection.z);
+}
+
+// [[x, y, z], [giroX, giroY, giroZ], "entidad"]
+static json replayEntity(const Vector3& position, float yaw, const char* entityName) {
+    return json::array({
+        json::array({ position.x, position.y, position.z }),
+        json::array({ 0.0f, yaw, 0.0f }),
+        entityName });
+}
+
 void CombatSimulation::setup(const std::filesystem::path& combatConfigFile) {
     createPlayers(combatConfigFile);
     connectOpponents();
@@ -36,6 +56,7 @@ void CombatSimulation::setup(const std::filesystem::path& combatConfigFile) {
     m_basicSpellId = findSpellIdByName(BASIC_SPELL_NAME);
     m_wasCasting.assign(m_players.size(), false);
     std::cout << "[SIM] hechizos en el catalogo: " << m_spells.getCatalogoHechizos().size() << "\n";
+    recordFrame();
 }
 
 void CombatSimulation::step() {
@@ -48,6 +69,7 @@ void CombatSimulation::step() {
     m_spells.update(SECONDS_PER_TICK);      // aun no hay hechizos en vuelo: llegan en S3
     applySpellHits();
     ++m_tick;
+    recordFrame();
 }
 
 void CombatSimulation::createPlayers(const std::filesystem::path& combatConfigFile) {
@@ -154,6 +176,41 @@ void CombatSimulation::printResult() const {
     const int winnerId = getWinnerId();
     if (winnerId == 0) std::cout << "sin ganador\n";
     else               std::cout << "gana el jugador " << winnerId << "\n";
+}
+
+void CombatSimulation::recordFrame() {
+    json frame = json::array();
+    for (const std::unique_ptr<Personaje>& player : m_players)
+        frame.push_back(replayEntity(player->getPosicion(), yawOf(player->getRotacion()), REPLAY_PLAYER_ENTITY));
+
+    for (const std::unique_ptr<Hechizo>& spell : m_spells.getActiveHechizos()) {
+        if (!spell->IsActive()) continue;
+        frame.push_back(replayEntity(spell->getPosition(), yawOf(spell->getDirection()), REPLAY_SPELL_ENTITY));
+    }
+    m_replayFrames.push_back(std::move(frame));
+}
+
+// Como las claves de combat.json: "player_1", "player_2"; "none" si no gana nadie
+std::string CombatSimulation::describeWinner() const {
+    const int winnerId = getWinnerId();
+    return winnerId == 0 ? "none" : "player_" + std::to_string(winnerId);
+}
+
+void CombatSimulation::writeReplay(const std::filesystem::path& replayFile) const {
+    const json replay = {
+        { "metadata",{
+            { "version", REPLAY_FORMAT_VERSION },
+            { "iterations", m_replayFrames.size() },
+            { "winner", describeWinner() },
+            { "ticksPerSecond", TICKS_PER_SECOND },
+            { "rotationOrder", "XYZ" },
+            { "rotationUnit", "radians" } } },
+        { "frames", m_replayFrames } };
+
+    std::ofstream out(replayFile);
+    if (!out) throw std::runtime_error("no se puede escribir " + replayFile.string());
+    out << replay.dump();   // sin sangrado: con cientos de frames, sangrado ocuparia varias veces mas
+    std::cout << "[SIM] replay escrito en " << replayFile.string() << ": " << m_replayFrames.size() << " frames\n";
 }
 
 static const char* describeAIState(EstadoIA state) {

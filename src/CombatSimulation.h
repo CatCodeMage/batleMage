@@ -26,7 +26,11 @@ public:
     bool isFinished() const;
     int  getWinnerId() const;    
     void printResult() const;
+
+    void writeReplay(const std::filesystem::path& replayFile) const;
 private:
+    void recordFrame();
+    std::string describeWinner() const;
     void createPlayers(const std::filesystem::path& combatConfigFile);
     void connectOpponents();
     size_t opponentIndexOf(size_t playerIndex) const;
@@ -50,4 +54,6 @@ private:
 
     std::vector<bool> m_wasCasting;   // m_wasCasting[i]: m_players[i] tenia CASTEANDO en el tick anterior
     int m_basicSpellId = -1;
+
+    nlohmann::json m_replayFrames = nlohmann::json::array();   // un frame por tick, en el formato de generateCombat
 };
