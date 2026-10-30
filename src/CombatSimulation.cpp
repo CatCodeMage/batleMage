@@ -5,7 +5,12 @@
 // Nombres de db/entities.json: generateCombat los usa para saber que modelo dibujar
 constexpr const char* REPLAY_PLAYER_ENTITY = "players";
 constexpr const char* REPLAY_SPELL_ENTITY = "spell";
+constexpr const char* REPLAY_HIT_ENTITY = "hit";
 constexpr const char* REPLAY_FORMAT_VERSION = "1.7";   // la de combate_chorras.json
+
+// constantes para contar los frames en que esta en estado "hit"
+constexpr float HIT_EFFECT_SECONDS = 0.3f;
+constexpr int HIT_EFFECT_FRAMES = static_cast<int>(60 * HIT_EFFECT_SECONDS);
 
 using json = nlohmann::json;
 
@@ -55,6 +60,7 @@ void CombatSimulation::setup(const std::filesystem::path& combatConfigFile) {
     readSpells(m_spells);
     m_basicSpellId = findSpellIdByName(BASIC_SPELL_NAME);
     m_wasCasting.assign(m_players.size(), false);
+    m_hitFrames.assign(m_players.size(), 0);
     std::cout << "[SIM] hechizos en el catalogo: " << m_spells.getCatalogoHechizos().size() << "\n";
     recordFrame();
 }
@@ -70,6 +76,14 @@ void CombatSimulation::step() {
     applySpellHits();
     ++m_tick;
     recordFrame();
+
+    for(int& frames : m_hitFrames)
+    {
+        if (frames > 0) 
+        {
+            --frames;
+        }
+    }
 }
 
 void CombatSimulation::createPlayers(const std::filesystem::path& combatConfigFile) {
@@ -141,13 +155,24 @@ bool CombatSimulation::tryHitAnyPlayer(Hechizo& spell) {
     const SphereCollider spellCollider{ spell.getPosition(), spell.getRadius() };
     const SpellDefinitionComponent& definition = m_spells.getCatalogoHechizos().at(spell.getId()).definition;
 
+    for (size_t playerIndex = 0; playerIndex < m_players.size(); playerIndex++)
+    {
+        Personaje& player = *m_players[playerIndex];
+        if (!isAlive(player)) continue;
+        if (m_combat.procesarImpacto(spellCollider, colliderOf(player), definition, player)) {
+            m_hitFrames[playerIndex] = HIT_EFFECT_FRAMES;
+            m_spells.destroySpell(&spell);
+            return true;
+        }
+    }
+    /*
     for (const std::unique_ptr<Personaje>& player : m_players) {
         if (!isAlive(*player)) continue;
         if (m_combat.procesarImpacto(spellCollider, colliderOf(*player), definition, *player)) {
             m_spells.destroySpell(&spell);
             return true;
         }
-    }
+    }*/
     return false;
 }
 
@@ -180,9 +205,16 @@ void CombatSimulation::printResult() const {
 
 void CombatSimulation::recordFrame() {
     json frame = json::array();
-    for (const std::unique_ptr<Personaje>& player : m_players)
+    
+    for (size_t playerIndex = 0; playerIndex < m_players.size(); playerIndex++)
+    {
+        Personaje& player = *m_players[playerIndex];
+        const char* entityName = (m_hitFrames[playerIndex] > 0) ? REPLAY_HIT_ENTITY : REPLAY_PLAYER_ENTITY;
+        frame.push_back(replayEntity(player.getPosicion(), yawOf(player.getRotacion()), entityName));
+    }
+    /*for (const std::unique_ptr<Personaje>& player : m_players) {
         frame.push_back(replayEntity(player->getPosicion(), yawOf(player->getRotacion()), REPLAY_PLAYER_ENTITY));
-
+    }*/
     for (const std::unique_ptr<Hechizo>& spell : m_spells.getActiveHechizos()) {
         if (!spell->IsActive()) continue;
         frame.push_back(replayEntity(spell->getPosition(), yawOf(spell->getDirection()), REPLAY_SPELL_ENTITY));

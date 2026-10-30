@@ -18,8 +18,12 @@
     "path": "./posibleProyecto/assets/Spirit.obj",
     "hitbox": "sphere"
   },
-  "ball": {
+  "fireball": {
     "path": "./posibleProyecto/assets/fireball.obj",
+    "hitbox": "sphere"
+  },
+  "hit": {
+    "path": "./posibleProyecto/assets/hit.obj",
     "hitbox": "sphere"
   }
 }
