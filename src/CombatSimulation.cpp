@@ -4,7 +4,12 @@
 // Nombres de db/entities.json: generateCombat los usa para saber que modelo dibujar
 constexpr const char* REPLAY_PLAYER_ENTITY = "players";
 constexpr const char* REPLAY_SPELL_ENTITY = "spell";
+constexpr const char* REPLAY_HIT_ENTITY = "hit";
 constexpr const char* REPLAY_FORMAT_VERSION = "1.7";   // la de combate_chorras.json
+
+// constantes para contar los frames en que esta en estado "hit"
+constexpr float HIT_EFFECT_SECONDS = 0.3f;
+constexpr int HIT_EFFECT_FRAMES = static_cast<int>(60 * HIT_EFFECT_SECONDS);
 
 using json = nlohmann::json;
 
@@ -49,6 +54,7 @@ void CombatSimulation::setup(const std::filesystem::path& combatConfigFile) {
     readSpells(m_spells);   // antes que la IA: connectOpponents le pasa el catalogo
     createPlayers(combatConfigFile);
     connectOpponents();
+    m_hitFrames.assign(m_players.size(), 0);
     recordFrame();
 }
 
@@ -61,6 +67,14 @@ void CombatSimulation::step() {
     applySpellHits();
     ++m_tick;
     recordFrame();
+
+    for(int& frames : m_hitFrames)
+    {
+        if (frames > 0) 
+        {
+            --frames;
+        }
+    }
 }
 
 void CombatSimulation::createPlayers(const std::filesystem::path& combatConfigFile) {
@@ -109,14 +123,15 @@ bool CombatSimulation::tryHitAnyPlayer(Hechizo& spell) {
     const SphereCollider spellCollider{ spell.getPosition(), SPELL_HIT_RADIUS };
     const SpellDefinitionComponent& definition = m_spells.getCatalogoHechizos().at(spell.getId()).definition;
 
-    for (const std::unique_ptr<Personaje>& player : m_players) {
-        if (!isAlive(*player)) continue;
-        if (m_combat.procesarImpacto(spellCollider, colliderOf(*player), definition, *player)) {
+    for (size_t playerIndex = 0; playerIndex < m_players.size(); ++playerIndex) {
+        Personaje& player = *m_players[playerIndex];
+        if (!isAlive(player)) continue;
+        if (m_combat.procesarImpacto(spellCollider, colliderOf(player), definition, player)) {
+            m_hitFrames[playerIndex] = HIT_EFFECT_FRAMES;   // el golpeado se dibuja un momento con el modelo "hit"
             m_spells.destroySpell(&spell);
             return true;
         }
     }
-
     return false;
 }
 
@@ -149,13 +164,19 @@ void CombatSimulation::printResult() const {
 
 void CombatSimulation::recordFrame() {
     json frame = json::array();
-    for (const std::unique_ptr<Personaje>& player : m_players)
-        frame.push_back(replayEntity(player->getPosicion(), player->getRotacion().y, REPLAY_PLAYER_ENTITY));
+
+    for (size_t playerIndex = 0; playerIndex < m_players.size(); ++playerIndex) {
+        const Personaje& player = *m_players[playerIndex];
+        const bool isShowingHit = m_hitFrames[playerIndex] > 0;
+        const char* entityName = isShowingHit ? REPLAY_HIT_ENTITY : REPLAY_PLAYER_ENTITY;
+        frame.push_back(replayEntity(player.getPosicion(), player.getRotacion().y, entityName));
+    }
 
     for (const std::unique_ptr<Hechizo>& spell : m_spells.getActiveHechizos()) {
         if (!spell->IsActive()) continue;
         frame.push_back(replayEntity(spell->getPosition(), yawOf(spell->getDirection()), REPLAY_SPELL_ENTITY));
     }
+
     m_replayFrames.push_back(std::move(frame));
 }
 

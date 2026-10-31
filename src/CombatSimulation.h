@@ -48,6 +48,7 @@ private:
     // asi que sus direcciones no pueden cambiar cuando el vector crece
     std::vector<std::unique_ptr<Personaje>> m_players;
     std::vector<std::unique_ptr<ControladorMaquinaEstados>> m_controllers;   // m_controllers[i] es la IA de m_players[i]
+    std::vector<int> m_hitFrames;
     HechizosGestor m_spells;
     CombatManager m_combat;
     int m_tick = 0;
