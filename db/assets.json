@@ -21,5 +21,31 @@
   "ball": {
     "path": "./posibleProyecto/assets/fireball.obj",
     "hitbox": "sphere"
+  },
+  "ground_grass": {
+    "path": "./posibleProyecto/assets/kenney_nature/ground_grass.obj"
+  },
+  "path_stoneCircle": {
+    "path": "./posibleProyecto/assets/kenney_nature/path_stoneCircle.obj"
+  },
+  "statue_column": {
+    "path": "./posibleProyecto/assets/kenney_nature/statue_column.obj",
+    "hitbox": "cilinder"
+  },
+  "rock_tallA": {
+    "path": "./posibleProyecto/assets/kenney_nature/rock_tallA.obj",
+    "hitbox": "cube"
+  },
+  "plant_bushLarge": {
+    "path": "./posibleProyecto/assets/kenney_nature/plant_bushLarge.obj",
+    "hitbox": "sphere"
+  },
+  "tree_oak": {
+    "path": "./posibleProyecto/assets/kenney_nature/tree_oak.obj",
+    "hitbox": "cilinder"
+  },
+  "tree_pineTallA": {
+    "path": "./posibleProyecto/assets/kenney_nature/tree_pineTallA.obj",
+    "hitbox": "cilinder"
   }
 }

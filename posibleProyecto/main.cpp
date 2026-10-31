@@ -72,6 +72,15 @@ std::vector<SceneLight> setLights() {
                 2.0f
             },
             false // Luz fija: no proyecta sombras
+        },
+        {
+            {
+                glm::vec3(-80.0f, 200.0f, -60.0f),   // sol: muy alto y lejos, asi su luz llega casi paralela a toda la arena
+                1000.0f,                             // alcance muy por encima de la distancia: apenas se atenua
+                glm::vec3(1.0f, 0.95f, 0.85f),       // blanco calido
+                1.2f
+            },
+            false   // sin sombras: un cubemap repartido en 100 m da sombras muy bastas
         }
     };
     return lights;
