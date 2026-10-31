@@ -7,7 +7,7 @@ constexpr const char* REPLAY_FORMAT_VERSION = "1.7";   // la de combate_chorras.
 
 // constantes para contar los frames en que esta en estado "hit"
 constexpr float HIT_EFFECT_SECONDS = 0.3f;
-constexpr int HIT_EFFECT_FRAMES = static_cast<int>(60 * HIT_EFFECT_SECONDS);
+constexpr int HIT_EFFECT_FRAMES = static_cast<int>(CombatSimulation::TICKS_PER_SECOND * HIT_EFFECT_SECONDS);
 
 using json = nlohmann::json;
 
@@ -81,18 +81,12 @@ void CombatSimulation::step() {
         player->update(SECONDS_PER_TICK);   // la IA decide y mueve al jugador
     }
 
-    m_spells.update(SECONDS_PER_TICK);      // aun no hay hechizos en vuelo: llegan en S3
+    m_spells.update(SECONDS_PER_TICK);      // mueve los hechizos en vuelo
     applySpellHits();
     ++m_tick;
     recordFrame();
 
-    for(int& frames : m_hitFrames)
-    {
-        if (frames > 0) 
-        {
-            --frames;
-        }
-    }
+    countDownHitEffects();
 }
 
 void CombatSimulation::createPlayers(const std::filesystem::path& combatConfigFile) {

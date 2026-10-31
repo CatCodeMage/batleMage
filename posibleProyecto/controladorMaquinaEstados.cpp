@@ -186,10 +186,6 @@ void ControladorMaquinaEstados::ejecutarEstado(Personaje& personaje,const glm::v
                 apuntarHacia(personaje, calcularDireccionAnticipada(personaje, hechizoElegido.velocidad));
                 personaje.lanzarHechizo(hechizoElegido.id);
 
-                // TEMPORAL 
-
-                std::cout << "[IA] lanza " << hechizoElegido.id << "\n";
-
                 m_cooldownAtaque = hechizoElegido.cooldown;
                 m_tiempoDesdeUltAtaque = 0.0f;
             } else {
