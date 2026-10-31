@@ -172,19 +172,23 @@ void Personaje::lanzarHechizo(int idHechizo)
     {
         direccionDisparo = glm::vec3(m_direccion.x / longitud, m_direccion.y / longitud, m_direccion.z / longitud);
     }
-    float distanciaSeparacion = m_radio + m_margenCasteo;
 
-    glm::vec3 posicionOrigenHechizo(
-        m_posicion.x + direccionDisparo.x * distanciaSeparacion,
-        m_posicion.y + direccionDisparo.y * distanciaSeparacion,
-        m_posicion.z + direccionDisparo.z * distanciaSeparacion
-    );
+    if (m_gestorHechizos != nullptr) {
+        // El hechizo nace con su centro fuera del mago: si no, su propio radio ya lo toca y se da a si mismo
+        const float radioHechizo = m_gestorHechizos->getCatalogoHechizos().at(idHechizo).radius;
+        float distanciaSeparacion = m_radio + radioHechizo + m_margenCasteo;
 
-    if(m_gestorHechizos != nullptr)
-    {
-        m_gestorHechizos->spawnSpell(idHechizo, posicionOrigenHechizo, direccionDisparo);
+        glm::vec3 posicionOrigenHechizo(
+            m_posicion.x + direccionDisparo.x * distanciaSeparacion,
+            m_posicion.y + direccionDisparo.y * distanciaSeparacion,
+            m_posicion.z + direccionDisparo.z * distanciaSeparacion
+        );
+
+        if (m_gestorHechizos != nullptr)
+        {
+            m_gestorHechizos->spawnSpell(idHechizo, posicionOrigenHechizo, direccionDisparo);
+        }
     }
-    
 }
 
 void Personaje::setControlador(ControladorPersonaje* nuevoControlador)

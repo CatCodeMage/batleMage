@@ -1,7 +1,7 @@
 {
     "fire_ball": {
         "cast_type": "line",
-        "cooldown": 15.0,
+        "cooldown": 3.0,
         "element": "fire",
         "damage": 23.5,
         "speed": 4,
@@ -10,7 +10,7 @@
     },
     "ice_lance": {
         "cast_type": "line",
-        "cooldown": 12.0,
+        "cooldown": 2.4,
         "element": "ice",
         "damage": 18.0,
         "speed": 6,
@@ -19,7 +19,7 @@
     },
     "lightning_bolt": {
         "cast_type": "line",
-        "cooldown": 10.0,
+        "cooldown": 2.0,
         "element": "lightning",
         "damage": 20.0,
         "speed": 10,
@@ -28,7 +28,7 @@
     },
     "arcane_ray": {
         "cast_type": "line",
-        "cooldown": 8.0,
+        "cooldown": 1.6,
         "element": "arcane",
         "damage": 12.0,
         "speed": 8,
@@ -37,7 +37,7 @@
     },
     "poison_cloud": {
         "cast_type": "area",
-        "cooldown": 20.0,
+        "cooldown": 4.0,
         "element": "poison",
         "damage": 8.0,
         "speed": 2,
@@ -46,7 +46,7 @@
     },
     "meteor": {
         "cast_type": "area",
-        "cooldown": 30.0,
+        "cooldown": 6.0,
         "element": "fire",
         "damage": 45.0,
         "speed": 3,
@@ -55,7 +55,7 @@
     },
     "frost_nova": {
         "cast_type": "area",
-        "cooldown": 25.0,
+        "cooldown": 5.0,
         "element": "ice",
         "damage": 15.0,
         "speed": 5,
@@ -64,7 +64,7 @@
     },
     "healing": {
         "cast_type": "self",
-        "cooldown": 18.0,
+        "cooldown": 3.6,
         "element": "water",
         "damage": -25.0,
         "speed": 0,
@@ -73,7 +73,7 @@
     },
     "earth_spike": {
         "cast_type": "line",
-        "cooldown": 13.0,
+        "cooldown": 2.6,
         "element": "earth",
         "damage": 19.0,
         "speed": 4,
@@ -82,7 +82,7 @@
     },
     "wind_blade": {
         "cast_type": "cone",
-        "cooldown": 7.0,
+        "cooldown": 1.4,
         "element": "wind",
         "damage": 11.0,
         "speed": 9,
@@ -91,7 +91,7 @@
     },
     "thunder_storm": {
         "cast_type": "area",
-        "cooldown": 35.0,
+        "cooldown": 7.0,
         "element": "lightning",
         "damage": 38.0,
         "speed": 0,
@@ -100,7 +100,7 @@
     },
     "water_jet": {
         "cast_type": "line",
-        "cooldown": 6.0,
+        "cooldown": 1.2,
         "element": "water",
         "damage": 10.0,
         "speed": 8,
@@ -109,7 +109,7 @@
     },
     "arcane_nova": {
         "cast_type": "area",
-        "cooldown": 22.0,
+        "cooldown": 4.4,
         "element": "fire",
         "damage": 28.0,
         "speed": 0,
@@ -118,7 +118,7 @@
     },
     "flame_wall": {
         "cast_type": "area",
-        "cooldown": 26.0,
+        "cooldown": 5.2,
         "element": "fire",
         "damage": 12.0,
         "speed": 0,
@@ -127,7 +127,7 @@
     },
     "ice_shard": {
         "cast_type": "cone",
-        "cooldown": 5.0,
+        "cooldown": 1.0,
         "element": "ice",
         "damage": 9.5,
         "speed": 7,
@@ -136,7 +136,7 @@
     },
     "chain_lightning": {
         "cast_type": "line",
-        "cooldown": 19.0,
+        "cooldown": 3.8,
         "element": "lightning",
         "damage": 24.0,
         "speed": 12,

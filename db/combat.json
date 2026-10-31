@@ -8,18 +8,18 @@
         "player_1": {
             "position": [
                 -20,
-                0,
+                1,
                 -20
             ],
-            "type": "sphere"
+            "type": "fire_mage"
         },
         "player_2": {
             "position": [
                 20,
-                0,
+                1,
                 20
             ],
-            "type": "sphere"
+            "type": "tank_mage"
         }
     },
     "spells": "../db/spells.json"

@@ -1,6 +1,5 @@
 #include "jsonManager.h"
 
-
 using json = nlohmann::json;
 
 const std::string SPELLS_PATH = "../db/spells.json";
@@ -17,6 +16,8 @@ ElementType parseElement(std::string element) {
 
 void readSpells(HechizosGestor& spellManager) {
 	constexpr float DEFAULT_SPELL_COST = 10.0f;
+	// La IA calcula el alcance de cada hechizo como velocidad x vida: con 100 s atacaban desde cualquier distancia
+	constexpr float SPELL_LIFETIME_SECONDS = 3.0f;
 
 	std::ifstream spells(SPELLS_PATH);
 
@@ -46,7 +47,7 @@ void readSpells(HechizosGestor& spellManager) {
 				spell["speed"].get<float>(),
 				spell["radious"].get<float>(),
 				scaleVec,
-				100
+				SPELL_LIFETIME_SECONDS
 			);
 
 			id++;

@@ -1,8 +1,82 @@
 {
-    "sphere": {
-        "radious": 5.0,
-        "scale": [1.0, 1.2, 1.0],
-        "slices": 20,
-        "stacks": 20
+  "sphere": {
+    "radious": 1.0,
+    "scale": [1.0, 1.0, 1.0],
+    "slices": 20,
+    "stacks": 20,
+    "stats": {
+      "maxHealth": 100.0,
+      "maxMana": 50.0,
+      "manaRegen": 3.0,
+      "moveSpeed": 4.0,
+      "safeDistance": 5.0,
+      "castMargin": 0.5,
+      "attackCooldown": 1.5,
+      "burnDamagePerSec": 5.0
     }
+  },
+  "fire_mage": {
+    "radious": 1.0,
+    "scale": [1.0, 1.2, 1.0],
+    "slices": 20,
+    "stacks": 20,
+    "stats": {
+      "maxHealth": 80.0,
+      "maxMana": 80.0,
+      "manaRegen": 5.0,
+      "moveSpeed": 4.5,
+      "safeDistance": 7.0,
+      "castMargin": 0.5,
+      "attackCooldown": 1.2,
+      "burnDamagePerSec": 5.0
+    }
+  },
+  "tank_mage": {
+    "radious": 1.0,
+    "scale": [1.4, 1.4, 1.4],
+    "slices": 20,
+    "stacks": 20,
+    "stats": {
+      "maxHealth": 160.0,
+      "maxMana": 40.0,
+      "manaRegen": 2.0,
+      "moveSpeed": 2.5,
+      "safeDistance": 3.0,
+      "castMargin": 0.6,
+      "attackCooldown": 2.0,
+      "burnDamagePerSec": 5.0
+    }
+  },
+  "ice_mage": {
+    "radious": 1.0,
+    "scale": [0.9, 1.1, 0.9],
+    "slices": 20,
+    "stacks": 20,
+    "stats": {
+      "maxHealth": 100.0,
+      "maxMana": 65.0,
+      "manaRegen": 4.0,
+      "moveSpeed": 5.0,
+      "safeDistance": 6.0,
+      "castMargin": 0.5,
+      "attackCooldown": 1.4,
+      "burnDamagePerSec": 5.0
+    }
+  },
+  "dwarf": {
+    "radious": 1.0,
+    "scale": [0.5, 0.5, 0.5],
+    "slices": 20,
+    "stacks": 20,
+    "stats": {
+      "maxHealth": 50.0,
+      "maxMana": 200.0,
+      "manaRegen": 2.5,
+      "moveSpeed": 7.0,
+      "safeDistance": 9.0,
+      "castMargin": 0.5,
+      "attackCooldown": 1.2,
+      "burnDamagePerSec": 5.0
+    }
+  }
 }

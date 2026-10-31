@@ -7,6 +7,9 @@
 #include "hechizosGestor.h"
 #include <string>
 #include "CombatManager.h"
+#include "jsonManager.h"   // readSpells
+#include <cmath>
+#include "Paths.h"
 
 // Combate sin graficos: los personajes con su IA y los hechizos en vuelo.
 // No toca OpenGL, para poder ejecutarse sin ventana.
@@ -34,10 +37,7 @@ private:
     void createPlayers(const std::filesystem::path& combatConfigFile);
     void connectOpponents();
     size_t opponentIndexOf(size_t playerIndex) const;
-
-    void spawnSpellsForNewCasts();
-    void spawnBasicSpell(size_t casterIndex);
-    int  findSpellIdByName(const std::string& spellName) const;
+     
     void printSpellsInFlight() const;
 
     void applySpellHits();
@@ -51,9 +51,6 @@ private:
     HechizosGestor m_spells;
     CombatManager m_combat;
     int m_tick = 0;
-
-    std::vector<bool> m_wasCasting;   // m_wasCasting[i]: m_players[i] tenia CASTEANDO en el tick anterior
-    int m_basicSpellId = -1;
 
     nlohmann::json m_replayFrames = nlohmann::json::array();   // un frame por tick, en el formato de generateCombat
 };
