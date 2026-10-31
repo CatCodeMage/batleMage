@@ -124,6 +124,8 @@ int guranteWindowCreated(GLFWwindow* window) {
 
     glfwMakeContextCurrent(window);
 
+    glfwSwapInterval(1);   // una imagen por refresco del monitor: no satura la GPU y la grabacion no pierde imagenes
+
     glewExperimental = GL_TRUE;
     if (glewInit() != GLEW_OK) {
         std::cerr << "No se pudo inicializar GLEW\n";
@@ -154,7 +156,9 @@ GLFWwindow* createWindow() {
         glfwWindowHint(GLFW_BLUE_BITS, mode->blueBits);
         glfwWindowHint(GLFW_REFRESH_RATE, mode->refreshRate);
 
-        window = glfwCreateWindow(mode->width, mode->height, "Prueba", monitor, nullptr);
+        glfwWindowHint(GLFW_DECORATED, GLFW_FALSE);   // sin bordes y del tamaño de la pantalla: parece pantalla completa pero se graba sin cortes
+        window = glfwCreateWindow(mode->width, mode->height, "Battle Mage", nullptr, nullptr);
+        if (window != nullptr) glfwSetWindowPos(window, 0, 0);
     }
 
     return window;
@@ -202,10 +206,10 @@ int createSimulation() {
 
     sysInfo.getCurrentState(window);
 
-    glViewport(0, 0, sysInfo.getWidht(), sysInfo.getHeight());
-
     if (guranteWindowCreated(window) != 0)
         return -1;
+
+    glViewport(0, 0, sysInfo.getWidht(), sysInfo.getHeight());
 
     buclePrincipaLTiempoReal(window, sysInfo);
 
