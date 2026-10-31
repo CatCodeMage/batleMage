@@ -31,6 +31,8 @@ public:
     void printResult() const;
 
     void writeReplay(const std::filesystem::path& replayFile) const;
+    void recordEnding();
+
 private:
     void recordFrame();
     std::string describeWinner() const;
@@ -44,6 +46,9 @@ private:
     bool tryHitAnyPlayer(Hechizo& spell);
     size_t countAlivePlayers() const;
 
+    void countDownHitEffects();
+
+    const char* replayEntityOfPlayer(size_t playerIndex) const;
     // unique_ptr: la IA guarda un puntero a su rival y el personaje uno a su IA,
     // asi que sus direcciones no pueden cambiar cuando el vector crece
     std::vector<std::unique_ptr<Personaje>> m_players;

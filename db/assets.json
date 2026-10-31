@@ -26,6 +26,28 @@
     "path": "./posibleProyecto/assets/hit.obj",
     "hitbox": "sphere"
   },
+  "spirit_red": {
+    "path": "./posibleProyecto/assets/spirit_red.obj",
+    "hitbox": "sphere"
+  },
+  "spirit_blue": {
+    "path": "./posibleProyecto/assets/spirit_blue.obj",
+    "hitbox": "sphere"
+  },
+  "dead_red": {
+    "path": "./posibleProyecto/assets/dead_red.obj"
+  },
+  "dead_blue": {
+    "path": "./posibleProyecto/assets/dead_blue.obj"
+  },
+  "ice_cube": {
+    "path": "./posibleProyecto/assets/ice_cube.obj",
+    "hitbox": "sphere"
+  },
+  "rock_cone": {
+    "path": "./posibleProyecto/assets/rock_cone.obj",
+    "hitbox": "sphere"
+  },
   "ground_grass": {
     "path": "./posibleProyecto/assets/kenney_nature/ground_grass.obj"
   },

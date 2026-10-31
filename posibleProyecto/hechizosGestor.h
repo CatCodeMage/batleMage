@@ -39,6 +39,8 @@ public:
     // Obtener catalogo de hechizos
     const std::unordered_map<int, hechizosTemplate>& getCatalogoHechizos() const;
 
+    void emptySpells();
+
 private:
     std::vector<std::unique_ptr<Hechizo>> spellPool;
     

@@ -221,6 +221,7 @@ void simulateCombatToReplay() {
     while (!simulation.isFinished())
         simulation.step();
     simulation.printResult();
+    simulation.recordEnding();
     simulation.writeReplay(dataPath("db/combate_generado.json"));
 }
 

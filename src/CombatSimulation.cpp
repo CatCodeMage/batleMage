@@ -2,8 +2,6 @@
 
 
 // Nombres de db/entities.json: generateCombat los usa para saber que modelo dibujar
-constexpr const char* REPLAY_PLAYER_ENTITY = "players";
-constexpr const char* REPLAY_SPELL_ENTITY = "spell";
 constexpr const char* REPLAY_HIT_ENTITY = "hit";
 constexpr const char* REPLAY_FORMAT_VERSION = "1.7";   // la de combate_chorras.json
 
@@ -20,7 +18,22 @@ constexpr size_t PLAYERS_IN_1V1 = 2;
 // Chocan con ese radio, no con el "radious" de spells.json (hasta 7), para que el golpe se vea donde ocurre
 constexpr float SPELL_HIT_RADIUS = 0.5f;
 
+constexpr const char* REPLAY_PLAYER_ENTITIES[] = { "player_red", "player_blue" };
+constexpr const char* REPLAY_DEAD_ENTITIES[] = { "dead_red",   "dead_blue" };
+
 CombatSimulation::CombatSimulation() : m_spells(SPELL_POOL_SIZE) {}
+
+// Por la vida y no por MUERTO: yaTieneEstado no es const
+static bool isAlive(const Personaje& player) {
+    return player.getVida() > 0.0f;
+}
+
+const char* CombatSimulation::replayEntityOfPlayer(size_t playerIndex) const {
+    if (!isAlive(*m_players[playerIndex]))  return REPLAY_DEAD_ENTITIES[playerIndex];
+    if (m_hitFrames[playerIndex] > 0)       return REPLAY_HIT_ENTITY;
+    return REPLAY_PLAYER_ENTITIES[playerIndex];
+}
+
 
 static CylinderCollider colliderOf(const Personaje& player) {
     return { player.getPosicion(), player.getRadio(), player.getRadio() };
@@ -29,11 +42,6 @@ static CylinderCollider colliderOf(const Personaje& player) {
 static Vector3 readPosition(const json& player) {
     const json& position = player.at("position");
     return Vector3(position.at(0).get<float>(), position.at(1).get<float>(), position.at(2).get<float>());
-}
-
-// Por la vida y no por MUERTO: yaTieneEstado no es const
-static bool isAlive(const Personaje& player) {
-    return player.getVida() > 0.0f;
 }
 
 // La IA guarda en la rotacion el vector hacia donde mira, no angulos.
@@ -56,6 +64,16 @@ void CombatSimulation::setup(const std::filesystem::path& combatConfigFile) {
     connectOpponents();
     m_hitFrames.assign(m_players.size(), 0);
     recordFrame();
+}
+
+void CombatSimulation::recordEnding() {
+    constexpr float ENDING_SECONDS = 4.0f;   
+    const int endingTicks = static_cast<int>(ENDING_SECONDS * TICKS_PER_SECOND);
+    m_spells.emptySpells(); // Para que no se vean una vez haya muerto un personaje
+    for (int endingTick = 0; endingTick < endingTicks; ++endingTick) {
+        countDownHitEffects();
+        recordFrame();
+    }
 }
 
 void CombatSimulation::step() {
@@ -167,17 +185,20 @@ void CombatSimulation::recordFrame() {
 
     for (size_t playerIndex = 0; playerIndex < m_players.size(); ++playerIndex) {
         const Personaje& player = *m_players[playerIndex];
-        const bool isShowingHit = m_hitFrames[playerIndex] > 0;
-        const char* entityName = isShowingHit ? REPLAY_HIT_ENTITY : REPLAY_PLAYER_ENTITY;
-        frame.push_back(replayEntity(player.getPosicion(), player.getRotacion().y, entityName));
+        frame.push_back(replayEntity(player.getPosicion(), player.getRotacion().y, replayEntityOfPlayer(playerIndex)));
     }
 
     for (const std::unique_ptr<Hechizo>& spell : m_spells.getActiveHechizos()) {
         if (!spell->IsActive()) continue;
-        frame.push_back(replayEntity(spell->getPosition(), yawOf(spell->getDirection()), REPLAY_SPELL_ENTITY));
+        frame.push_back(replayEntity(spell->getPosition(), yawOf(spell->getDirection()), spell->getName().c_str()));
     }
 
     m_replayFrames.push_back(std::move(frame));
+}
+
+void CombatSimulation::countDownHitEffects() {
+    for (int& framesLeft : m_hitFrames)
+        if (framesLeft > 0) --framesLeft;
 }
 
 // Como las claves de combat.json: "player_1", "player_2"; "none" si no gana nadie

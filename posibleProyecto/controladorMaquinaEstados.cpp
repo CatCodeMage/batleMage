@@ -15,9 +15,38 @@ ControladorMaquinaEstados::ControladorMaquinaEstados(Personaje* objetivo,
     m_regenMana = regeneracionManaSeg;
     m_tiempoDesdeUltAtaque = cooldownAtaque;
 }
+
+// Se mueve de lado alrededor del rival; cambia de sentido cada pocos segundos para no ser predecible
+void ControladorMaquinaEstados::rodearObjetivo(Personaje& personaje, const glm::vec3& direccionHaciaObjetivo, float deltaTime)
+{
+    constexpr float FRACCION_VELOCIDAD_RODEO = 0.7f;
+    constexpr float SEGUNDOS_MINIMOS_POR_SENTIDO = 1.5f;
+    constexpr float SEGUNDOS_EXTRA_AL_AZAR = 2.0f;
+
+    m_tiempoHastaCambiarSentido -= deltaTime;
+    if (m_tiempoHastaCambiarSentido <= 0.0f) {
+        m_sentidoRodeo = (std::rand() % 2 == 0) ? 1.0f : -1.0f;
+        const float azarEntre0y1 = static_cast<float>(std::rand()) / RAND_MAX;
+        m_tiempoHastaCambiarSentido = SEGUNDOS_MINIMOS_POR_SENTIDO + azarEntre0y1 * SEGUNDOS_EXTRA_AL_AZAR;
+    }
+
+    const glm::vec3 direccionLateral(direccionHaciaObjetivo.z, 0.0f, -direccionHaciaObjetivo.x);   // perpendicular en el suelo
+    personaje.moverse(direccionLateral * m_sentidoRodeo * m_velocidadMovimiento * FRACCION_VELOCIDAD_RODEO * deltaTime);
+}
+
 void ControladorMaquinaEstados::setcatalogoHechizos(const std::vector<InfoHechizo>& catalogo)
 {
     m_catalogoHechizos = catalogo;
+}
+
+// Apunta adonde estara el rival cuando llegue el hechizo, suponiendo que sigue moviendose igual
+glm::vec3 ControladorMaquinaEstados::calcularDireccionAnticipada(const Personaje& personaje, float velocidadHechizo) const
+{
+    const glm::vec3 posicionPropia = personaje.getPosicion();
+    const glm::vec3 posicionObjetivo = m_objetivo->getPosicion();
+    const float segundosDeVuelo = glm::length(posicionObjetivo - posicionPropia) / velocidadHechizo;
+    const glm::vec3 posicionPrevista = posicionObjetivo + m_velocidadObjetivo * segundosDeVuelo;
+    return glm::normalize(posicionPrevista - posicionPropia);
 }
 
 void ControladorMaquinaEstados::actualizar(Personaje& personaje, float deltaTime)
@@ -38,6 +67,13 @@ void ControladorMaquinaEstados::actualizar(Personaje& personaje, float deltaTime
     }
     glm::vec3 posPropia = personaje.getPosicion();
     glm::vec3 posObj = m_objetivo->getPosicion();
+
+    // Velocidad del rival a partir de cuanto se ha movido desde el tick anterior
+    if (m_conocePosicionAnteriorObjetivo && deltaTime > 0.0f)
+        m_velocidadObjetivo = (posObj - m_posicionAnteriorObjetivo) / deltaTime;
+    m_posicionAnteriorObjetivo = posObj;
+    m_conocePosicionAnteriorObjetivo = true;
+
     glm::vec3 diff(posObj.x - posPropia.x, 
                 posObj.y - posPropia.y, 
                 posObj.z - posPropia.z);
@@ -132,6 +168,13 @@ void ControladorMaquinaEstados::ejecutarEstado(Personaje& personaje,const glm::v
         {
             personaje.borrarEstado(EstadoPersonaje::VOLANDO);
             apuntarHacia(personaje, direccionHaciaObjetivo);
+
+            constexpr float DISTANCIA_COMBATE_PREFERIDA = 12.0f;   // mayor que el safeDistance maximo (9): no se pone a huir
+            if (distancia > DISTANCIA_COMBATE_PREFERIDA)
+                acercarseAlObjetivo(personaje, direccionHaciaObjetivo, deltaTime);   // se acerca mientras lanza: entran mas hechizos en alcance
+
+            rodearObjetivo(personaje, direccionHaciaObjetivo, deltaTime);
+
             if (m_tiempoDesdeUltAtaque >= m_cooldownAtaque)
             {
                 personaje.borrarEstado(EstadoPersonaje::IDLE);
@@ -140,7 +183,13 @@ void ControladorMaquinaEstados::ejecutarEstado(Personaje& personaje,const glm::v
                 int indiceRandom = std::rand() % m_hechizosLanzables.size();
                 InfoHechizo hechizoElegido = m_hechizosLanzables[indiceRandom];
                 personaje.disminuirMana(hechizoElegido.costeMana);
+                apuntarHacia(personaje, calcularDireccionAnticipada(personaje, hechizoElegido.velocidad));
                 personaje.lanzarHechizo(hechizoElegido.id);
+
+                // TEMPORAL 
+
+                std::cout << "[IA] lanza " << hechizoElegido.id << "\n";
+
                 m_cooldownAtaque = hechizoElegido.cooldown;
                 m_tiempoDesdeUltAtaque = 0.0f;
             } else {
@@ -153,6 +202,11 @@ void ControladorMaquinaEstados::ejecutarEstado(Personaje& personaje,const glm::v
             break;
         }
     }
+}
+
+void ControladorMaquinaEstados::acercarseAlObjetivo(Personaje& personaje, const glm::vec3& direccionHaciaObjetivo, float deltaTime)
+{
+    personaje.moverse(direccionHaciaObjetivo * m_velocidadMovimiento * deltaTime);
 }
 
 void ControladorMaquinaEstados::cargarCatalogoDesdeGestor(const HechizosGestor& gestor)
@@ -170,6 +224,7 @@ void ControladorMaquinaEstados::cargarCatalogoDesdeGestor(const HechizosGestor& 
         info.costeMana = temp.definition.cost;
         info.alcance = temp.speed * temp.defaultLifeTime;
         info.cooldown = temp.definition.cooldown;
+        info.velocidad = temp.speed;
 
         m_catalogoHechizos.push_back(info);
     }

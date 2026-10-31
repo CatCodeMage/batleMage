@@ -3,12 +3,44 @@
         "scale": [1, 1, 1],
         "asset": "spirit"
     },
-    "spell": {
-        "scale": [0.5, 0.5, 0.5],
-        "asset": "fireball"
+    "player_red": {
+        "scale": [1, 1, 1],
+        "asset": "spirit_red"
+    },
+    "player_blue": {
+        "scale": [1, 1, 1],
+        "asset": "spirit_blue"
+    },
+    "dead_red": {
+        "scale": [1, 1, 1],
+        "asset": "dead_red"
+    },
+    "dead_blue": {
+        "scale": [1, 1, 1],
+        "asset": "dead_blue"
     },
     "hit": {
         "scale": [0.9, 0.9, 0.9],
         "asset": "hit"
-    }
+    },
+    "spell": {
+        "scale": [0.5, 0.5, 0.5],
+        "asset": "fireball"
+    },
+    "fire_ball":       { "scale": [0.5, 0.5, 0.5], "asset": "fireball" },
+    "meteor":          { "scale": [0.5, 0.5, 0.5], "asset": "fireball" },
+    "flame_wall":      { "scale": [0.5, 0.5, 0.5], "asset": "fireball" },
+    "ice_lance":       { "scale": [0.5, 0.5, 0.5], "asset": "ice_cube" },
+    "ice_shard":       { "scale": [0.5, 0.5, 0.5], "asset": "ice_cube" },
+    "frost_nova":      { "scale": [0.5, 0.5, 0.5], "asset": "ice_cube" },
+    "earth_spike":     { "scale": [0.5, 0.5, 0.5], "asset": "rock_cone" },
+    "lightning_bolt":  { "scale": [0.5, 0.5, 0.5], "asset": "fireball" },
+    "thunder_storm":   { "scale": [0.5, 0.5, 0.5], "asset": "fireball" },
+    "chain_lightning": { "scale": [0.5, 0.5, 0.5], "asset": "fireball" },
+    "arcane_ray":      { "scale": [0.5, 0.5, 0.5], "asset": "fireball" },
+    "arcane_nova":     { "scale": [0.5, 0.5, 0.5], "asset": "fireball" },
+    "poison_cloud":    { "scale": [0.5, 0.5, 0.5], "asset": "fireball" },
+    "healing":         { "scale": [0.5, 0.5, 0.5], "asset": "fireball" },
+    "wind_blade":      { "scale": [0.5, 0.5, 0.5], "asset": "fireball" },
+    "water_jet":       { "scale": [0.5, 0.5, 0.5], "asset": "fireball" }
 }
