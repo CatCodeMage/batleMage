@@ -1,0 +1,60 @@
+{
+  "mode": "simulate",
+  "combatType": "1v1",
+  "map": "map_arena_01",
+  "teams": {
+    "A": [
+      {
+        "playerType": "fire_mage",
+        "entity": "player_red",
+        "wands": [
+          {
+            "wandId": "wand_ice_apprentice",
+            "spells": [
+              "poison_cloud",
+              "meteor",
+              "wind_blade"
+            ]
+          },
+          {
+            "wandId": "wand_burst",
+            "spells": [
+              "ice_lance",
+              "frost_nova",
+              "healing"
+            ]
+          }
+        ],
+        "basicSpell": null
+      }
+    ],
+    "B": [
+      {
+        "playerType": "dwarf",
+        "entity": "player_blue",
+        "wands": [
+          {
+            "wandId": "wand_shuffle",
+            "spells": [
+              "ice_lance",
+              "lightning_bolt",
+              "arcane_ray",
+              "frost_nova",
+              "thunder_storm",
+              "flame_wall"
+            ]
+          },
+          {
+            "wandId": "wand_burst",
+            "spells": [
+              "ice_lance",
+              "meteor",
+              "healing"
+            ]
+          }
+        ],
+        "basicSpell": null
+      }
+    ]
+  }
+}

@@ -1,0 +1,111 @@
+{
+  "wand_apprentice": {
+    "name": "Varita de Aprendiz",
+    "element": "arcane",
+    "asset": "fireball",
+    "mana": 50,
+    "capacity": 3,
+    "castDelay": 0.4,
+    "rechargeTime": 1.2
+  },
+
+  "wand_fire_starter": {
+    "name": "Varita Ígnea Básica",
+    "element": "fire",
+    "asset": "fireball",
+    "mana": 80,
+    "capacity": 4,
+    "castDelay": 0.3,
+    "rechargeTime": 1.5
+  },
+
+  "wand_ice_apprentice": {
+    "name": "Varita de Escarcha",
+    "element": "ice",
+    "asset": "ice_cube",
+    "mana": 65,
+    "capacity": 3,
+    "castDelay": 0.25,
+    "rechargeTime": 1.0
+  },
+
+  "wand_storm": {
+    "name": "Varita de Tormenta",
+    "element": "lightning",
+    "asset": "fireball",
+    "mana": 90,
+    "capacity": 4,
+    "castDelay": 0.2,
+    "rechargeTime": 2.2
+  },
+
+  "wand_arcane": {
+    "name": "Varita Arcana",
+    "element": "arcane",
+    "asset": "fireball",
+    "mana": 120,
+    "capacity": 5,
+    "castDelay": 0.35,
+    "rechargeTime": 2.0
+  },
+
+  "wand_rapid": {
+    "name": "Varita Rápida",
+    "element": "wind",
+    "asset": "fireball",
+    "mana": 40,
+    "capacity": 2,
+    "castDelay": 0.1,
+    "rechargeTime": 0.8
+  },
+
+  "wand_heavy": {
+    "name": "Varita Pesada",
+    "element": "earth",
+    "asset": "rock_cone",
+    "mana": 150,
+    "capacity": 5,
+    "castDelay": 0.8,
+    "rechargeTime": 3.0
+  },
+
+  "wand_shuffle": {
+    "name": "Varita del Caos",
+    "element": "poison",
+    "asset": "fireball",
+    "mana": 100,
+    "capacity": 6,
+    "castDelay": 0.4,
+    "rechargeTime": 1.8
+  },
+
+  "wand_multi": {
+    "name": "Varita Múltiple",
+    "element": "arcane",
+    "asset": "fireball",
+    "mana": 110,
+    "capacity": 4,
+    "castDelay": 0.5,
+    "rechargeTime": 2.0
+  },
+
+  "wand_burst": {
+    "name": "Varita de Ráfaga",
+    "element": "fire",
+    "asset": "fireball",
+    "mana": 100,
+    "capacity": 3,
+    "castDelay": -0.2,
+    "rechargeTime": 2.5
+  },
+
+  "wand_healer": {
+    "name": "Varita de Sanación",
+    "element": "water",
+    "asset": "ice_cube",
+    "mana": 90,
+    "capacity": 3,
+    "castDelay": 0.3,
+    "rechargeTime": 1.0
+  }
+}
