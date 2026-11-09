@@ -231,7 +231,7 @@ void simulateCombatToReplay() {
 
 int main()
 {
-    //sendForm();   // cuando se active: antes de simular, porque es el formulario el que escribe combat.json
+    sendForm();   // cuando se active: antes de simular, porque es el formulario el que escribe combat.json
     simulateCombatToReplay();
     return createSimulation();
 }

@@ -11,7 +11,7 @@
                 1,
                 -20
             ],
-            "type": "fire_mage"
+            "type": "dwarf"
         },
         "player_2": {
             "position": [
@@ -19,7 +19,7 @@
                 1,
                 20
             ],
-            "type": "tank_mage"
+            "type": "dwarf"
         }
     },
     "spells": "../db/spells.json"

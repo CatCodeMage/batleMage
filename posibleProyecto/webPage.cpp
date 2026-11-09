@@ -115,9 +115,9 @@ bool saveCombatMetadata(const std::map<std::string, std::string>& form) {
         combatMetadata["metadata"]["combatType"] = form.at("combatType");
         combatMetadata["map"] = "../db/map.json";
         combatMetadata["players"]["player_1"]["type"] = form.at("player_1");
-        combatMetadata["players"]["player_1"]["position"] = { -20, 0, -20 };
+        combatMetadata["players"]["player_1"]["position"] = { -20, 1, -20 };
         combatMetadata["players"]["player_2"]["type"] = form.at("player_2");
-        combatMetadata["players"]["player_2"]["position"] = { 20, 0, 20 };
+        combatMetadata["players"]["player_2"]["position"] = { 20, 1, 20 };
         combatMetadata["spells"] = "../db/spells.json";
 
         std::ofstream combat(DESTINATION_FILE);
