@@ -15,7 +15,7 @@
 #include "MapData.h"
 #include "webPage.h"
 #include "jsonManager.h"
-#include "simulationData.h"
+#include "UserInterface.h"
 
 struct FramesData
 {
@@ -23,6 +23,7 @@ struct FramesData
 
     int frame;
     int lessFrames;
+    bool isPaused = false;
 };
 
 struct simulationData
@@ -51,5 +52,6 @@ struct simulationData
     ShadowSystem shadows;
     Input keysInput;
     FramesData framesInfo;
+    UserInterface visualInterface;
 };
 

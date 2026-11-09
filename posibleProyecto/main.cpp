@@ -100,7 +100,10 @@ void buclePrincipaLTiempoReal(GLFWwindow* window, SystemInfo& sysInfo) {
     float unplayedSeconds = 0.0f;   // tiempo real que aun no se ha convertido en frames del combate
 
     while (shouldContinue(window)) {
-        unplayedSeconds += (std::min) (sysInfo.getDeltaTime(), MAX_SECONDS_PER_SCREEN_FRAME);
+
+        if (!simData.framesInfo.isPaused)
+            unplayedSeconds += (std::min)(sysInfo.getDeltaTime(), MAX_SECONDS_PER_SCREEN_FRAME);
+
         while (unplayedSeconds >= secondsPerCombatFrame) {
             simData.framesInfo.frame++;
             unplayedSeconds -= secondsPerCombatFrame;

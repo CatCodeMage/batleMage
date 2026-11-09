@@ -1,4 +1,6 @@
 #include "simulationData.h"
+#include <imgui.h>
+#include "CombatPanel.h"
 
 void simulationData::changeLights(std::vector<SceneLight>& newLights) {
 	lights = newLights;
@@ -22,9 +24,12 @@ void simulationData::init(GLFWwindow* window) {
 	framesInfo.combat = generateCombat(libModel);
 	framesInfo.frame = 0;
 	framesInfo.lessFrames = 0;
+
+	visualInterface.init(window);
 }
 
 void simulationData::destroy() {
+	visualInterface.destroy();
 	shadows.destroy();
 	libMesh.destroy();
 	textures.destroy();
@@ -36,6 +41,7 @@ void simulationData::clearLastFrame() {
 }
 
 void simulationData::updateFrame(GLFWwindow* window) {
+	visualInterface.endFrame();
 	glfwSwapBuffers(window);
 	glfwPollEvents();
 }
@@ -44,6 +50,7 @@ void simulationData::procesMainBodyLoopRealTime(GLFWwindow* window, SystemInfo& 
 	clearLastFrame();
 
 	// System
+	visualInterface.beginFrame();
 	sysInfo.getCurrentState(window);
 	float time = sysInfo.getTimeStored();
 
@@ -52,6 +59,7 @@ void simulationData::procesMainBodyLoopRealTime(GLFWwindow* window, SystemInfo& 
 
 	glm::mat4 vp = viewCamera.get_proj() * viewCamera.get_view();
 
+	// Submit to queue
 	submitEntidades(renderer, libModel, map.entities);
 
 	submitEntidades(renderer, libModel, framesInfo.combat[framesInfo.frame]);
@@ -64,6 +72,8 @@ void simulationData::procesMainBodyLoopRealTime(GLFWwindow* window, SystemInfo& 
 
 	// Pintar
 	renderer.flush(libMesh, vp);
+
+	drawCombatPanel(framesInfo);
 
 	updateFrame(window);
 }

@@ -372,3 +372,6 @@ posibleProyecto/[Aa]ssets/
 
 #compilació
 build
+
+# Imgui dades locals
+imgui.ini
