@@ -16,6 +16,7 @@
 #include "webPage.h"
 #include "jsonManager.h"
 #include "simulationData.h"
+#include "Mp4Exporter.h"
 
 struct FramesData
 {

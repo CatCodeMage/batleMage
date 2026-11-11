@@ -108,6 +108,9 @@
     <ClCompile Include="..\src\CombatSimulation.cpp">
       <Filter>Archivos de recursos\Archivos de origen</Filter>
     </ClCompile>
+    <ClCompile Include="Mp4Exporter.cpp">
+      <Filter>Archivos de recursos\Archivos de origen</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h">
@@ -216,6 +219,9 @@
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
     <ClInclude Include="..\src\CombatSimulation.h">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
+    <ClInclude Include="Mp4Exporter.h">
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
   </ItemGroup>

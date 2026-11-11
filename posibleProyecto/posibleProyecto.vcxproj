@@ -181,6 +181,7 @@
     <ClInclude Include="controladorMaquinaEstados.h" />
     <ClInclude Include="controladorPersonaje.h" />
     <ClInclude Include="ModelLibrary.h" />
+    <ClCompile Include="Mp4Exporter.cpp" />
     <ClCompile Include="Paths.cpp" />
     <ClCompile Include="personaje.cpp" />
     <ClCompile Include="Renderer.cpp" />
@@ -207,6 +208,7 @@
     <ClInclude Include="MapData.h" />
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="MeshLibrary.h" />
+    <ClInclude Include="Mp4Exporter.h" />
     <ClInclude Include="Paths.h" />
     <ClInclude Include="personaje.h" />
     <ClInclude Include="Renderer.h" />

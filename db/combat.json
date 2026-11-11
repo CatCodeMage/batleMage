@@ -1,59 +1,26 @@
 {
-  "mode": "simulate",
-  "combatType": "1v1",
-  "map": "map_arena_01",
-  "teams": {
-    "A": [
-      {
-        "playerType": "sphere",
-        "entity": "player_red",
-        "wands": [
-          {
-            "wandId": "wand_burst",
-            "spells": [
-              "ice_lance",
-              "wind_blade",
-              "lightning_bolt"
-            ]
-          },
-          {
-            "wandId": "wand_arcane",
-            "spells": [
-              "ice_lance",
-              "wind_blade",
-              "frost_nova",
-              "thunder_storm",
-              "chain_lightning"
-            ]
-          }
-        ],
-        "basicSpell": null
-      }
-    ],
-    "B": [
-      {
-        "playerType": "ice_mage",
-        "entity": "player_blue",
-        "wands": [
-          {
-            "wandId": "wand_burst",
-            "spells": [
-              "meteor",
-              "thunder_storm",
-              "flame_wall"
-            ]
-          },
-          {
-            "wandId": "wand_burst",
-            "spells": [
-              "ice_lance",
-              "meteor",
-              "frost_nova"
-            ]
-          }
-        ],
-        "basicSpell": null
-      }
-    ]
-  }
+    "frames": "",
+    "map": "../db/map.json",
+    "metadata": {
+        "combatType": "1v1"
+    },
+    "players": {
+        "player_1": {
+            "position": [
+                -20,
+                1,
+                -20
+            ],
+            "type": "fire_mage"
+        },
+        "player_2": {
+            "position": [
+                20,
+                1,
+                20
+            ],
+            "type": "tank_mage"
+        }
+    },
+    "spells": "../db/spells.json"
 }
