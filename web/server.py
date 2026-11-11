@@ -7,7 +7,7 @@ import os
 PORT = 8000
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_DIR = os.path.join(BASE_DIR, '..', 'db')
-COMBAT_FILE = 'combat.json'
+COMBAT_FILE = 'combat_1.json'
 
 
 class Handler(http.server.SimpleHTTPRequestHandler):
