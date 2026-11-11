@@ -1,3 +1,8 @@
 {
-    "cmake.sourceDirectory": "D:/Documents/UAB 3r/VGI/Projecte/battleMage/posibleProyecto/libs/glm-master"
+    "cmake.sourceDirectory": "D:/Documents/UAB 3r/VGI/Projecte/battleMage/posibleProyecto/libs/glm-master",
+    "C_Cpp.default.includePath": [
+        "${workspaceFolder}/**",
+        "${workspaceFolder}/posibleProyecto/libs/assimp/include"
+    ],
+    "C_Cpp.default.mergeConfigurations": true
 }
