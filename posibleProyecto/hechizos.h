@@ -8,10 +8,10 @@
 
 
 class Hechizo {
-    public:
+public:
 
-    Hechizo(int id, const std::string& name, ElementType element, float cost, 
-            float damage, float cooldown, float speed, float radius);
+    Hechizo(int id, const std::string& name, ElementType element, float cost,
+        float damage, float cooldown, float speed, float radius);
 
     //***************************** */
     // Funciones (lógica de hechizos)
@@ -25,7 +25,7 @@ class Hechizo {
 
     // Función para reiniciar el proyectil existente
     void reset();
-    
+
     // Función para saber si ha expirado tiempo de vida
     bool hasExpired() const {
         return currentLifeTime >= maxLifeTime;
@@ -71,23 +71,55 @@ class Hechizo {
     void setScale(const glm::vec3& newScale) { movement.scale = newScale; }
     void setSpeed(float newSpeed) { movement.speed = newSpeed; }
     void setRadius(float newRadius) { movement.radius = newRadius; }
-    
+
     // Control manual de ciclo de vida si fuera necesario
     void setActive(bool active) { isActive = active; }
     void setMaxLifeTime(float time) { maxLifeTime = time; }
 
     // hechizo entero
-    void setDefinition ( SpellDefinitionComponent hechizoDatos);
-            
-    private:
+    void setDefinition(SpellDefinitionComponent hechizoDatos);
+
+    // definición completa del hechizo en vuelo (con modificadores ya aplicados)
+    const SpellDefinitionComponent& getDefinition() const { return hechizo; }
+
+    void setDirection(const glm::vec3& newDir) { movement.direction = newDir; }
+
+    // quién lo ha lanzado (-1 = desconocido)
+    void setLanzador(int id) { idLanzador = id; }
+    int  getLanzador() const { return idLanzador; }
+
+    // comportamientos activados por modificadores (sin memoria dinámica)
+    void setComportamientos(uint32_t etq, int rebotes) {
+        etiquetas = etq;
+        rebotesRestantes = rebotes;
+    }
+    uint32_t getEtiquetas() const { return etiquetas; }
+    int getRebotesRestantes() const { return rebotesRestantes; }
+
+    // colisiones avisa de que el hechizo ha chocado con una superficie del mundo.
+    // vector normal (perpendicular a la superficie): apunta desde la superficie HACIA el hechizo. penetracion: cuánto se ha metido (>= 0).
+    // El hechizo decide qué hacer: rebotar o desactivarse.
+    void alChocarSuperficie(const glm::vec3& normal, float penetracion);
+
+    // posición dentro del pool (la gestiona HechizosGestor)
+    void setIndicePool(int indice) { indicePool = indice; }
+    int  getIndicePool() const { return indicePool; }
+
+private:
     // struct con los datos del hechizo
     SpellDefinitionComponent hechizo;
-    
+
     // struct con los datos de movimiento de projectil
     ProjectileComponent movement;
-    
+
     //variables para saber el tiempo de vida
-    bool isActive;       
-    float maxLifeTime;   
+    bool isActive;
+    float maxLifeTime;
     float currentLifeTime;
+
+    // NUEVO: datos de comportamientos y control
+    int      idLanzador = -1;
+    uint32_t etiquetas = ETQ_NINGUNA;
+    int      rebotesRestantes = 0;
+    int      indicePool = -1;   // NO se borra en reset()
 };

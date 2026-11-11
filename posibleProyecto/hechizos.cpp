@@ -1,15 +1,15 @@
 #include "hechizos.h"
 
-Hechizo::Hechizo(int id, const std::string& name, ElementType element, 
-                             float cost, float damage, float cooldown, 
-                             float speed, float radius) 
+Hechizo::Hechizo(int id, const std::string& name, ElementType element,
+    float cost, float damage, float cooldown,
+    float speed, float radius)
 {
     // Inicialización del componente de definición
     //CAMBIAR: en el futuro meter casttype y movementpattern
     hechizo = { id, name, element, CastType::Projectile, MovementPattern::Linear, cost, damage, cooldown };
-    
+
     // Inicialización del componente de movimiento (valores por defecto para posición/rotación)
-    movement = { 
+    movement = {
         glm::vec3(0.0f),          // translacio
         glm::vec3(0.0f),          // rotacio
         glm::vec3(1.0f),          // scale
@@ -32,6 +32,7 @@ void Hechizo::cast(const glm::vec3& initialPosition, const glm::vec3& direction)
 }
 
 // CAMBIAR: segun el tipo de movimiento y tipo de casteo, de momento como un proectil
+// (sin cambios: el rebote ya no se comprueba aquí, lo avisa colisiones)
 void Hechizo::update(float deltaTime) {
     if (!isActive) return;
 
@@ -43,8 +44,28 @@ void Hechizo::update(float deltaTime) {
 
     //Comprobar si ha terminado su vida
     if (hasExpired()) {
-        setActive(false); 
+        setActive(false);
     }
+}
+
+// NUEVO: reacción a un choque con el mundo (lo detecta colisiones, no el hechizo)
+void Hechizo::alChocarSuperficie(const glm::vec3& normal, float penetracion) {
+    if (!isActive) return;
+
+    // Si ya se está alejando de la superficie (p. ej. acaba de rebotar), no hacer nada
+    if (glm::dot(movement.direction, normal) >= 0.0f) return;
+
+    // Sin etiqueta de rebote o sin rebotes restantes: choca y desaparece
+    if (!(etiquetas & ETQ_REBOTE) || rebotesRestantes <= 0) {
+        setActive(false);
+        return;
+    }
+
+    // Rebote 3D: refleja la dirección respecto a la normal (sirve para suelo, paredes, rocas...)
+    movement.direction = glm::reflect(movement.direction, normal);
+    // Sacarlo de la superficie para que no siga "dentro"
+    movement.translacio += normal * penetracion;
+    rebotesRestantes--;
 }
 
 void Hechizo::reset() {
@@ -58,9 +79,14 @@ void Hechizo::reset() {
 
     // Reiniciamos tiempos y desactivamos el hechizo
     currentLifeTime = 0.0f;
-    isActive = false; 
+    isActive = false;
+
+    // NUEVO: limpiamos comportamientos y lanzador (indicePool NO se toca)
+    idLanzador = -1;
+    etiquetas = ETQ_NINGUNA;
+    rebotesRestantes = 0;
 }
 
-void Hechizo::setDefinition(SpellDefinitionComponent hechizoDatos){
+void Hechizo::setDefinition(SpellDefinitionComponent hechizoDatos) {
     hechizo = hechizoDatos;
 }
