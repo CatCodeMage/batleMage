@@ -21,8 +21,13 @@ public:
     HechizosGestor(size_t poolSize);
 
     // para registrar los datos del un hechizo 
-    void registrarHechizo(int id, const std::string& name, ElementType element, float cost, 
-    float damage, float cooldown, float speed, float radius, glm::vec3 scale,float maxLifeTime);
+    void registrarHechizo(
+        int id, const std::string& name, ElementType element,
+        float cost, float damage, float cooldown,
+        float speed, float radius, glm::vec3 scale,
+        float maxLifeTime,
+        MovementPattern pattern = MovementPattern::Linear
+    );
 
     // Lanza un hechizo buscando uno inactivo en la pool y aplicando las propiedades
     void spawnSpell(int spellId, const glm::vec3& initialPosition, const glm::vec3& direction);

@@ -1,66 +1,100 @@
+
 #include "hechizos.h"
 
-Hechizo::Hechizo(int id, const std::string& name, ElementType element, 
-                             float cost, float damage, float cooldown, 
-                             float speed, float radius) 
+Hechizo::Hechizo(int id, const std::string& name, ElementType element,
+    float cost, float damage, float cooldown,
+    float speed, float radius)
 {
-    // Inicialización del componente de definición
-    //CAMBIAR: en el futuro meter casttype y movementpattern
-    hechizo = { id, name, element, CastType::Projectile, MovementPattern::Linear, cost, damage, cooldown };
-    
-    // Inicialización del componente de movimiento (valores por defecto para posición/rotación)
-    movement = { 
+    // Definicion del hechizo
+    hechizo = {
+        id, name, element,
+        CastType::Projectile,
+        MovementPattern::Linear,
+        cost, damage, cooldown
+    };
+
+    // Estado inicial del proyectil
+    movement = {
         glm::vec3(0.0f),          // translacio
         glm::vec3(0.0f),          // rotacio
         glm::vec3(1.0f),          // scale
-        glm::vec3(0.0f, 0.0f, 1.0f), // direction (por defecto hacia adelante en Z)
-        speed,                    // speed
-        radius                    // radius
+        glm::vec3(0.0f, 0.0f, 1.0f), // direction
+        glm::vec3(0.0f),          // velocity (NUEVO)
+        speed,
+        radius
     };
 
-    // Inicialización de estado
     isActive = false;
     maxLifeTime = 5.0f;
     currentLifeTime = 0.0f;
 }
 
-void Hechizo::cast(const glm::vec3& initialPosition, const glm::vec3& direction) {
+
+void Hechizo::cast(const glm::vec3& initialPosition,
+    const glm::vec3& direction)
+{
     movement.translacio = initialPosition;
     movement.direction = glm::normalize(direction);
+
+    // Velocidad inicial del proyectil
+    movement.velocity = movement.direction * movement.speed;
+
+    if (hechizo.formaMovimiento == MovementPattern::Parabolic) {
+        // Sale horizontalmente, sin impulso hacia arriba
+        movement.velocity.y = 0.0f;
+    }
+
     currentLifeTime = 0.0f;
-    isActive = true; // Activamos el proyectil al lanzarlo
+    isActive = true;
 }
 
-// CAMBIAR: segun el tipo de movimiento y tipo de casteo, de momento como un proectil
-void Hechizo::update(float deltaTime) {
+
+void Hechizo::update(float deltaTime)
+{
     if (!isActive) return;
 
-    // Actualizar la posición (translacio) en base a la velocidad y dirección
-    movement.translacio += movement.direction * (movement.speed * deltaTime);
+    if (hechizo.formaMovimiento == MovementPattern::Parabolic) {
 
-    // Acumular tiempo
+        // Gravedad negativa porque el eje Y apunta hacia arriba
+        const glm::vec3 gravedad(0.0f, -1.5f, 0.0f);
+
+        // Actualizar posicion teniendo en cuenta la aceleracion
+        movement.translacio +=
+            movement.velocity * deltaTime +
+            0.5f * gravedad * deltaTime * deltaTime;
+
+        // La gravedad modifica la velocidad vertical
+        movement.velocity += gravedad * deltaTime;
+    }
+    else {
+        // Movimiento lineal original
+        movement.translacio +=
+            movement.direction * (movement.speed * deltaTime);
+    }
+
     currentLifeTime += deltaTime;
 
-    //Comprobar si ha terminado su vida
     if (hasExpired()) {
-        setActive(false); 
+        setActive(false);
     }
 }
 
-void Hechizo::reset() {
-    // Reiniciamos el movimiento a valores nulos/ceros
+void Hechizo::reset()
+{
     movement.translacio = glm::vec3(0.0f);
     movement.rotacio = glm::vec3(0.0f);
-    movement.scale = glm::vec3(1.0f); // O 0.0f si prefieres que desaparezca por completo
-    movement.direction = glm::vec3(0.0f, 0.0f, 0.0f); // Sin dirección
+    movement.scale = glm::vec3(1.0f);
+    movement.direction = glm::vec3(0.0f);
+    movement.velocity = glm::vec3(0.0f);
+
     movement.speed = 0.0f;
     movement.radius = 0.0f;
 
-    // Reiniciamos tiempos y desactivamos el hechizo
     currentLifeTime = 0.0f;
-    isActive = false; 
+    isActive = false;
 }
 
-void Hechizo::setDefinition(SpellDefinitionComponent hechizoDatos){
+void Hechizo::setDefinition(SpellDefinitionComponent hechizoDatos)
+{
     hechizo = hechizoDatos;
 }

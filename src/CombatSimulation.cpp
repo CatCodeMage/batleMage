@@ -124,11 +124,45 @@ size_t CombatSimulation::opponentIndexOf(size_t playerIndex) const {
     return (playerIndex + 1) % m_players.size();
 }
  
-void CombatSimulation::applySpellHits() {
-    for (const std::unique_ptr<Hechizo>& spell : m_spells.getActiveHechizos()) {
-        if (spell->IsActive()) tryHitAnyPlayer(*spell);
+
+void CombatSimulation::applySpellHits()
+{
+    constexpr float GROUND_HEIGHT = 0.0f;
+
+    for (const std::unique_ptr<Hechizo>& spell :
+        m_spells.getActiveHechizos())
+    {
+        if (!spell->IsActive())
+            continue;
+
+        // Primero comprobar impacto contra personajes
+        if (tryHitAnyPlayer(*spell))
+            continue;
+
+        // Consultar el tipo de movimiento
+        const SpellDefinitionComponent& definition =
+            m_spells.getCatalogoHechizos()
+            .at(spell->getId()).definition;
+
+        // Solo comprobar suelo en hechizos parabolicos
+        if (definition.formaMovimiento ==
+            MovementPattern::Parabolic)
+        {
+            glm::vec3 posicion = spell->getPosition();
+
+            // Parte inferior de la esfera
+            float alturaInferior =
+                posicion.y - SPELL_HIT_RADIUS;
+
+            if (alturaInferior <= GROUND_HEIGHT)
+            {
+                // Destruir el proyectil al tocar suelo
+                m_spells.destroySpell(spell.get());
+            }
+        }
     }
 }
+
 
 // Un hechizo golpea como mucho a un mago y desaparece
 bool CombatSimulation::tryHitAnyPlayer(Hechizo& spell) {

@@ -1,3 +1,4 @@
+
 #include "jsonManager.h"
 
 using json = nlohmann::json;
@@ -8,159 +9,204 @@ const std::string COMBAT_PATH = "../db/combate_generado.json";
 const std::string ENTITIES_PATH = "../db/entities.json";
 
 ElementType parseElement(std::string element) {
-	if (element == "fire")      return ElementType::Fire;
-	if (element == "ice")       return ElementType::ICE;
-	if (element == "physical") return ElementType::Physical;
-	return ElementType::Fire;
+    if (element == "fire")      return ElementType::Fire;
+    if (element == "ice")       return ElementType::ICE;
+    if (element == "physical") return ElementType::Physical;
+    return ElementType::Fire;
 }
 
 void readSpells(HechizosGestor& spellManager) {
-	constexpr float DEFAULT_SPELL_COST = 10.0f;
-	// La IA calcula el alcance de cada hechizo como velocidad x vida: con 100 s atacaban desde cualquier distancia
-	constexpr float SPELL_LIFETIME_SECONDS = 3.0f;
+    constexpr float DEFAULT_SPELL_COST = 10.0f;
 
-	std::ifstream spells(SPELLS_PATH);
+    // La IA calcula el alcance como velocidad x tiempo de vida.
+    constexpr float SPELL_LIFETIME_SECONDS = 3.0f;
 
-	if (spells.is_open())
-	{
-		json j;
-		spells >> j;
+    std::ifstream spells(SPELLS_PATH);
 
-		int id = 0;
+    if (spells.is_open())
+    {
+        json j;
+        spells >> j;
 
-		for (auto& [name, spell] : j.items()) {
-			ElementType elem = parseElement(spell["element"]);
+        int id = 0;
 
-			glm::vec3 scaleVec(
-				spell["scale"][0].get<float>(),
-				spell["scale"][1].get<float>(),
-				spell["scale"][2].get<float>()
-			);
+        for (auto& [name, spell] : j.items()) {
+            ElementType elem = parseElement(spell["element"]);
 
-			spellManager.registrarHechizo(
-				id,
-				name,
-				elem,
-				spell.value<float>("cost", DEFAULT_SPELL_COST),
-				spell["damage"].get<float>(),
-				spell["cooldown"].get<float>(),
-				spell["speed"].get<float>(),
-				spell["radious"].get<float>(),
-				scaleVec,
-				SPELL_LIFETIME_SECONDS
-			);
+            glm::vec3 scaleVec(
+                spell["scale"][0].get<float>(),
+                spell["scale"][1].get<float>(),
+                spell["scale"][2].get<float>()
+            );
 
-			id++;
-		}
-	}
-	else
-	{
-		std::cout << "No file found" << std::endl;;
-	}
+            // NUEVO: leer el tipo de movimiento del JSON.
+            // Si no se especifica, el movimiento sera lineal.
+            std::string movementName = spell.value(
+                "movement_pattern",
+                std::string("linear")
+            );
+
+            MovementPattern pattern = MovementPattern::Linear;
+
+            if (movementName == "parabolic") {
+                pattern = MovementPattern::Parabolic;
+            }
+
+            spellManager.registrarHechizo(
+                id,
+                name,
+                elem,
+                spell.value<float>("cost", DEFAULT_SPELL_COST),
+                spell["damage"].get<float>(),
+                spell["cooldown"].get<float>(),
+                spell["speed"].get<float>(),
+                spell["radious"].get<float>(),
+                scaleVec,
+                SPELL_LIFETIME_SECONDS,
+                pattern
+            );
+
+            id++;
+        }
+    }
+    else
+    {
+        std::cout << "No file found" << std::endl;
+    }
 }
 
 std::vector<std::string> getPlayers() {
-	try {
-		std::vector<std::string> playerOptions;
+    try {
+        std::vector<std::string> playerOptions;
 
-		std::ifstream players(PLAYERS_PATH);
+        std::ifstream players(PLAYERS_PATH);
 
-		if (!players.is_open())
-		{
-			return {};
-		}
+        if (!players.is_open())
+        {
+            return {};
+        }
 
-		json j;
+        json j;
+        players >> j;
 
-		players >> j;
+        for (auto& [key, value] : j.items()) {
+            playerOptions.push_back(key);
+        }
 
-		for (auto& [key, value] : j.items()) {
-			playerOptions.push_back(key);
-		}
+        return playerOptions;
+    }
+    catch (const std::exception& e) {
+        std::cout << e.what() << std::endl;
 
-		return playerOptions;
-	}
-	catch (const std::exception& e) {
-		std::cout << e.what() << std::endl;
-
-		return {};
-	}
+        return {};
+    }
 }
 
-Entidad generateEntity(const std::vector<float>& position, const std::vector<float>& rotation,
-	const EntityInfo eInfo, const ModelLibrary& lib) {
+Entidad generateEntity(
+    const std::vector<float>& position,
+    const std::vector<float>& rotation,
+    const EntityInfo eInfo,
+    const ModelLibrary& lib)
+{
+    if (!lib.has(eInfo.asset)) {
+        throw std::runtime_error(
+            "asset desconocido: '" + eInfo.asset + "'"
+        );
+    }
 
-	if (!lib.has(eInfo.asset)) throw std::runtime_error("asset desconocido: '" + eInfo.asset + "'");
+    Entidad entity;
+    entity.model = lib.find(eInfo.asset);
 
-	Entidad entity;
-	entity.model = lib.find(eInfo.asset);
-	entity.transform.scale = glm::vec3(eInfo.scale[0], eInfo.scale[1], eInfo.scale[2]);
-	entity.transform.pos = glm::vec3(position[0], position[1], position[2]);
-	entity.transform.rot = glm::vec3(rotation[0], rotation[1], rotation[2]);
+    entity.transform.scale = glm::vec3(
+        eInfo.scale[0],
+        eInfo.scale[1],
+        eInfo.scale[2]
+    );
 
-	entity.kind = 0;   // opcional: si no está, 0 = liso
+    entity.transform.pos = glm::vec3(
+        position[0],
+        position[1],
+        position[2]
+    );
 
-	return entity;
+    entity.transform.rot = glm::vec3(
+        rotation[0],
+        rotation[1],
+        rotation[2]
+    );
+
+    entity.kind = 0;
+
+    return entity;
 }
 
 EntityInfo getEntityInfo(const std::string entityName) {
-	try {
-		std::ifstream entityFile(ENTITIES_PATH);
+    try {
+        std::ifstream entityFile(ENTITIES_PATH);
 
-		if (!entityFile.is_open())
-		{
-			return EntityInfo{};
-		}
+        if (!entityFile.is_open())
+        {
+            return EntityInfo{};
+        }
 
-		json entityData;
-		entityFile >> entityData;
+        json entityData;
+        entityFile >> entityData;
 
-		return EntityInfo{ entityData.at(entityName).at("asset"), entityData.at(entityName).at("scale").get<std::vector<float>>()};
-	}
-	catch (const std::exception& e) {
-		std::cout << e.what();
-		return EntityInfo{};
-	}
+        return EntityInfo{
+            entityData.at(entityName).at("asset"),
+            entityData.at(entityName).at("scale")
+                .get<std::vector<float>>()
+        };
+    }
+    catch (const std::exception& e) {
+        std::cout << e.what();
+        return EntityInfo{};
+    }
 }
 
-std::vector<std::vector <Entidad>> generateCombat(const ModelLibrary& modelLib) {
-	try {
-		std::ifstream simulationFile(COMBAT_PATH);
+std::vector<std::vector<Entidad>> generateCombat(
+    const ModelLibrary& modelLib)
+{
+    try {
+        std::ifstream simulationFile(COMBAT_PATH);
 
-		if (!simulationFile.is_open())
-		{
-			return {};
-		}
+        if (!simulationFile.is_open())
+        {
+            return {};
+        }
 
-		json simulationData;
+        json simulationData;
+        std::vector<std::vector<Entidad>> combatSequence;
 
-		std::vector<std::vector <Entidad>> combatSequence;
+        simulationFile >> simulationData;
 
-		simulationFile >> simulationData;
+        json jsonCombat = simulationData["frames"];
 
-		json jsonCombat = simulationData["frames"];
+        for (auto& frame : jsonCombat) {
 
-		for (auto& frame : jsonCombat) {
+            std::vector<Entidad> entities;
 
-			std::vector<Entidad> entities;
-			
-			for (auto& entity : frame)
-			{
-				EntityInfo eInfo = getEntityInfo(entity[2]);
+            for (auto& entity : frame)
+            {
+                EntityInfo eInfo = getEntityInfo(entity[2]);
 
-				entities.push_back(generateEntity(entity[0].get<std::vector<float>>(), 
-					entity[1].get<std::vector<float>>(), eInfo, modelLib));
-			}
+                entities.push_back(
+                    generateEntity(
+                        entity[0].get<std::vector<float>>(),
+                        entity[1].get<std::vector<float>>(),
+                        eInfo,
+                        modelLib
+                    )
+                );
+            }
 
-			combatSequence.push_back(entities);
-		}
+            combatSequence.push_back(entities);
+        }
 
-		return combatSequence;
-		
-	}
-	catch (const std::exception& e) {
-		std::cout << e.what() << std::endl;
-		return {};
-	}
-
+        return combatSequence;
+    }
+    catch (const std::exception& e) {
+        std::cout << e.what() << std::endl;
+        return {};
+    }
 }

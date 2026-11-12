@@ -10,15 +10,22 @@ HechizosGestor::HechizosGestor(size_t poolSize) {
     }
 }
 
-void HechizosGestor::registrarHechizo(int id, const std::string& name, ElementType element, float cost, 
-    float damage, float cooldown, float speed, float radius, glm::vec3 scale,float maxLifeTime) {
-    
-    // Creamos el componente de definición estática
-    // CAMBIAR: DE MOMENTO PONGO QUE ES FULL PROYECTILES Y LINEAR
-    SpellDefinitionComponent def = { id, name, element, CastType::Projectile, MovementPattern::Linear, cost, damage, cooldown };
+void HechizosGestor::registrarHechizo(
+    int id, const std::string& name, ElementType element,
+    float cost, float damage, float cooldown,
+    float speed, float radius, glm::vec3 scale,
+    float maxLifeTime, MovementPattern pattern)
+{
+    SpellDefinitionComponent def = {
+        id, name, element,
+        CastType::Projectile,
+        pattern,
+        cost, damage, cooldown
+    };
 
-    // Lo guardamos en el catálogo junto con sus datos de movimiento
-    hechizhosCatalog[id] = { def, speed, radius, scale, maxLifeTime };
+    hechizhosCatalog[id] = {
+        def, speed, radius, scale, maxLifeTime
+    };
 }
 
 void HechizosGestor::spawnSpell(int spellId, const glm::vec3& initialPosition, const glm::vec3& direction) {
