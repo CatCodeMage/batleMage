@@ -4,6 +4,8 @@
 
 Simulador de combates mágicos en 3D, hecho en C++ con OpenGL 3.3. Dos magos controlados por una IA se enfrentan solos: el combate se simula primero sin gráficos y después se reproduce en una arena 3D.
 
+![Demo de un combate en la arena](demo.gif)
+
 Proyecto en equipo (6 personas) de la asignatura **Visualització Gràfica Interactiva (VGI)** de la UAB.
 
 ## Estado actual
