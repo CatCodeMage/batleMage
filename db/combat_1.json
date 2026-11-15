@@ -1,0 +1,50 @@
+{
+  "frames": "",
+  "map": "../db/map.json",
+  "metadata": {
+    "combatType": "1v1",
+    "mode": "simulate"
+  },
+  "players": {
+    "player_1": {
+      "position": [
+        20,
+        1,
+        0
+      ],
+      "type": "tank_mage",
+      "wands": [
+        {
+          "slots": 4,
+          "spells": [
+            "flame_wall",
+            "arcane_ray",
+            "ice_lance",
+            "lightning_bolt"
+          ]
+        },
+        {
+          "slots": 4,
+          "spells": [
+            "arcane_ray",
+            "ice_lance"
+          ]
+        }
+      ],
+      "basicSpell": null,
+      "aiWands": false
+    },
+    "player_2": {
+      "position": [
+        -20,
+        1,
+        0
+      ],
+      "type": "tank_mage",
+      "wands": "AI_GENERATED",
+      "basicSpell": null,
+      "aiWands": true
+    }
+  },
+  "spells": "../db/spells.json"
+}

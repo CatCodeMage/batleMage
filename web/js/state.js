@@ -9,14 +9,15 @@ const State = {
     A: [],
     B: [],
   },
-  mapId: '/db/map.json',
+  mapId: 'map_arena_01',
+  spawn: { mode: 'auto', positions: {} },
   mode: null,
 };
 
 function resetState() {
   State.currentStep = 1;
   State.combat = { combatType: null, teamSizeA: 1, teamSizeB: 1 };
-  State.teams = { A: [], B: [] };
-  State.mapId = 'map_arena_01';
+  State.players = { player_1: [], player_2: [] };
+  State.mapId = '../db/map.js';
   State.mode = null;
 }

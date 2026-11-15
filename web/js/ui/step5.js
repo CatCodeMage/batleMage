@@ -8,7 +8,7 @@ function renderStep5() {
       <button id="btn-play" class="btn-secondary">🎮 Jugar</button>
     </div>
     <div class="review-io">
-      <button id="btn-save" class="btn-ghost">💾 Guardar preset</button>
+      <button id="btn-save" class="btn-ghost">💾 Guardar en Servidor</button>
       <button id="btn-load" class="btn-ghost">📂 Cargar preset</button>
       <input type="file" id="file-load" accept=".json" hidden />
     </div>
@@ -52,26 +52,28 @@ function renderSummary() {
 }
 
 function renderTeamSummary(team, chars) {
-  const color = team === 'A' ? 'red' : 'blue';
   return `
     <div class="summary-team team-${team}">
       <h3 style="color:${team === 'A' ? 'var(--accent)' : 'var(--blue)'}">Equipo ${team}</h3>
-      ${chars.length === 0 ? '<em>Vacío</em>' : chars.map(c => {
-        const activeWands = c.wands.filter(w => w.wandId);
+      ${chars.length === 0 ? '<em>Vacío</em>' : chars.map((c, i) => {
+        const playerName = team === 'A' ? `player_${i + 1}` : `player_${State.teams.A.length + i + 1}`;
+        
         return `
           <div class="summary-char">
-            <strong>${c.playerType}</strong>
-            <small>(${c.entity})</small>
+            <strong>${playerName}</strong> (${c.playerType})
             <ul>
-              ${activeWands.length === 0
-                ? '<li><em>Sin varitas</em></li>'
-                : activeWands.map(w => {
-                    const wandDef = Data.wands[w.wandId] || {};
-                    return `<li>
-                      <span class="wand-name">${wandDef.name || w.wandId}</span>
-                      <span class="wand-spells">${w.spells.join(', ')}</span>
-                    </li>`;
-                  }).join('')}
+              ${c.aiWands 
+                ? '<li><em>Varitas generadas por la IA</em></li>'
+                : (c.wands.length === 0 
+                    ? '<li><em>Sin varitas</em></li>'
+                    : c.wands.map(w => `
+                        <li>
+                          <span class="wand-name">Varita (${w.slots} esp.)</span>
+                          <span class="wand-spells">${w.spells.length > 0 ? w.spells.join(' → ') : 'Vacía'}</span>
+                        </li>
+                      `).join('')
+                  )
+              }
               ${c.basicSpell
                 ? `<li class="basic-spell"><em>Básico:</em> ${c.basicSpell}</li>`
                 : ''}
@@ -89,6 +91,7 @@ function bindActions() {
     const cfg = buildCombatConfig('simulate');
     showJson(cfg);
     console.log('[SIMULATE]', cfg);
+    alert('Simulación preparada.\nMira la consola para el JSON.');
   });
 
   document.getElementById('btn-play').addEventListener('click', () => {
@@ -100,23 +103,24 @@ function bindActions() {
   });
 
   document.getElementById('btn-save').addEventListener('click', async () => {
-  if (!validateAllSteps()) return;
-  const cfg = buildCombatConfig('simulate');
+    if (!validateAllSteps()) return;
+    const cfg = buildCombatConfig('simulate');
 
-  try {
-    const res = await fetch('/save-combat', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(cfg),
-    });
-    const data = await res.json();
+    try {
+      const res = await fetch('/save-combat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(cfg),
+      });
+      const data = await res.json();
 
-    if (!res.ok || !data.ok) throw new Error(data.error || 'Error desconocido');
-
-  } catch (err) {
-    console.error(err);
-  }
-});
+      if (!res.ok || !data.ok) throw new Error(data.error || 'Error desconocido');
+      alert('Guardado correctamente en db/combat.json');
+    } catch (err) {
+      alert('Error al guardar: ' + err.message);
+      console.error(err);
+    }
+  });
 
   const fileInput = document.getElementById('file-load');
   document.getElementById('btn-load').addEventListener('click', () => fileInput.click());
@@ -127,8 +131,8 @@ function bindActions() {
       const text = await file.text();
       const cfg = JSON.parse(text);
       loadPresetIntoState(cfg);
-      renderStep(1);
-      alert('Preset cargado');
+      renderStep(1); // Vuelve al paso 1 para revisar todo
+      alert('Preset cargado correctamente');
     } catch (err) {
       alert('Error al cargar el preset: ' + err.message);
     }
@@ -146,13 +150,17 @@ function loadPresetIntoState(cfg) {
   State.combat.combatType = cfg.combatType;
   State.combat.teamSizeA = cfg.teams.A.length;
   State.combat.teamSizeB = cfg.teams.B.length;
-  State.mapId = cfg.map || 'map_arena_01';
+  State.mapId = cfg.map || './db/map.json';
 
   const rebuildTeam = (teamKey) => cfg.teams[teamKey].map(c => ({
     playerType: c.playerType,
     entity: c.entity || (teamKey === 'A' ? 'player_red' : 'player_blue'),
-    wands: (c.wands || []).map(w => ({ wandId: w.wandId, spells: [...w.spells] })),
+    wands: (c.wands || []).map(w => ({ 
+      slots: w.slots || 4, 
+      spells: [...w.spells] 
+    })),
     basicSpell: c.basicSpell || null,
+    aiWands: c.aiWands || false
   }));
 
   State.teams.A = rebuildTeam('A');

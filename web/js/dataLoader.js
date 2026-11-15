@@ -16,7 +16,6 @@ async function loadAllData() {
     entities: './db/entities.json',
     assets:   './db/assets.json',
     hitbox:   './db/hitbox.json',
-    wands:    './db/wands.json',
   };    
 
 const entries = await Promise.all(

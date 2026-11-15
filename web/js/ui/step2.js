@@ -61,20 +61,16 @@ function assignToFirstEmptySlot(playerType) {
     const size = team === 'A' ? State.combat.teamSizeA : State.combat.teamSizeB;
     if (State.teams[team].length < size) {
       State.teams[team].push({
+        id: `player_${team === 'A' ? 'A' : 'B'}_${State.teams[team].length + 1}`,
         playerType,
         entity: team === 'A' ? 'player_red' : 'player_blue',
-        wands: [
-          { wandId: null, spells: [] },
-          { wandId: null, spells: [] },
-          { wandId: null, spells: [] },
-          { wandId: null, spells: [] },
-        ],
+        wands: [],
         basicSpell: null,
+        aiWands: false
       });
       return;
     }
   }
-  alert('Ambos equipos están llenos');
 }
 
 function validateStep2() {
