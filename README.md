@@ -1,27 +1,27 @@
 # Battle Mage
 
-> 🚧 **Proyecto en desarrollo.** Este README es un resumen rápido; se ampliará cuando avance el proyecto.
+> 🚧 **Work in progress.** This README is a quick summary; it will grow as the project moves forward.
 
-Simulador de combates mágicos en 3D, hecho en C++ con OpenGL 3.3. Dos magos controlados por una IA se enfrentan solos: el combate se simula primero sin gráficos y después se reproduce en una arena 3D.
+A 3D magic combat simulator written in C++ with OpenGL 3.3. Two AI-controlled mages fight on their own: the combat is first simulated without graphics and then replayed in a 3D arena.
 
-![Demo de un combate en la arena](demo.gif)
+![Demo of a fight in the arena](demo.gif)
 
-Proyecto en equipo (6 personas) de la asignatura **Visualització Gràfica Interactiva (VGI)** de la UAB.
+Team project (6 people) for the **Visualització Gràfica Interactiva (VGI)** course at UAB.
 
-## Estado actual
+## Current status
 
-- Simulación del combate a paso fijo y reproducible, separada de los gráficos.
-- IA de los magos con máquina de estados: esperar, perseguir, atacar y huir.
-- Hechizos con maná, alcance y cooldown, y detección de impactos.
-- Arena 3D con iluminación, sombras, texturas y modelos `.obj`.
-- Demo de la fase 0 terminada (31/10/2026).
+- Fixed-timestep, reproducible combat simulation, decoupled from rendering.
+- Mage AI built as a state machine: wait, chase, attack and flee.
+- Spells with mana, range and cooldown, plus hit detection.
+- 3D arena with lighting, shadows, textures and `.obj` models.
+- Phase 0 demo finished (31 Oct 2026).
 
-## Ejecutarlo
+## Running it
 
-Windows 10/11 de 64 bits con Visual Studio (carga de trabajo de C++):
+64-bit Windows 10/11 with Visual Studio (C++ desktop workload):
 
 1. `git clone https://github.com/CatCodeMage/batleMage.git`
-2. Abre `posibleProyecto.slnx`.
-3. Elige **x64** y **Debug**, y ejecuta.
+2. Open `posibleProyecto.slnx`.
+3. Select **x64** and **Debug**, then run.
 
-Las librerías (GLFW, GLEW, GLM, SOIL2, tinyobjloader, nlohmann/json) van incluidas en el repo. Hay más detalles en [`docs/`](docs/).
+The libraries (GLFW, GLEW, GLM, SOIL2, tinyobjloader, nlohmann/json) are included in the repo. More details in [`docs/`](docs/) (in Spanish).
