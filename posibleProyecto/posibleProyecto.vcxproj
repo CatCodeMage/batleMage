@@ -165,6 +165,7 @@
     <ClCompile Include="hechizosGestor.cpp" />
     <ClCompile Include="Input.cpp" />
     <ClCompile Include="jsonManager.cpp" />
+    <ClCompile Include="lanzadorHechizos.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MapData.cpp" />
     <ClCompile Include="Mesh.cpp" />
@@ -180,10 +181,12 @@
     <ClInclude Include="..\src\logica\mapa.h" />
     <ClInclude Include="controladorMaquinaEstados.h" />
     <ClInclude Include="controladorPersonaje.h" />
+    <ClInclude Include="lanzadorHechizos.h" />
     <ClInclude Include="ModelLibrary.h" />
     <ClCompile Include="Mp4Exporter.cpp" />
     <ClCompile Include="Paths.cpp" />
     <ClCompile Include="personaje.cpp" />
+    <ClCompile Include="PruebaHechizos.cpp" />
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="shaders.cpp" />
     <ClCompile Include="simulationData.cpp" />
@@ -211,6 +214,7 @@
     <ClInclude Include="Mp4Exporter.h" />
     <ClInclude Include="Paths.h" />
     <ClInclude Include="personaje.h" />
+    <ClInclude Include="PruebaHechizos.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="shaders.h" />
