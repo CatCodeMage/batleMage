@@ -44,7 +44,6 @@ bool Mp4Exporter::init(const std::wstring& path, int width, int height, int fps)
 	}
 
 	ComPtr<IMFMediaType> inType;
-	ComPtr<IMFMediaType> inType;
 	MFCreateMediaType(&inType);
 	inType->SetGUID(MF_MT_MAJOR_TYPE, MFMediaType_Video);
 	inType->SetGUID(MF_MT_SUBTYPE, MFVideoFormat_RGB32);

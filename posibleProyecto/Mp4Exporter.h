@@ -1,6 +1,7 @@
 #pragma once
 #include "global.h"
 #include <mfapi.h>
+#include <mfidl.h>
 #include <mfreadwrite.h>
 #include <wrl/client.h>
 

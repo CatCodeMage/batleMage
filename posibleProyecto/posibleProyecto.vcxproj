@@ -195,6 +195,7 @@
     <ClCompile Include="Transform.cpp" />
     <ClCompile Include="PointShadowMap.cpp" />
     <ClCompile Include="ShadowSystem.cpp" />
+    <ClCompile Include="varita.cpp" />
     <ClCompile Include="webPage.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -224,6 +225,7 @@
     <ClInclude Include="Transform.h" />
     <ClInclude Include="PointShadowMap.h" />
     <ClInclude Include="ShadowSystem.h" />
+    <ClInclude Include="varita.h" />
     <ClInclude Include="webPage.h" />
   </ItemGroup>
   <ItemGroup>
