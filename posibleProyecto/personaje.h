@@ -62,7 +62,7 @@ public:
 
     void moverse(const glm::vec3& desplazamiento);
     void rotar(const glm::vec3& deltaRotacion);
-    void lanzarHechizo(int idHechizo);
+    void lanzarHechizo();
     void recibirDano(float cantidadDano);
     void aumentarVida(float cantidad);
     void disminuirMana(float cantidad);

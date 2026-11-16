@@ -15,14 +15,17 @@ Personaje::Personaje(int id, glm::vec3 posicionInicial, float radio, HechizosGes
     this->m_vidaMax = 100.0f;
     this->m_vida = this->m_vidaMax;
     this->m_manaMax = 50.0f;
-    this->m_mana = this->m_manaMax;
+    this->m_mana = this->m_manaMax; 
     this->m_tiempoQuemado = 0.0f;
     this->m_tiempoCongelado = 0.0f;
     this->m_danoQuemadura = 5.0f;
     anadirEstado(EstadoPersonaje::IDLE);
     m_controlador = nullptr;
     m_gestorHechizos = gestorHechizos;
-
+    m_varitaActual = 0;
+    for (int i = 0; i < MAX_VARITAS; ++i) {
+        m_varitas.push_back(Varita("Varita basica " + std::to_string(i)));
+    }
 }
 
 void Personaje::anadirEstado(EstadoPersonaje nuevoEstado, float duracion)
@@ -162,36 +165,21 @@ void Personaje::disminuirMana(float cantidad)
     if(m_mana < 0) m_mana = 0;
 }
 
-void Personaje::lanzarHechizo(int idHechizo)
+void Personaje::lanzarHechizo()
 {
     if (yaTieneEstado(EstadoPersonaje::MUERTO) || yaTieneEstado(EstadoPersonaje::CONGELADO)) return;
     
     anadirEstado(EstadoPersonaje::CASTEANDO);
     
-    //direccion normalizada donde mira el pj
     float longitud = std::sqrt(m_direccion.x * m_direccion.x + m_direccion.y * m_direccion.y + m_direccion.z * m_direccion.z);
-
     glm::vec3 direccionDisparo(0.0f, 0.0f, 1.0f);
     if (longitud > 0.0001f)
     {
         direccionDisparo = glm::vec3(m_direccion.x / longitud, m_direccion.y / longitud, m_direccion.z / longitud);
     }
 
-    if (m_gestorHechizos != nullptr) {
-        // El hechizo nace con su centro fuera del mago: si no, su propio radio ya lo toca y se da a si mismo
-        const float radioHechizo = m_gestorHechizos->getCatalogoHechizos().at(idHechizo).radius;
-        float distanciaSeparacion = m_radio + radioHechizo + m_margenCasteo;
-
-        glm::vec3 posicionOrigenHechizo(
-            m_posicion.x + direccionDisparo.x * distanciaSeparacion,
-            m_posicion.y + direccionDisparo.y * distanciaSeparacion,
-            m_posicion.z + direccionDisparo.z * distanciaSeparacion
-        );
-
-        if (m_gestorHechizos != nullptr)
-        {
-            m_gestorHechizos->spawnSpell(idHechizo, posicionOrigenHechizo, direccionDisparo);
-        }
+    if (m_gestorHechizos != nullptr && !m_varitas.empty()) {
+        m_varitas[m_varitaActual].intentarDisparar(m_posicion, m_radio, m_margenCasteo, direccionDisparo, m_gestorHechizos);
     }
 }
 
@@ -204,7 +192,11 @@ int Personaje::getId() const { return m_id; }
 
 float Personaje::getVida() const { return m_vida; }
 
-float Personaje::getMana() const { return m_mana; }
+float Personaje::getMana() const 
+{ 
+    if (m_varitas.empty()) return 0.0f;
+    return m_varitas[m_varitaActual].getManaActual(); 
+}
 
 float Personaje::getRadio() const { return m_radio; }
 
