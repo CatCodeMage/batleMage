@@ -223,7 +223,7 @@ int createSimulation() {
 // Simula el combate entero sin graficos y lo deja grabado para que los graficos lo reproduzcan
 void simulateCombatToReplay() {
     CombatSimulation simulation;
-    simulation.setup(dataPath("db/combat.json"));
+    simulation.setup(dataPath("db/combat_1.json"));
     while (!simulation.isFinished()) {
         simulation.step();
     }

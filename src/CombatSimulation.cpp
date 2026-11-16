@@ -98,9 +98,17 @@ void CombatSimulation::createPlayers(const std::filesystem::path& combatConfigFi
     for (const json& player : config.at("players"))   // player_1, player_2 (nlohmann los ordena)
     {
         m_players.push_back(std::make_unique<Personaje>(nextPlayerId++, readPosition(player)));
-        m_players.back()->setGestorHechizos(&m_spells);   // el personaje crea sus propios hechizos al lanzar
+        if (player.at("aiWand")) {
+            //TODO: Crear generador de varetes
+            //createWand(); Generara varetes de forma random, caldria modificar-ho en un futur
+        }
+        else {
+            //esperar a que player estigui completa
+        }
+        //m_players.back()->setGestorHechizos(&m_spells);   // el personaje crea sus propios hechizos al lanzar
 
-        const std::string playerType = player.value("type", "sphere");
+        // TODO: Afegir més obj, de moment no es toca
+        const std::string playerType = player.value("type", "sphere"); 
         if (!m_players.back()->cargarDesdeJson(dataPath("db/players.json").string(), playerType))
             throw std::runtime_error(combatConfigFile.string() + ": tipo de mago desconocido \"" + playerType + "\"");
     }

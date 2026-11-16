@@ -4,12 +4,12 @@ function renderStep5() {
     <h2>Revisión y lanzamiento</h2>
     <div id="review-summary" class="review-summary"></div>
     <div class="review-actions">
-      <button id="btn-simulate" class="btn-primary">🧪 Simular</button>
-      <button id="btn-play" class="btn-secondary">🎮 Jugar</button>
+      <button id="btn-simulate" class="btn-primary">Simular</button>
+      <button id="btn-play" class="btn-secondary">Jugar</button>
     </div>
     <div class="review-io">
-      <button id="btn-save" class="btn-ghost">💾 Guardar en Servidor</button>
-      <button id="btn-load" class="btn-ghost">📂 Cargar preset</button>
+      <button id="btn-save" class="btn-ghost">Guardar en Servidor</button>
+      <button id="btn-load" class="btn-ghost">Cargar preset</button>
       <input type="file" id="file-load" accept=".json" hidden />
     </div>
     <details class="review-json">

@@ -25,8 +25,7 @@ function buildCombatConfig(mode) {
     playersObj[playerKey] = {
       position: pos,
       type: char.playerType,
-      // Aquí afegim la configuració de les varites DINÀMIQUES
-      wands: char.aiWands ? "AI_GENERATED" : char.wands.map(w => ({
+      wands: char.aiWands ? [] : char.wands.map(w => ({
         slots: w.slots,
         spells: [...w.spells]
       })),

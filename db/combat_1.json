@@ -41,7 +41,7 @@
         0
       ],
       "type": "tank_mage",
-      "wands": "AI_GENERATED",
+      "wands": [],
       "basicSpell": null,
       "aiWands": true
     }

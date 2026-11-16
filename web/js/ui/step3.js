@@ -326,7 +326,7 @@ function moveSpell(char, fromWand, fromSlot, toWand, toSlot) {
 function validateStep3() {
   for (const team of ['A', 'B']) {
     for (const char of State.teams[team]) {
-      if (char.aiWands) continue;   // la IA s'encarrega, no validem
+      if (char.aiWands) continue; 
 
       if (char.wands.length === 0) {
         alert(`${char.playerType} (Equipo ${team}) no tiene ninguna varita.`);
