@@ -92,6 +92,10 @@ void Personaje::update(float deltaTime)
     {
         m_controlador->actualizar(*this, deltaTime);
     }
+    for(Varita& varita : m_varitas)
+    {
+        varita.update(deltaTime);
+    }
 }
 
 void Personaje::moverse(const glm::vec3& desplazamiento)
