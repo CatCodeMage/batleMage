@@ -1,5 +1,4 @@
 {
-  "frames": "",
   "map": "../db/map.json",
   "metadata": {
     "combatType": "1v1",
@@ -15,20 +14,42 @@
       "type": "tank_mage",
       "wands": [
         {
-          "slots": 4,
-          "spells": [
-            "flame_wall",
+          "nombre": "Varita 1",
+          "castDelay": 0.15,
+          "rechargeTime": 0.8,
+          "manaMax": 0,
+          "manaActual": 0,
+          "recargaMana": 15,
+          "capacidad": 6,
+          "dispersion": 2,
+          "ranuras": [
             "arcane_ray",
-            "ice_lance",
-            "lightning_bolt"
-          ]
+            "lightning_bolt",
+            "arcane_ray",
+            "poison_cloud",
+            "meteor",
+            "frost_nova"
+          ],
+          "indiceActual": 0,
+          "tiempoEspera": 0
         },
         {
-          "slots": 4,
-          "spells": [
-            "arcane_ray",
-            "ice_lance"
-          ]
+          "nombre": "Varita 2",
+          "castDelay": 0.15,
+          "rechargeTime": 0.8,
+          "manaMax": 0,
+          "manaActual": 0,
+          "recargaMana": 15,
+          "capacidad": 4,
+          "dispersion": 2,
+          "ranuras": [
+            "fire_ball",
+            "fire_ball",
+            "fire_ball",
+            "fire_ball"
+          ],
+          "indiceActual": 0,
+          "tiempoEspera": 0
         }
       ],
       "basicSpell": null,
