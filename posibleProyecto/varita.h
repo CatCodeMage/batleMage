@@ -4,11 +4,6 @@
 #include <glm/glm.hpp>
 #include "hechizosGestor.h"
 
-enum class TipoHechizo {
-    LANZABLE,
-    VARITA,
-    MODIFICADOR_HECHIZO,
-};
 class Varita
 {
 private:
@@ -40,7 +35,7 @@ public:
     void limpiarRanura(int indiceRanura);
 
     bool intentarDisparar(const glm::vec3& posicionMago, float radioMago, float margenCasteo,
-                          const glm::vec3& direccionApuntado, HechizosGestor* gestorHechizos);
+                          const glm::vec3& direccionApuntado, HechizosGestor* gestorHechizos, int idLanzador = -1);
 
     bool puedeAtacarObjetivo(float distanciaAlObjetivo, const HechizosGestor& gestor) const;
     float getVelocidadProximoHechizo(const HechizosGestor& gestor) const;
@@ -50,7 +45,7 @@ public:
     void setRechargeTime(float tiempo) { m_rechargeTime = tiempo; }
     void setManaMax(float manaMax) { m_manaMax = manaMax; m_manaActual = manaMax; }
     void setRecargaMana(float recarga) { m_recargaMana = recarga; }
-    void setCapacidad(int capacidad) { m_capacidad = capacidad; m_ranuras.resize(capacidad); }
+    void setCapacidad(int capacidad) { m_capacidad = capacidad; m_ranuras.resize(capacidad, -1); }
     void setDispersion(float dispersion) { m_dispersion = dispersion; }
 
     std::string getNombre() const { return m_nombre; }
@@ -61,5 +56,7 @@ public:
     float getRecargaMana() const { return m_recargaMana; }
     int getCapacidad() const { return m_capacidad; }
     float getDispersion() const { return m_dispersion; }
+    const std::vector<int>& getRanuras() const { return m_ranuras; }
+    int getIndiceActual() const { return m_indiceActual; }
 };
 
