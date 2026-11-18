@@ -200,6 +200,8 @@
     <ClCompile Include="ShadowSystem.cpp" />
     <ClCompile Include="varita.cpp" />
     <ClCompile Include="webPage.cpp" />
+    <ClCompile Include="varita.cpp" />
+    <ClCompile Include="lanzadorHechizos.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AssetLoadData.h" />
@@ -230,6 +232,8 @@
     <ClInclude Include="ShadowSystem.h" />
     <ClInclude Include="varita.h" />
     <ClInclude Include="webPage.h" />
+    <ClInclude Include="varita.h" />
+    <ClInclude Include="lanzadorHechizos.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="posibleProyecto.rc" />

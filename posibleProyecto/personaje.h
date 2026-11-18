@@ -57,12 +57,13 @@ private:
     int m_varitaActual;
 
 public:
-    Personaje(int id, glm::vec3 posicionInicial, float radio = 1.0f, HechizosGestor* gestorHechizos = nullptr);
+    Personaje(int id, glm::vec3 posicionInicial, float radio, HechizosGestor* gestorHechizos, const std::vector<Varita>& varitasIniciales = {});
     void update(float deltaTime);
 
     void moverse(const glm::vec3& desplazamiento);
     void rotar(const glm::vec3& deltaRotacion);
     void lanzarHechizo();
+    void lanzarHechizo(int idHechizo);
     void recibirDano(float cantidadDano);
     void aumentarVida(float cantidad);
     void disminuirMana(float cantidad);
