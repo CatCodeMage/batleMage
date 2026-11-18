@@ -158,8 +158,8 @@ GLFWwindow* createWindow() {
         glfwWindowHint(GLFW_GREEN_BITS, mode->greenBits);
         glfwWindowHint(GLFW_BLUE_BITS, mode->blueBits);
         glfwWindowHint(GLFW_REFRESH_RATE, mode->refreshRate);
-
-        glfwWindowHint(GLFW_DECORATED, GLFW_FALSE);   // sin bordes y del tamaño de la pantalla: parece pantalla completa pero se graba sin cortes
+        // ventana normal con su X ocupando la pantalla; sin pantalla completa exclusiva, la grabacion no tiene pantallazos negros
+        glfwWindowHint(GLFW_MAXIMIZED, GLFW_TRUE);   
         window = glfwCreateWindow(mode->width, mode->height, "Battle Mage", nullptr, nullptr);
         if (window != nullptr) glfwSetWindowPos(window, 0, 0);
     }

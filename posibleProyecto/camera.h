@@ -8,7 +8,7 @@ class Camera
 public:
 	Camera(); 
 	void set_camera(float widht, float height);
-	void update(Input & input, const SystemInfo& sysInfo);
+	void update(Input & input, const SystemInfo& sysInfo, bool canMoveWithKeys);
 
 	bool procesOrders(const Input& input, float& fwd, float& strafe, float& turn);
 

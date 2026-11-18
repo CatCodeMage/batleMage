@@ -17,6 +17,8 @@
 #include "jsonManager.h"
 #include "UserInterface.h"
 
+enum class InteractionMode { Editing, ControllingCamera };
+
 struct FramesData
 {
     std::vector<std::vector <Entidad>> combat;
@@ -32,7 +34,7 @@ struct simulationData
 
     void changeLights(std::vector<SceneLight>& newLights);
 
-    void clearLastFrame(); 
+    void clearLastFrame(GLFWwindow* window, SystemInfo& sysInfo);
     
     void updateFrame(GLFWwindow* window);
 
@@ -40,6 +42,7 @@ struct simulationData
 
     void destroy();
     
+    void updateInteractionMode(GLFWwindow* window);
     // Data
     MeshLibrary libMesh;
     ModelLibrary libModel;
@@ -53,5 +56,6 @@ struct simulationData
     Input keysInput;
     FramesData framesInfo;
     UserInterface visualInterface;
+    InteractionMode interactionMode = InteractionMode::Editing;
 };
 

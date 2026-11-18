@@ -62,10 +62,10 @@ void Camera::updateView() {
 	w_view = glm::lookAt(w_pos, w_pos + w_front, glm::vec3(0.f, 1.f, 0.f));
 }
 
-void Camera::update(Input& input, const SystemInfo& sysInfo) {
+void Camera::update(Input& input, const SystemInfo& sysInfo, bool canMoveWithKeys) {
 	set_camera((float)sysInfo.getWidht(), (float)sysInfo.getHeight());
 	rotateWithMouse(input);
 	updateFront();                                 
-	moveWithKeys(input, sysInfo.getDeltaTime());
+	if (canMoveWithKeys) moveWithKeys(input, sysInfo.getDeltaTime());
 	updateView();
 }

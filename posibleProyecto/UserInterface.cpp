@@ -73,12 +73,14 @@ void UserInterface::init(GLFWwindow* window) {
 	ImGui_ImplOpenGL3_Init(GLSL_VERSION);
 }
 
-void UserInterface::beginFrame() {
+void UserInterface::beginFrame(bool arePanelsVisible) {
 	ImGui_ImplOpenGL3_NewFrame();
 	ImGui_ImplGlfw_NewFrame();
 	ImGui::NewFrame();
-	// el centro queda transparente: se ve la escena
-	ImGui::DockSpaceOverViewport(0, ImGui::GetMainViewport(), ImGuiDockNodeFlags_PassthruCentralNode);   
+
+	ImGuiDockNodeFlags dockspaceFlags = ImGuiDockNodeFlags_PassthruCentralNode;   // el centro queda transparente: se ve la escena
+	if (!arePanelsVisible) dockspaceFlags |= ImGuiDockNodeFlags_KeepAliveOnly;     // no se dibuja, pero los paneles no se desacoplan
+	ImGui::DockSpaceOverViewport(0, ImGui::GetMainViewport(), dockspaceFlags);
 }
 
 void UserInterface::endFrame() {
@@ -90,4 +92,36 @@ void UserInterface::destroy() {
 	ImGui_ImplOpenGL3_Shutdown();
 	ImGui_ImplGlfw_Shutdown();
 	ImGui::DestroyContext();
+}
+
+void UserInterface::setMouseEnabled(bool isEnabled) {   // en modo camara ImGui no debe reaccionar al cursor invisible
+	ImGuiIO& io = ImGui::GetIO();
+	if (isEnabled) io.ConfigFlags &= ~ImGuiConfigFlags_NoMouse;
+	else           io.ConfigFlags |= ImGuiConfigFlags_NoMouse;
+}
+
+bool UserInterface::isUsingKeyboard() const {           // p. ej. escribiendo en un campo
+	return ImGui::GetIO().WantCaptureKeyboard;
+}
+
+bool UserInterface::wasSceneClicked() const {           // clic que no cae en ningun panel: cae en la escena
+	const bool isMouseOverInterface = ImGui::GetIO().WantCaptureMouse;
+	return !isMouseOverInterface && ImGui::IsMouseClicked(ImGuiMouseButton_Left);
+}
+
+void UserInterface::drawCameraModeHint() {
+	constexpr float MARGIN_PIXELS = 12.0f;
+	constexpr float BACKGROUND_ALPHA = 0.6f;
+	const ImGuiViewport* viewport = ImGui::GetMainViewport();
+	const ImVec2 topCenter(viewport->WorkPos.x + viewport->WorkSize.x * 0.5f, viewport->WorkPos.y + MARGIN_PIXELS);
+	const ImVec2 pivotCenteredHorizontally(0.5f, 0.0f);
+	const ImGuiWindowFlags hintFlags = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoInputs
+		| ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoDocking
+		| ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing;
+
+	ImGui::SetNextWindowPos(topCenter, ImGuiCond_Always, pivotCenteredHorizontally);
+	ImGui::SetNextWindowBgAlpha(BACKGROUND_ALPHA);
+	ImGui::Begin("##CameraModeHint", nullptr, hintFlags);
+	ImGui::TextUnformatted("Modo camara - ESC para volver a editar");
+	ImGui::End();
 }
