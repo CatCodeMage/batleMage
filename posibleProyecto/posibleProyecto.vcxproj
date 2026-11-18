@@ -168,6 +168,7 @@
     <ClCompile Include="lanzadorHechizos.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MapData.cpp" />
+    <ClCompile Include="MaterialLibrary.cpp" />
     <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="MeshLibrary.cpp" />
     <ClCompile Include="ModelLibrary.cpp" />
@@ -182,6 +183,8 @@
     <ClInclude Include="controladorMaquinaEstados.h" />
     <ClInclude Include="controladorPersonaje.h" />
     <ClInclude Include="lanzadorHechizos.h" />
+    <ClInclude Include="Material.h" />
+    <ClInclude Include="MaterialLibrary.h" />
     <ClInclude Include="ModelLibrary.h" />
     <ClCompile Include="Mp4Exporter.cpp" />
     <ClCompile Include="Paths.cpp" />
