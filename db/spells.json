@@ -76,7 +76,7 @@
     "earth_spike": {
         "cast_type": "line",
         "cooldown": 2.6,
-        "element": "earth",
+        "element": "physical",
         "damage": 19.0,
         "speed": 4,
         "radious": 2,
@@ -85,7 +85,7 @@
     "wind_blade": {
         "cast_type": "cone",
         "cooldown": 1.4,
-        "element": "wind",
+        "element": "physical",
         "damage": 11.0,
         "speed": 9,
         "radious": 2,

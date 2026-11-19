@@ -29,8 +29,12 @@ Damage CombatManager::crearDamage(
             0.30f,
             3.0f
         );
+    case ElementType::Lightning:
+        return Damage(
+            hechizo.damage,
+            ElementType::Lightning
+        );
     }
-
     return Damage(
         hechizo.damage,
         ElementType::Physical

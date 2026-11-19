@@ -4,7 +4,8 @@ enum class ElementType
 {
     Physical,
     Fire,
-    ICE
+    ICE,
+    Lightning
 };
 
 enum class EffectType

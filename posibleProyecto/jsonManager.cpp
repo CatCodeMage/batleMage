@@ -15,6 +15,7 @@ ElementType parseElement(std::string element) {
     if (element == "fire")      return ElementType::Fire;
     if (element == "ice")       return ElementType::ICE;
     if (element == "physical") return ElementType::Physical;
+    if (element == "lightning") return ElementType::Lightning;
     return ElementType::Fire;
 }
 
