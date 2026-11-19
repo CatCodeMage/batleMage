@@ -23,4 +23,4 @@ struct ObjPiece {
 std::vector<ObjPiece> loadObj(const std::filesystem::path& file);
 
 int loadAssetManifest(const std::filesystem::path& manifest, MeshLibrary& meshes, ModelLibrary& models,
-    TextureLibrary& textures);
+    TextureLibrary& textures, size_t maxBones);

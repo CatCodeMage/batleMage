@@ -106,13 +106,14 @@ void readHierarchy(const aiNode* node, std::int32_t parentIndex,
                                 "; esta primera versión soporta únicamente UV0");
     }
 
-    const aiTexture* embedded = scene.GetEmbeddedTexture(texturePath.C_Str());
+    const auto [embedded, embeddedIndex] = scene.GetEmbeddedTextureAndIndex(texturePath.C_Str());
     if (!embedded) {
         result.source = ImportedTexture::Source::ExternalFile;
         result.file = (file.parent_path() / std::filesystem::path(texturePath.C_Str())).lexically_normal();
         return result;
     }
 
+    result.embeddedIndex = embeddedIndex;
     result.formatHint = embedded->achFormatHint;
     if (!embedded->pcData) throw importError(file, "textura embebida sin datos");
 
@@ -171,9 +172,7 @@ void assignWeights(ImportedMesh& output, const aiMesh& source,
     for (std::uint32_t i = 0; i < source.mNumBones; ++i) {
         const aiBone& bone = *source.mBones[i];
         const std::string boneName = bone.mName.C_Str();
-        const std::uint32_t nodeIndex = findNodeIndex(boneName, nodeByName, file);
-        const auto id = static_cast<std::int32_t>(output.bones.size());
-        output.bones.push_back({boneName, nodeIndex, toGlm(bone.mOffsetMatrix)});
+        std::int32_t id = -1;
 
         for (std::uint32_t j = 0; j < bone.mNumWeights; ++j) {
             const aiVertexWeight& weight = bone.mWeights[j];
@@ -183,9 +182,16 @@ void assignWeights(ImportedMesh& output, const aiMesh& source,
             if (!std::isfinite(weight.mWeight) || weight.mWeight < 0.0f) {
                 throw importError(file, "peso inválido en hueso '" + boneName + "'");
             }
-            if (weight.mWeight > MIN_WEIGHT) {
-                weights[weight.mVertexId].push_back({id, weight.mWeight});
+            
+            if (weight.mWeight <= MIN_WEIGHT) continue;
+
+            if (id == -1) {
+                const auto nodeIndex = findNodeIndex(boneName, nodeByName, file);
+                id = static_cast<std::int32_t>(output.bones.size());
+                output.bones.push_back({boneName, nodeIndex, toGlm(bone.mOffsetMatrix)});
             }
+
+            weights[weight.mVertexId].push_back({id, weight.mWeight});
         }
     }
 

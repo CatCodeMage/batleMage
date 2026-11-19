@@ -1,15 +1,13 @@
 #include "SkinnedRenderer.h"
-
-#include <glm/gtc/type_ptr.hpp>
+#include "../shaders.h"
 
 #include <algorithm>
 #include <stdexcept>
-#include <string>
 
 namespace bm::anim {
 namespace {
 
-// El tamano de uBoneMatrices se antepone al compilar, segun los limites reales.
+// Las dos pasadas comparten exactamente la transformacion de posicion.
 constexpr const char* VertexSource = R"GLSL(
 layout(location = 0) in vec3 aPosition;
 layout(location = 1) in vec3 aNormal;
@@ -22,8 +20,16 @@ uniform mat4 uViewProj;
 uniform mat4 uBoneMatrices[MAX_BONES];
 uniform int uBoneCount;
 
+out vec3 vWorldPos;
+#ifndef DEPTH_PASS
+uniform vec4 uBaseColor;
+uniform float uKind;
+
 out vec3 vNormal;
 out vec2 vUV;
+out vec4 vColor;
+flat out float vKind;
+#endif
 
 void main() {
     mat4 skin = mat4(0.0);
@@ -42,93 +48,24 @@ void main() {
     else skin = mat4(1.0);
 
     mat4 worldTransform = uModel * skin;
-    gl_Position = uViewProj * worldTransform * vec4(aPosition, 1.0);
+    vec4 world = worldTransform * vec4(aPosition, 1.0);
+    vWorldPos = world.xyz;
+    gl_Position = uViewProj * world;
+
+#ifndef DEPTH_PASS
     mat3 linear = mat3(worldTransform);
     // Inversa transpuesta: tambien contempla escalas no uniformes en huesos/modelo.
-    if (abs(determinant(linear)) > 1e-8)
+    if (determinant(linear) != 0.0)
         vNormal = transpose(inverse(linear)) * aNormal;
     else
         vNormal = linear * aNormal;
+    if (dot(vNormal, vNormal) == 0.0) vNormal = vec3(0.0, 1.0, 0.0);
     vUV = aUV;
+    vColor = uBaseColor;
+    vKind = uKind;
+#endif
 }
 )GLSL";
-
-constexpr const char* FragmentSource = R"GLSL(#version 330 core
-in vec3 vNormal;
-in vec2 vUV;
-uniform sampler2D uAlbedo;
-uniform int uHasAlbedo;
-uniform vec4 uBaseColor;
-out vec4 FragColor;
-
-void main() {
-    vec4 base = uBaseColor;
-    if (uHasAlbedo != 0) base *= texture(uAlbedo, vUV);
-    vec3 normal = vec3(0.0, 1.0, 0.0);
-    if (dot(vNormal, vNormal) > 1e-12) normal = normalize(vNormal);
-    // La misma luz hemisferica de referencia del motor. Luces/sombras: futura integracion.
-    vec3 sky = vec3(0.45, 0.55, 0.75);
-    vec3 ground = vec3(0.12, 0.10, 0.08);
-    vec3 light = mix(ground, sky, normal.y * 0.5 + 0.5) * 0.6;
-    FragColor = vec4(base.rgb * light, base.a);
-}
-)GLSL";
-
-GLuint compileStage(GLenum type, const char* source) {
-    const GLuint shader = glCreateShader(type);
-    if (!shader) throw std::runtime_error("SkinnedRenderer: no se pudo crear el shader");
-    try {
-        glShaderSource(shader, 1, &source, nullptr);
-        glCompileShader(shader);
-        GLint compiled = GL_FALSE;
-        glGetShaderiv(shader, GL_COMPILE_STATUS, &compiled);
-        if (compiled != GL_TRUE) {
-            GLint length = 0;
-            glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &length);
-            std::string log(static_cast<std::size_t>((std::max)(length, 1)), '\0');
-            glGetShaderInfoLog(shader, static_cast<GLsizei>(log.size()), nullptr, log.data());
-            throw std::runtime_error("SkinnedRenderer: error compilando shader: " + log);
-        }
-    } catch (...) {
-        glDeleteShader(shader);
-        throw;
-    }
-    return shader;
-}
-
-GLuint createProgram(std::size_t maxBones) {
-    const std::string vertex = "#version 330 core\nconst int MAX_BONES = " +
-                               std::to_string(maxBones) + ";\n" + VertexSource;
-    GLuint vs = 0, fs = 0, program = 0;
-    try {
-        vs = compileStage(GL_VERTEX_SHADER, vertex.c_str());
-        fs = compileStage(GL_FRAGMENT_SHADER, FragmentSource);
-        program = glCreateProgram();
-        if (!program) throw std::runtime_error("SkinnedRenderer: no se pudo crear el programa");
-        glAttachShader(program, vs);
-        glAttachShader(program, fs);
-        glLinkProgram(program);
-        GLint linked = GL_FALSE;
-        glGetProgramiv(program, GL_LINK_STATUS, &linked);
-        if (linked != GL_TRUE) {
-            GLint length = 0;
-            glGetProgramiv(program, GL_INFO_LOG_LENGTH, &length);
-            std::string log(static_cast<std::size_t>((std::max)(length, 1)), '\0');
-            glGetProgramInfoLog(program, static_cast<GLsizei>(log.size()), nullptr, log.data());
-            throw std::runtime_error("SkinnedRenderer: error enlazando shader: " + log);
-        }
-    } catch (...) {
-        if (program) glDeleteProgram(program);
-        if (vs) glDeleteShader(vs);
-        if (fs) glDeleteShader(fs);
-        throw;
-    }
-    glDetachShader(program, vs);
-    glDetachShader(program, fs);
-    glDeleteShader(vs);
-    glDeleteShader(fs);
-    return program;
-}
 
 } // namespace
 
@@ -136,73 +73,88 @@ SkinnedRenderer::~SkinnedRenderer() {
     destroy();
 }
 
+SkinnedRenderer::Program SkinnedRenderer::createProgram(const std::string& vertex, const char* fragment) {
+    const GLuint id = createShaderProgram(vertex.c_str(), fragment);
+    return { id, glGetUniformLocation(id, "uModel"), glGetUniformLocation(id, "uViewProj"),
+        glGetUniformLocation(id, "uBoneMatrices[0]"), glGetUniformLocation(id, "uBoneCount") };
+}
+
 void SkinnedRenderer::initialize() {
-    if (m_program) return;
+    if (m_lighting.id) return;
     GLint components = 0, attributes = 0;
     glGetIntegerv(GL_MAX_VERTEX_UNIFORM_COMPONENTS, &components);
     glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &attributes);
-    // 16 floats por mat4. Reservamos 48 para modelo, viewProj, contador y margen.
+    // 16 floats por mat4 y 48 componentes reservados para los demas uniforms.
     constexpr GLint RESERVED_COMPONENTS = 48;
-    constexpr GLint MAX_BONES = 64;
-    if (attributes < 5 || components < RESERVED_COMPONENTS + 16) {
+    constexpr GLint MAX_BONES = 128;
+    if (attributes < 5 || components < RESERVED_COMPONENTS + 16)
         throw std::runtime_error("SkinnedRenderer: limites OpenGL insuficientes");
-    }
+
     const auto capacity = static_cast<std::size_t>((std::min)(MAX_BONES, (components - RESERVED_COMPONENTS) / 16));
-    m_program = createProgram(capacity);
+    const std::string header = "#version 330 core\nconst int MAX_BONES = " + std::to_string(capacity) + ";\n";
+    m_lighting = createProgram(header + VertexSource, fragmentSrc);
+    try {
+        m_depth = createProgram(header + "#define DEPTH_PASS\n" + VertexSource, depthFragmentSrc);
+    } catch (...) {
+        destroy();
+        throw;
+    }
     m_maxBones = capacity;
-    m_locModel = glGetUniformLocation(m_program, "uModel");
-    m_locViewProj = glGetUniformLocation(m_program, "uViewProj");
-    m_locBones = glGetUniformLocation(m_program, "uBoneMatrices[0]");
-    m_locBoneCount = glGetUniformLocation(m_program, "uBoneCount");
-    m_locColor = glGetUniformLocation(m_program, "uBaseColor");
-    m_locAlbedo = glGetUniformLocation(m_program, "uAlbedo");
-    m_locHasAlbedo = glGetUniformLocation(m_program, "uHasAlbedo");
+    m_locColor = glGetUniformLocation(m_lighting.id, "uBaseColor");
+    m_locKind = glGetUniformLocation(m_lighting.id, "uKind");
+    m_locLightPosition = glGetUniformLocation(m_depth.id, "uLightPosition");
+    m_locFarPlane = glGetUniformLocation(m_depth.id, "uFarPlane");
 }
 
-void SkinnedRenderer::draw(const SkinnedMesh& mesh, const glm::mat4& model,
-                           const glm::mat4& viewProj, std::span<const glm::mat4> boneMatrices,
-                           GLuint albedoTexture, const glm::vec4& color) const {
-    if (!m_program) throw std::logic_error("SkinnedRenderer: falta initialize()");
-    if (boneMatrices.size() != mesh.boneCount()) {
-        throw std::invalid_argument("SkinnedRenderer: la paleta no coincide con la submalla");
-    }
-    if (boneMatrices.size() > m_maxBones) {
-        throw std::invalid_argument("SkinnedRenderer: la submalla supera el limite de huesos (" +
-                                    std::to_string(m_maxBones) + ")");
-    }
+void SkinnedRenderer::submit(const SkinnedMesh& mesh, const glm::mat4& model,
+    std::span<const glm::mat4> boneMatrices, GLuint albedoTexture, const glm::vec4& color, int kind) {
+    if (boneMatrices.size() != mesh.boneCount() || boneMatrices.size() > m_maxBones)
+        throw std::invalid_argument("SkinnedRenderer: paleta de huesos invalida");
+    m_draws.push_back({ &mesh, model, boneMatrices, albedoTexture, mesh.baseColor() * color, static_cast<float>(kind) });
+}
 
-    GLint previousProgram = 0, previousActiveTexture = 0, previousTexture = 0;
-    glGetIntegerv(GL_CURRENT_PROGRAM, &previousProgram);
-    glGetIntegerv(GL_ACTIVE_TEXTURE, &previousActiveTexture);
+void SkinnedRenderer::drawLighting(const glm::mat4& viewProj) const {
+    if (empty()) return;
+
+    glUseProgram(m_lighting.id);
+    glUniformMatrix4fv(m_lighting.viewProj, 1, GL_FALSE, glm::value_ptr(viewProj));
     glActiveTexture(GL_TEXTURE0);
-    glGetIntegerv(GL_TEXTURE_BINDING_2D, &previousTexture);
+    draw(m_lighting, true);
+}
 
-    glUseProgram(m_program);
-    glUniformMatrix4fv(m_locModel, 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(m_locViewProj, 1, GL_FALSE, glm::value_ptr(viewProj));
-    glUniform1i(m_locBoneCount, static_cast<GLint>(boneMatrices.size()));
-    if (!boneMatrices.empty()) {
-        glUniformMatrix4fv(m_locBones, static_cast<GLsizei>(boneMatrices.size()), GL_FALSE,
-                           glm::value_ptr(boneMatrices.front()));
+void SkinnedRenderer::drawDepth(const glm::mat4& viewProj, const glm::vec3& lightPosition, float farPlane) const {
+    if (empty()) return;
+
+    glUseProgram(m_depth.id);
+    glUniformMatrix4fv(m_depth.viewProj, 1, GL_FALSE, glm::value_ptr(viewProj));
+    glUniform3fv(m_locLightPosition, 1, glm::value_ptr(lightPosition));
+    glUniform1f(m_locFarPlane, farPlane);
+    draw(m_depth, false);
+}
+
+void SkinnedRenderer::draw(const Program& program, bool lighting) const {
+    for (const Draw& part : m_draws) {
+        glUniformMatrix4fv(program.model, 1, GL_FALSE, glm::value_ptr(part.model));
+        glUniform1i(program.boneCount, static_cast<GLint>(part.bones.size()));
+        if (!part.bones.empty())
+            glUniformMatrix4fv(program.bones, static_cast<GLsizei>(part.bones.size()), GL_FALSE,
+                glm::value_ptr(part.bones.front()));
+        if (lighting) {
+            glUniform4fv(m_locColor, 1, glm::value_ptr(part.color));
+            glUniform1f(m_locKind, part.kind);
+            glBindTexture(GL_TEXTURE_2D, part.albedoTexture);
+        }
+        part.mesh->draw();
     }
-    const glm::vec4 baseColor = mesh.baseColor() * color;
-    glUniform4fv(m_locColor, 1, glm::value_ptr(baseColor));
-    glUniform1i(m_locAlbedo, 0);
-    glUniform1i(m_locHasAlbedo, albedoTexture != 0);
-    glBindTexture(GL_TEXTURE_2D, albedoTexture);
-    mesh.draw();
-
-    glBindTexture(GL_TEXTURE_2D, static_cast<GLuint>(previousTexture));
-    glActiveTexture(static_cast<GLenum>(previousActiveTexture));
-    glUseProgram(static_cast<GLuint>(previousProgram));
 }
 
 void SkinnedRenderer::destroy() {
-    if (m_program) glDeleteProgram(m_program);
-    m_program = 0;
+    clear();
+    if (m_lighting.id) glDeleteProgram(m_lighting.id);
+    if (m_depth.id) glDeleteProgram(m_depth.id);
+    m_lighting = {};
+    m_depth = {};
     m_maxBones = 0;
-    m_locModel = m_locViewProj = m_locBones = -1;
-    m_locBoneCount = m_locColor = m_locAlbedo = m_locHasAlbedo = -1;
 }
 
 } // namespace bm::anim

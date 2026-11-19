@@ -73,5 +73,13 @@
   "tree_pineTallA": {
     "path": "./posibleProyecto/assets/kenney_nature/tree_pineTallA.obj",
     "hitbox": "cilinder"
+  },
+  "elaina": {
+    "type": "skinned",
+    "path": "./posibleProyecto/assets/elaina.glb",
+    "animations": {
+      "idle": "Elaina",
+      "move": "Elaina"
+    }
   }
 }

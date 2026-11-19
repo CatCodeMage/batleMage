@@ -1,4 +1,7 @@
 #include "TextureLibrary.h"
+#include "skeleton_animation/AssimpModelLoader.h"
+
+#include <limits>
 
 // SOIL convierte cualquier imagen a RGBA: 4 bytes por pixel, asi las filas nunca quedan desalineadas
 constexpr int RGBA_CHANNELS = 4;
@@ -37,6 +40,37 @@ GLuint TextureLibrary::load(const std::filesystem::path& file) {
     SOIL_free_image_data(pixels);
     w_byPath[key] = texture;
     return texture;
+}
+
+GLuint TextureLibrary::load(const bm::anim::ImportedTexture& texture, const std::filesystem::path& modelFile) {
+    using Source = bm::anim::ImportedTexture::Source;
+    if (texture.source == Source::None) return white();
+    if (texture.source == Source::ExternalFile) return load(texture.file);
+
+    const std::string key = modelFile.lexically_normal().string() + "::" + std::to_string(texture.embeddedIndex);
+    const auto cached = w_byPath.find(key);
+    if (cached != w_byPath.end()) return cached->second;
+
+    GLuint albedo = 0;
+    constexpr int maxSize = (std::numeric_limits<int>::max)();
+    if (texture.source == Source::EmbeddedRGBA8 && texture.width <= maxSize && texture.height <= maxSize) {
+        albedo = uploadRgbaTexture(texture.bytes.data(), static_cast<int>(texture.width), static_cast<int>(texture.height));
+    } else if (texture.source == Source::EmbeddedCompressed && texture.bytes.size() <= maxSize) {
+        int width = 0, height = 0, channels = 0;
+        unsigned char* pixels = SOIL_load_image_from_memory(texture.bytes.data(),
+            static_cast<int>(texture.bytes.size()), &width, &height, &channels, SOIL_LOAD_RGBA);
+        if (pixels) {
+            albedo = uploadRgbaTexture(pixels, width, height);
+            SOIL_free_image_data(pixels);
+        }
+    }
+
+    if (!albedo) {
+        std::cerr << "[Textura] no se puede cargar " << key << " (se usa blanco)\n";
+        return white();
+    }
+    w_byPath.emplace(key, albedo);
+    return albedo;
 }
 
 void TextureLibrary::destroy() {

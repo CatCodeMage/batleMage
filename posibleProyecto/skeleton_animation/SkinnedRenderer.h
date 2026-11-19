@@ -19,20 +19,37 @@ public:
     void destroy(); // Antes de cerrar el contexto; repetible.
     std::size_t maxBones() const { return m_maxBones; }
 
-    // model = characterModel * animator.meshTransform(meshIndex).
-    // La paleta debe corresponder a ESTA submalla (vacia para una malla rigida).
-    // albedoTexture es prestada; 0 utiliza solo el color del material y el tinte.
-    // El llamador configura framebuffer, viewport, profundidad, culling y blending.
-    // Restaura programa, VAO, unidad activa y textura 2D de la unidad 0.
-    void draw(const SkinnedMesh& mesh, const glm::mat4& model,
-              const glm::mat4& viewProj, std::span<const glm::mat4> boneMatrices,
-              GLuint albedoTexture = 0, const glm::vec4& color = glm::vec4(1.0f)) const;
+    // La malla y su paleta se prestan hasta que termine el frame.
+    void submit(const SkinnedMesh& mesh, const glm::mat4& model, std::span<const glm::mat4> boneMatrices,
+                GLuint albedoTexture, const glm::vec4& color, int kind);
+    bool empty() const { return m_draws.empty(); }
+    GLuint lightingProgram() const { return m_lighting.id; }
+    void drawLighting(const glm::mat4& viewProj) const;
+    void drawDepth(const glm::mat4& viewProj, const glm::vec3& lightPosition, float farPlane) const;
+    void clear() { m_draws.clear(); }
 
 private:
-    GLuint m_program = 0;
+    struct Program {
+        GLuint id = 0;
+        GLint model = -1, viewProj = -1, bones = -1, boneCount = -1;
+    };
+    struct Draw {
+        const SkinnedMesh* mesh;
+        glm::mat4 model;
+        std::span<const glm::mat4> bones;
+        GLuint albedoTexture;
+        glm::vec4 color;
+        float kind;
+    };
+
+    static Program createProgram(const std::string& vertex, const char* fragment);
+    void draw(const Program& program, bool lighting) const;
+
+    std::vector<Draw> m_draws;
+    Program m_lighting, m_depth;
     std::size_t m_maxBones = 0;
-    GLint m_locModel = -1, m_locViewProj = -1, m_locBones = -1;
-    GLint m_locBoneCount = -1, m_locColor = -1, m_locAlbedo = -1, m_locHasAlbedo = -1;
+    GLint m_locColor = -1, m_locKind = -1;
+    GLint m_locLightPosition = -1, m_locFarPlane = -1;
 };
 
 } // namespace bm::anim

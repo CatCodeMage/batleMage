@@ -81,6 +81,24 @@
     <ClCompile Include="ShadowSystem.cpp">
       <Filter>Archivos de recursos\Archivos de origen</Filter>
     </ClCompile>
+    <ClCompile Include="skeleton_animation\AssimpModelLoader.cpp">
+      <Filter>Archivos de origen</Filter>
+    </ClCompile>
+    <ClCompile Include="skeleton_animation\Skeleton.cpp">
+      <Filter>Archivos de origen</Filter>
+    </ClCompile>
+    <ClCompile Include="skeleton_animation\AnimationClip.cpp">
+      <Filter>Archivos de origen</Filter>
+    </ClCompile>
+    <ClCompile Include="skeleton_animation\Animator.cpp">
+      <Filter>Archivos de origen</Filter>
+    </ClCompile>
+    <ClCompile Include="skeleton_animation\SkinnedMesh.cpp">
+      <Filter>Archivos de origen</Filter>
+    </ClCompile>
+    <ClCompile Include="skeleton_animation\SkinnedRenderer.cpp">
+      <Filter>Archivos de origen</Filter>
+    </ClCompile>
     <ClCompile Include="simulationData.cpp">
       <Filter>Archivos de recursos\Archivos de origen</Filter>
     </ClCompile>
@@ -180,6 +198,24 @@
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
     <ClInclude Include="ShadowSystem.h">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
+    <ClInclude Include="skeleton_animation\AssimpModelLoader.h">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
+    <ClInclude Include="skeleton_animation\Skeleton.h">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
+    <ClInclude Include="skeleton_animation\AnimationClip.h">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
+    <ClInclude Include="skeleton_animation\Animator.h">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
+    <ClInclude Include="skeleton_animation\SkinnedMesh.h">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
+    <ClInclude Include="skeleton_animation\SkinnedRenderer.h">
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
     <ClInclude Include="simulationData.h">

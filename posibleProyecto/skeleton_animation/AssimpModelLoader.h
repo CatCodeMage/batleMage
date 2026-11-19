@@ -47,6 +47,7 @@ struct ImportedTexture {
     enum class Source { None, ExternalFile, EmbeddedCompressed, EmbeddedRGBA8 };
     Source source = Source::None;
     std::filesystem::path file;  // válida para ExternalFile
+    int embeddedIndex = -1;      // índice de textura dentro del modelo
     std::string formatHint;      // png, jpg, etc. (si Assimp lo conoce)
     std::uint32_t width = 0;     // para EmbeddedRGBA8
     std::uint32_t height = 0;    // para EmbeddedRGBA8

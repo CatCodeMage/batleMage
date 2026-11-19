@@ -3,7 +3,7 @@
 
 // Nombres de db/entities.json: generateCombat los usa para saber que modelo dibujar
 constexpr const char* REPLAY_HIT_ENTITY = "hit";
-constexpr const char* REPLAY_FORMAT_VERSION = "1.7";   // la de combate_chorras.json
+constexpr const char* REPLAY_FORMAT_VERSION = "1.8";
 
 // constantes para contar los frames en que esta en estado "hit"
 constexpr float HIT_EFFECT_SECONDS = 0.3f;
@@ -23,7 +23,6 @@ constexpr const char* REPLAY_DEAD_ENTITIES[] = { "dead_red",   "dead_blue" };
 
 CombatSimulation::CombatSimulation() : m_spells(SPELL_POOL_SIZE) {}
 
-// Por la vida y no por MUERTO: yaTieneEstado no es const
 static bool isAlive(const Personaje& player) {
     return player.getVida() > 0.0f;
 }
@@ -63,6 +62,7 @@ void CombatSimulation::setup(const std::filesystem::path& combatConfigFile) {
     createPlayers(combatConfigFile);
     connectOpponents();
     m_hitFrames.assign(m_players.size(), 0);
+    m_playerReplayStates.resize(m_players.size());
     recordFrame();
 }
 
@@ -72,7 +72,7 @@ void CombatSimulation::recordEnding() {
     m_spells.emptySpells(); // Para que no se vean una vez haya muerto un personaje
     for (int endingTick = 0; endingTick < endingTicks; ++endingTick) {
         countDownHitEffects();
-        recordFrame();
+        recordFrame(true);
     }
 }
 
@@ -174,12 +174,36 @@ void CombatSimulation::printResult() const {
     else               std::cout << "gana el jugador " << winnerId << "\n";
 }
 
-void CombatSimulation::recordFrame() {
+void CombatSimulation::recordFrame(bool ending) {
     json frame = json::array();
+    const size_t frameIndex = m_replayFrames.size();
 
     for (size_t playerIndex = 0; playerIndex < m_players.size(); ++playerIndex) {
         const Personaje& player = *m_players[playerIndex];
-        frame.push_back(replayEntity(player.getPosicion(), player.getRotacion().y, replayEntityOfPlayer(playerIndex)));
+        auto& state = m_playerReplayStates[playerIndex];
+        const glm::vec3 position = player.getPosicion();
+        const char* action = "idle";
+        if (!isAlive(player)) action = "death";
+        else if (m_hitFrames[playerIndex] > 0) action = "hit";
+        else if (!ending && player.yaTieneEstado(EstadoPersonaje::CASTEANDO) &&
+                 !player.yaTieneEstado(EstadoPersonaje::CONGELADO)) action = "cast";
+        else if (frameIndex > 0 && position != state.position) action = "move";
+
+        if (state.animation != action || m_hitFrames[playerIndex] == HIT_EFFECT_FRAMES) {
+            state.animation = action;
+            state.startFrame = frameIndex;
+        }
+        state.position = position;
+
+        // Se conserva la entidad visual antigua para los personajes OBJ.
+        json entry = replayEntity(position, player.getRotacion().y, replayEntityOfPlayer(playerIndex));
+        entry.push_back({
+            { "id", player.getId() },
+            { "entity", REPLAY_PLAYER_ENTITIES[playerIndex] },
+            { "animation", state.animation },
+            { "animationStartFrame", state.startFrame }
+        });
+        frame.push_back(std::move(entry));
     }
 
     for (const std::unique_ptr<Hechizo>& spell : m_spells.getActiveHechizos()) {

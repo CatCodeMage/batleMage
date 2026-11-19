@@ -8,6 +8,8 @@
 #include <functional>
 #include <vector>
 
+namespace bm::anim { class SkinnedRenderer; }
+
 class ShadowSystem {
 public:
     // Maximo de luces que pueden proyectar sombras simultaneamente.
@@ -37,7 +39,8 @@ public:
     // Llamar antes de Renderer::flush().
     void render(
         const std::vector<SceneLight>& lights,
-        const DrawGeometry& drawGeometry
+        const DrawGeometry& drawGeometry,
+        const bm::anim::SkinnedRenderer* skinned = nullptr
     );
 
     // Enviar los cubemaps y sus uniforms al shader principal.

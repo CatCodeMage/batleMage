@@ -24,13 +24,13 @@ Animator::Animator(std::shared_ptr<const Skeleton> skeleton)
     evaluatePose();
 }
 
-void Animator::play(std::shared_ptr<const AnimationClip> clip, bool looping) {
+void Animator::play(std::shared_ptr<const AnimationClip> clip, bool looping, double seconds) {
     if (clip && &clip->model() != &m_skeleton->model()) {
         throw std::invalid_argument("Animator: el clip pertenece a otro modelo");
     }
     m_clip = std::move(clip);
     m_looping = looping;
-    reset();
+    setTime(seconds);
 }
 
 void Animator::update(double deltaSeconds) {

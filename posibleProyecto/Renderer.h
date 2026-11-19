@@ -27,11 +27,13 @@ public:
     void drawShadowGeometry(const MeshLibrary& lib) const;
     void submitLights(std::vector<SceneLight>& lights, const float time);
     void submitLight(const Light& light);
+    // El programa ya debe estar activo.
+    void applyLights(GLuint program) const;
 private:
     void getActualViewProj(const glm::mat4& viewProj);
-    void flushLigth();
     std::vector<Light> w_lights;
     std::vector<std::vector<InstanceData>> w_batches;      
     std::vector<GLuint> w_batchTextures;   
-    GLint w_locViewProj, w_locNumLights, w_locLights, w_locAlbedo;
+    GLuint w_program = 0;
+    GLint w_locViewProj;
 };

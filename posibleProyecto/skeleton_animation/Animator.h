@@ -10,8 +10,8 @@ class Animator {
 public:
     explicit Animator(std::shared_ptr<const Skeleton> skeleton);
 
-    // nullptr restaura la bind pose. Un nuevo play siempre empieza en cero.
-    void play(std::shared_ptr<const AnimationClip> clip, bool looping = true);
+    // nullptr restaura la bind pose. El replay puede arrancar el clip en una pose intermedia.
+    void play(std::shared_ptr<const AnimationClip> clip, bool looping = true, double seconds = 0.0);
     void update(double deltaSeconds);
     // Evalua inmediatamente; permite avanzar y rebobinar sin acumular deltas.
     void setTime(double seconds);

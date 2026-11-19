@@ -5,9 +5,10 @@
 #include "MeshLibrary.h"
 #include "ModelLibrary.h"
 
-struct EntityInfo {
-	std::string asset;
-	std::vector<float> scale;
+struct FramesData {
+	std::vector<std::vector<Entidad>> combat;
+	int frame = 0;
+	int ticksPerSecond = 0;
 };
 
 ElementType parseElement(std::string element);
@@ -18,9 +19,4 @@ std::vector<std::string> getPlayers();
 
 void writeCombat();
 
-Entidad generateEntity(const std::vector<float>& position, const std::vector<float>& rotation,
-	const EntityInfo eInfo, const ModelLibrary& lib);
-
-EntityInfo getEntityInfo(const std::string entityName);
-
-std::vector<std::vector <Entidad>> generateCombat(const ModelLibrary& modelLib);
+FramesData generateCombat(const ModelLibrary& modelLib, const std::filesystem::path& replayFile);

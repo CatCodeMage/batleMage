@@ -96,7 +96,7 @@ void buclePrincipaLTiempoReal(GLFWwindow* window, SystemInfo& sysInfo) {
     std::vector<SceneLight> data = setLights();
     simData.changeLights(data);
 
-    const float secondsPerCombatFrame = CombatSimulation::SECONDS_PER_TICK;   // el replay graba un frame por tick
+    const float secondsPerCombatFrame = 1.0f / simData.framesInfo.ticksPerSecond;
     float unplayedSeconds = 0.0f;   // tiempo real que aun no se ha convertido en frames del combate
 
     while (shouldContinue(window)) {
@@ -111,8 +111,6 @@ void buclePrincipaLTiempoReal(GLFWwindow* window, SystemInfo& sysInfo) {
 
         simData.procesMainBodyLoopRealTime(window, sysInfo);
     }
-
-    simData.destroy();
 }
 
 int guranteWindowCreated(GLFWwindow* window) {
@@ -206,12 +204,20 @@ int createSimulation() {
 
     sysInfo.getCurrentState(window);
 
-    if (guranteWindowCreated(window) != 0)
+    if (guranteWindowCreated(window) != 0) {
+        glfwTerminate();
         return -1;
+    }
 
     glViewport(0, 0, sysInfo.getWidht(), sysInfo.getHeight());
 
-    buclePrincipaLTiempoReal(window, sysInfo);
+    try {
+        buclePrincipaLTiempoReal(window, sysInfo);
+    } catch (const std::exception& ex) {
+        std::cerr << "[Battle Mage] " << ex.what() << '\n';
+        glfwTerminate();
+        return -1;
+    }
 
     glfwTerminate();
 
