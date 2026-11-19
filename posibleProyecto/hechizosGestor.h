@@ -57,6 +57,9 @@ public:
     // Obtener catalogo de hechizos
     const std::unordered_map<int, hechizosTemplate>& getCatalogoHechizos() const;
 
+    // Id de una carta (hechizo, modificador o multicast) por su nombre, o -1 si no existe
+    int idPorNombre(const std::string & nombre) const;
+
     void emptySpells();
 
 private:

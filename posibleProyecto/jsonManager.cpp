@@ -6,6 +6,8 @@ const std::string SPELLS_PATH = "../db/spells.json";
 const std::string PLAYERS_PATH = "../db/players.json";
 const std::string COMBAT_PATH = "../db/combate_generado.json";
 const std::string ENTITIES_PATH = "../db/entities.json";
+const std::string CARDS_PATH = "../db/cards.json";
+
 
 ElementType parseElement(std::string element) {
 	if (element == "fire")      return ElementType::Fire;
@@ -56,6 +58,59 @@ void readSpells(HechizosGestor& spellManager) {
 	else
 	{
 		std::cout << "No file found" << std::endl;;
+	}
+}
+
+static uint32_t parseEtiqueta(const std::string& tag) {
+	if (tag == "bounce") return ETQ_REBOTE;
+	if (tag == "homing") return ETQ_HOMING;   // reservada: aún no hace nada
+	std::cerr << "[cartas.json] etiqueta desconocida: " << tag << "\n";
+	return ETQ_NINGUNA;
+}
+
+void readCards(HechizosGestor& spellManager)
+{
+	std::ifstream file(CARDS_PATH);
+	if (!file.is_open()) {
+		std::cerr << "[cartas.json] no encontrado: no se cargan cartas\n";
+		return;
+	}
+	try {
+		json j;
+		file >> j;
+		for (auto& [name, card] : j.items()) {
+			const int id = card.at("id").get<int>();
+			const std::string type = card.at("type").get<std::string>();
+			const float mana = card.value("mana", 0.0f);
+			const float castDelay = card.value("cast_delay", 0.0f);
+			
+			if (type == "modifier") {
+				const json mods = card.value("mods", json::object());
+				ModificadoresDisparo m;
+				m.danoExtra = mods.value("damage_extra", 0.0f);
+				m.multVelocidad = mods.value("speed_mult", 1.0f);
+				m.lifetimeExtra = mods.value("lifetime_extra", 0.0f);
+				m.dispersionExtra = mods.value("spread_extra", 0.0f);
+				m.rebotes = mods.value("bounces", 0);
+				for (const std::string& tag : mods.value("tags", std::vector<std::string>{}))
+					m.etiquetas |= parseEtiqueta(tag);
+				if (m.rebotes > 0) m.etiquetas |= ETQ_REBOTE;   // "bounces" ya implica rebote
+				spellManager.registrarModificador(id, name, mana, castDelay, m);
+				
+			}
+			else if (type == "multicast") {
+				spellManager.registrarMulticast(id, name, mana, castDelay, card.at("draws").get<int>());
+			}
+			else {
+				std::cerr << "[cartas.json] tipo desconocido en " << name << ": " << type << "\n";
+				
+			}
+			
+		}
+		
+	}
+	catch (const std::exception& e) {
+		std::cerr << "[cartas.json] " << e.what() << "\n";
 	}
 }
 

@@ -15,12 +15,6 @@ constexpr bool  MAGOS_INMORTALES = true;    // los golpes se ven y se cuentan, p
 constexpr float ALTURA_SUELO = 0.0f;    // map.json: el suelo está en y = 0
 constexpr float DISTANCIA_MAGOS = 10.0f;   // los hechizos alcanzan 12-30 (velocidad x 3 s): en combat.json están a ~56
 
-// Ids de las cartas de prueba (no chocan con los de spells.json, 0..15)
-constexpr int CARTA_MAS_DANO = 100;
-constexpr int CARTA_REBOTE = 101;
-constexpr int CARTA_DOBLE = 200;
-constexpr int CARTA_TRIPLE = 201;
-
 // Igual que CombatSimulation, para que el replay sea compatible
 constexpr size_t      POOL_HECHIZOS = 256;
 constexpr float       SPELL_HIT_RADIUS = 0.5f;
@@ -51,10 +45,10 @@ static json replayEntity(const glm::vec3& pos, float yaw, const char* entityName
 PruebaHechizos::PruebaHechizos() : m_spells(POOL_HECHIZOS) {}
 
 int PruebaHechizos::idPorNombre(const std::string& nombre) const {
-    for (const auto& [id, plantilla] : m_spells.getCatalogoHechizos())
-        if (plantilla.definition.name == nombre) return id;
-    std::cerr << "[PRUEBA] hechizo no encontrado en spells.json: " << nombre << "\n";
-    return -1;
+    // Busca en todas las cartas: hechizos (spells.json) y modificadores/multicast (cards.json)
+    const int id = m_spells.idPorNombre(nombre);
+    if (id < 0) std::cerr << "[PRUEBA] carta no encontrada en spells.json ni cards.json: " << nombre << "\n";
+    return id;
 }
 
 // =====================================================================
@@ -62,7 +56,7 @@ int PruebaHechizos::idPorNombre(const std::string& nombre) const {
 // =====================================================================
 void PruebaHechizos::setup(const std::filesystem::path& combatConfigFile) {
     readSpells(m_spells);
-    registrarCartas();
+    readCards(m_spells);    // modificadores y multicast desde db/cards.json
     crearMagos(combatConfigFile);
     crearVaritas();
 
@@ -72,17 +66,6 @@ void PruebaHechizos::setup(const std::filesystem::path& combatConfigFile) {
     recordFrame();
     std::cout << "[PRUEBA] combate de prueba de hechizos: " << DURACION_PRUEBA_S << " s, magos "
         << (MAGOS_INMORTALES ? "inmortales" : "mortales") << "\n";
-}
-
-void PruebaHechizos::registrarCartas() {
-    ModificadoresDisparo masDano; masDano.danoExtra = 10.0f;
-    m_spells.registrarModificador(CARTA_MAS_DANO, "damage_plus", 5.0f, 0.08f, masDano);
-
-    ModificadoresDisparo rebote;  rebote.rebotes = 4; rebote.etiquetas = ETQ_REBOTE; rebote.lifetimeExtra = 3.0f;
-    m_spells.registrarModificador(CARTA_REBOTE, "bounce", 0.0f, 0.0f, rebote);
-
-    m_spells.registrarMulticast(CARTA_DOBLE, "double_spell", 0.0f, 0.0f, 2);
-    m_spells.registrarMulticast(CARTA_TRIPLE, "triple_spell", 2.0f, 0.03f, 3);
 }
 
 // Mismos tipos de mago y altura que el combate normal (combat.json + players.json), pero sin IA
@@ -124,7 +107,8 @@ void PruebaHechizos::crearVaritas() {
     // Mago 1 (rojo): [doble][+10 daño][fire_ball][lightning_bolt]
     //   -> 2 proyectiles distintos a la vez, con +10 de daño cada uno
     VaritaPrueba& v1 = m_varitas[0];
-    v1.ranuras = { CARTA_DOBLE, CARTA_MAS_DANO, idPorNombre("fire_ball"), idPorNombre("lightning_bolt") };
+    v1.ranuras = { idPorNombre("double_spell"), idPorNombre("damage_plus"),
+                   idPorNombre("fire_ball"), idPorNombre("lightning_bolt") };
     v1.castDelay = 0.3f;
     v1.recarga = 1.0f;
 
@@ -132,7 +116,7 @@ void PruebaHechizos::crearVaritas() {
     //   -> abanico de 3 que van hacia el suelo, rebotan y siguen en arco hacia el rival
     VaritaPrueba& v2 = m_varitas[1];
     const int shard = idPorNombre("ice_shard");
-    v2.ranuras = { CARTA_TRIPLE, CARTA_REBOTE, shard, shard, shard };
+    v2.ranuras = { idPorNombre("triple_spell"), idPorNombre("bounce"), shard, shard, shard };
     v2.castDelay = 0.4f;
     v2.recarga = 1.5f;
     v2.inclinacionY = -0.5f;   // hacia el suelo: rebota y hace arcos por la gravedad

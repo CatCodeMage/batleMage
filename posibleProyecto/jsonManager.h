@@ -13,6 +13,8 @@ struct EntityInfo {
 ElementType parseElement(std::string element);
 
 void readSpells(HechizosGestor& spellManager);
+void readCards(HechizosGestor& spellManager);
+
 
 std::vector<std::string> getPlayers();
 

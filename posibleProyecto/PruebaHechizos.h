@@ -44,7 +44,6 @@ private:
         float inclinacionY = 0.0f;       // > 0 hacia arriba, < 0 hacia abajo
     };
 
-    void registrarCartas();
     void crearMagos(const std::filesystem::path& combatConfigFile);
     void crearVaritas();
     void dispararVaritas();

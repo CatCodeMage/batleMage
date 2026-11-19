@@ -153,6 +153,14 @@ void HechizosGestor::procesarChoqueSuperficie(Hechizo* spell, const glm::vec3& n
     if (!spell->IsActive()) devolverAlPool(spell);
 }
 
+int HechizosGestor::idPorNombre(const std::string& nombre) const
+{
+    for (const auto& [id, carta] : cartas) {
+        if (carta->getNombre() == nombre) return id;
+    }
+    return -1;
+}
+
 // CAMBIO: antes hacía clear() y el pool quedaba inservible; ahora desactiva todos
 void HechizosGestor::emptySpells() {
     for (auto& spell : spellPool) {

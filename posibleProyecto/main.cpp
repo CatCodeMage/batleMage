@@ -222,12 +222,11 @@ int createSimulation() {
 #include "PruebaHechizos.h"   // PRUEBA
 
 void simulateCombatToReplay() {
-    //CombatSimulation simulation;
-	PruebaHechizos simulation;           // para probar hechizos sin IA, sin varitas y sin movimiento de magos
-
-    simulation.setup(dataPath("db/combat.json"));
-    while (!simulation.isFinished())
+    CombatSimulation simulation;
+    simulation.setup(dataPath("db/combat_1.json"));
+    while (!simulation.isFinished()) {
         simulation.step();
+    }
     simulation.printResult();
     simulation.recordEnding();
     simulation.writeReplay(dataPath("db/combate_generado.json"));
