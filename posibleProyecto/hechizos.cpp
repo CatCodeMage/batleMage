@@ -18,12 +18,10 @@ Hechizo::Hechizo(int id, const std::string& name, ElementType element,
         glm::vec3(0.0f),          // translacio
         glm::vec3(0.0f),          // rotacio
         glm::vec3(1.0f),          // scale
-        glm::vec3(0.0f, 0.0f, 1.0f), // direction
-        glm::vec3(0.0f),          // velocity (NUEVO)
-        speed,
-        radius
+        glm::vec3(0.0f),          // velocity
+        radius                    // radius
     };
-
+    rapidezInicial = speed;
     isActive = false;
     maxLifeTime = 5.0f;
     currentLifeTime = 0.0f;
@@ -34,42 +32,48 @@ void Hechizo::cast(const glm::vec3& initialPosition,
     const glm::vec3& direction)
 {
     movement.translacio = initialPosition;
-    movement.direction = glm::normalize(direction);
-
-    // Velocidad inicial del proyectil
-    movement.velocity = movement.direction * movement.speed;
-
+    const float length = glm::length(direction);
+    movement.velocity = length > 0.0f ? direction * (rapidezInicial / length) : glm::vec3(0.0f);
     if (hechizo.formaMovimiento == MovementPattern::Parabolic) {
-        // Sale horizontalmente, sin impulso hacia arriba
+        // El proyectil parabolico sale horizontal y la gravedad modifica su velocidad.
         movement.velocity.y = 0.0f;
     }
-
     currentLifeTime = 0.0f;
     isActive = true;
 }
 
+// calculo movimiento lineal
+void Hechizo::moverLineal(float dt) {
+    movement.translacio += movement.velocity * dt;
+}
 
-void Hechizo::update(float deltaTime)
-{
+// Caida con gravedad: x = x0 + v*dt + 1/2*g*dt^2 calculo parabolico
+void Hechizo::moverParabolico(float dt) {
+    const glm::vec3 gravedad(0.0f, -SPELL_GRAVITY, 0.0f);
+
+    movement.translacio += movement.velocity * dt + 0.5f * gravedad * dt * dt;
+    movement.velocity += gravedad * dt;
+}
+
+
+// Direccion actual: la velocidad normalizada.
+// Si esta parado devuelve un vector nulo, para no dividir entre 0 (NaN)
+glm::vec3 Hechizo::getDirection() const {
+    const float v = glm::length(movement.velocity);
+    if (v < 0.0001f) return glm::vec3(0.0f);
+    return movement.velocity / v;
+}
+
+
+// CAMBIAR: segun el tipo de movimiento y tipo de casteo, de momento como un proectil
+// (sin cambios: el rebote ya no se comprueba aquí, lo avisa colisiones)
+void Hechizo::update(float deltaTime) {
     if (!isActive) return;
 
-    if (hechizo.formaMovimiento == MovementPattern::Parabolic) {
-
-        // Gravedad negativa porque el eje Y apunta hacia arriba
-        const glm::vec3 gravedad(0.0f, -1.5f, 0.0f);
-
-        // Actualizar posicion teniendo en cuenta la aceleracion
-        movement.translacio +=
-            movement.velocity * deltaTime +
-            0.5f * gravedad * deltaTime * deltaTime;
-
-        // La gravedad modifica la velocidad vertical
-        movement.velocity += gravedad * deltaTime;
-    }
-    else {
-        // Movimiento lineal original
-        movement.translacio +=
-            movement.direction * (movement.speed * deltaTime);
+    switch (hechizo.formaMovimiento) {
+        case MovementPattern::Parabolic: moverParabolico(deltaTime); break;
+        case MovementPattern::Static:    break;
+        default:                         moverLineal(deltaTime);   break;
     }
 
     currentLifeTime += deltaTime;
@@ -79,22 +83,44 @@ void Hechizo::update(float deltaTime)
     }
 }
 
-void Hechizo::reset()
-{
-    movement.translacio = glm::vec3(0.0f);
-    movement.rotacio = glm::vec3(0.0f);
-    movement.scale = glm::vec3(1.0f);
-    movement.direction = glm::vec3(0.0f);
-    movement.velocity = glm::vec3(0.0f);
+// NUEVO: reacción a un choque con el mundo (lo detecta colisiones, no el hechizo)
+void Hechizo::alChocarSuperficie(const glm::vec3& normal, float penetracion) {
+    if (!isActive) return;
 
-    movement.speed = 0.0f;
-    movement.radius = 0.0f;
+    // Si ya se está alejando de la superficie (p. ej. acaba de rebotar), no hacer nada
+    if (glm::dot(movement.velocity, normal) >= 0.0f) return;
 
-    currentLifeTime = 0.0f;
-    isActive = false;
+    // Sin etiqueta de rebote o sin rebotes restantes: choca y desaparece
+    if (!(etiquetas & ETQ_REBOTE) || rebotesRestantes <= 0) {
+        setActive(false);
+        return;
+    }
+
+    // Reflejar la velocidad conserva la trayectoria tras el rebote, tambien con gravedad.
+    movement.velocity = glm::reflect(movement.velocity, normal);
+    // Sacarlo de la superficie para que no siga "dentro"
+    movement.translacio += normal * penetracion;
+    rebotesRestantes--;
 }
 
-void Hechizo::setDefinition(SpellDefinitionComponent hechizoDatos)
-{
+void Hechizo::reset() {
+    // Reiniciamos el movimiento a valores nulos/ceros
+    movement.translacio = glm::vec3(0.0f);
+    movement.rotacio = glm::vec3(0.0f);
+    movement.scale = glm::vec3(1.0f); // O 0.0f si prefieres que desaparezca por completo
+    movement.radius = 0.0f;
+    movement.velocity = glm::vec3(0.0f);
+    rapidezInicial = 0.0f;
+    // Reiniciamos tiempos y desactivamos el hechizo
+    currentLifeTime = 0.0f;
+    isActive = false;
+
+    // NUEVO: limpiamos comportamientos y lanzador (indicePool NO se toca)
+    idLanzador = -1;
+    etiquetas = ETQ_NINGUNA;
+    rebotesRestantes = 0;
+}
+
+void Hechizo::setDefinition(SpellDefinitionComponent hechizoDatos) {
     hechizo = hechizoDatos;
 }

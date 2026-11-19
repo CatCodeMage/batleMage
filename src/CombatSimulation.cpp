@@ -327,61 +327,15 @@ void CombatSimulation::applySpellHits()
             continue;
         }
 
-        // Consultar el tipo de movimiento
-        const SpellDefinitionComponent& definition =
-            m_spells
-            .getCatalogoHechizos()
-            .at(
-                spell->getId()
-            )
-            .definition;
-
-        // Solo comprobar suelo
-        // en hechizos parabolicos
-        if (
-            definition.formaMovimiento ==
-            MovementPattern::Parabolic)
+        const SphereCollider spellCollider{
+            spell->getPosition(),
+            SPELL_HIT_RADIUS
+        };
+        const CollisionInfo info =
+            m_collisionManager.getGroundCollisionInfo(spellCollider, GROUND_HEIGHT);
+        if (info.collision)
         {
-            SphereCollider spellCollider{
-                spell->getPosition(),
-                SPELL_HIT_RADIUS
-            };
-
-            CollisionInfo info =
-                m_collisionManager
-                .getGroundCollisionInfo(
-                    spellCollider,
-                    GROUND_HEIGHT
-                );
-
-            if (info.collision)
-            {
-                /*
-                    Ahora ya tenemos:
-
-                    info.normal
-                    info.penetration
-
-                    Ejemplo suelo:
-                    normal = (0, 1, 0)
-
-                    Mas adelante aqui se podra llamar:
-
-                    procesarChoqueSuperficie(
-                        spell.get(),
-                        info.normal,
-                        info.penetration
-                    );
-
-                    De momento mantenemos
-                    el comportamiento anterior:
-                    destruir el hechizo.
-                */
-
-                m_spells.destroySpell(
-                    spell.get()
-                );
-            }
+            m_spells.procesarChoqueSuperficie(spell.get(), info.normal, info.penetration);
         }
     }
 }
@@ -396,13 +350,7 @@ bool CombatSimulation::tryHitAnyPlayer(
         SPELL_HIT_RADIUS
     };
 
-    const SpellDefinitionComponent& definition =
-        m_spells
-        .getCatalogoHechizos()
-        .at(
-            spell.getId()
-        )
-        .definition;
+    const SpellDefinitionComponent& definition = spell.getDefinition();
 
     for (
         size_t playerIndex = 0;
@@ -412,7 +360,7 @@ bool CombatSimulation::tryHitAnyPlayer(
         Personaje& player =
             *m_players[playerIndex];
 
-        if (!isAlive(player))
+        if (!isAlive(player) || player.getId() == spell.getLanzador())
         {
             continue;
         }

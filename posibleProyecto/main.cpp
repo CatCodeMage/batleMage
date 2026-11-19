@@ -16,7 +16,9 @@
 #include "jsonManager.h"
 #include "simulationData.h"
 #include "CombatSimulation.h"
+#include "PruebaHechizos.h"
 #include <algorithm>
+#include <string_view>
 
 int shouldContinue(GLFWwindow* window) {
     return glfwWindowShouldClose(window) == 0;
@@ -231,8 +233,9 @@ int createSimulation() {
 }
 
 // Simula el combate entero sin graficos y lo deja grabado para que los graficos lo reproduzcan
+template <typename Simulation>
 void simulateCombatToReplay() {
-    CombatSimulation simulation;
+    Simulation simulation;
     simulation.setup(dataPath("db/combat.json"));
     while (!simulation.isFinished())
         simulation.step();
@@ -241,9 +244,13 @@ void simulateCombatToReplay() {
     simulation.writeReplay(dataPath("db/combate_generado.json"));
 }
 
-int main()
+
+int main(int argc, char* argv[])
 {
     //sendForm();   // cuando se active: antes de simular, porque es el formulario el que escribe combat.json
-    simulateCombatToReplay();
+    if (argc > 1 && std::string_view(argv[1]) == "--prueba-hechizos")
+        simulateCombatToReplay<PruebaHechizos>();
+    else
+        simulateCombatToReplay<CombatSimulation>();
     return createSimulation();
 }
