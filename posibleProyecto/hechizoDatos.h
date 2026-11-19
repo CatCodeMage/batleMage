@@ -13,6 +13,8 @@
 enum class CastType { Projectile, AreaOfEffect, Cone, Raycast, Self };
 enum class MovementPattern { Linear, Homing, Parabolic, Orbiting, Static };
 
+constexpr float SPELL_GRAVITY = 1.5f;   // unidades/s^2 (la de Alex; la tuya era 5.0)
+
 // 2. El componente aloja el enum junto al resto de datos estáticos
 // he sacado del anterior struct los que cambia
 struct SpellDefinitionComponent {
@@ -31,8 +33,7 @@ struct ProjectileComponent {
     glm::vec3 translacio;
     glm::vec3 rotacio;
     glm::vec3 scale;
-    glm::vec3 direction;
-    float speed;
+    glm::vec3 velocity;   // velocidad actual del proyectil
     float radius;
 };
 

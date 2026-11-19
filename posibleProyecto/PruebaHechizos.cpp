@@ -12,7 +12,6 @@ using json = nlohmann::json;
 // =====================================================================
 constexpr float DURACION_PRUEBA_S = 20.0f;   // segundos simulados
 constexpr bool  MAGOS_INMORTALES = true;    // los golpes se ven y se cuentan, pero no matan
-constexpr float GRAVEDAD = 5.0f;    // solo para hechizos con REBOTE
 constexpr float ALTURA_SUELO = 0.0f;    // map.json: el suelo está en y = 0
 constexpr float DISTANCIA_MAGOS = 10.0f;   // los hechizos alcanzan 12-30 (velocidad x 3 s): en combat.json están a ~56
 
@@ -144,7 +143,6 @@ void PruebaHechizos::crearVaritas() {
 // =====================================================================
 void PruebaHechizos::step() {
     dispararVaritas();
-    aplicarGravedad();
     m_spells.update(SECONDS_PER_TICK);
     aplicarSuelo();
     aplicarImpactos();
@@ -192,17 +190,6 @@ void PruebaHechizos::dispararVaritas() {
                 << mago.getId() << ": " << r.proyectilesLanzados << " proyectiles, mana " << v.mana
                 << (r.hayQueRecargar ? " (recarga)" : "") << "\n";
         }
-    }
-}
-
-// Gravedad solo para hechizos con REBOTE (el resto vuela recto, como siempre)
-void PruebaHechizos::aplicarGravedad() {
-    for (const std::unique_ptr<Hechizo>& spell : m_spells.getActiveHechizos()) {
-        if (!spell->IsActive() || !(spell->getEtiquetas() & ETQ_REBOTE)) continue;
-        if (spell->getSpeed() <= 0.0f) continue;
-        glm::vec3 d = spell->getDirection();
-        d.y -= GRAVEDAD * SECONDS_PER_TICK / spell->getSpeed();   // = restar g*dt a la velocidad vertical
-        spell->setDirection(d);
     }
 }
 

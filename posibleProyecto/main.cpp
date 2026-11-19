@@ -219,8 +219,12 @@ int createSimulation() {
 }
 
 // Simula el combate entero sin graficos y lo deja grabado para que los graficos lo reproduzcan
+#include "PruebaHechizos.h"   // PRUEBA
+
 void simulateCombatToReplay() {
-    CombatSimulation simulation;
+    //CombatSimulation simulation;
+	PruebaHechizos simulation;           // para probar hechizos sin IA, sin varitas y sin movimiento de magos
+
     simulation.setup(dataPath("db/combat.json"));
     while (!simulation.isFinished())
         simulation.step();
@@ -228,6 +232,7 @@ void simulateCombatToReplay() {
     simulation.recordEnding();
     simulation.writeReplay(dataPath("db/combate_generado.json"));
 }
+
 
 int main()
 {

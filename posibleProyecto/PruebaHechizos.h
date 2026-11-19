@@ -48,7 +48,6 @@ private:
     void crearMagos(const std::filesystem::path& combatConfigFile);
     void crearVaritas();
     void dispararVaritas();
-    void aplicarGravedad();
     void aplicarSuelo();
     void aplicarImpactos();
     void countDownHitEffects();
