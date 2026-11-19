@@ -9,6 +9,7 @@ struct FramesData {
 	std::vector<std::vector<Entidad>> combat;
 	int frame = 0;
 	int ticksPerSecond = 0;
+	bool isPaused = false;
 };
 
 ElementType parseElement(std::string element);

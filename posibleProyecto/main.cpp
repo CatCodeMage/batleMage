@@ -100,7 +100,10 @@ void buclePrincipaLTiempoReal(GLFWwindow* window, SystemInfo& sysInfo) {
     float unplayedSeconds = 0.0f;   // tiempo real que aun no se ha convertido en frames del combate
 
     while (shouldContinue(window)) {
-        unplayedSeconds += (std::min) (sysInfo.getDeltaTime(), MAX_SECONDS_PER_SCREEN_FRAME);
+
+        if (!simData.framesInfo.isPaused)
+            unplayedSeconds += (std::min)(sysInfo.getDeltaTime(), MAX_SECONDS_PER_SCREEN_FRAME);
+
         while (unplayedSeconds >= secondsPerCombatFrame) {
             simData.framesInfo.frame++;
             unplayedSeconds -= secondsPerCombatFrame;
@@ -153,8 +156,8 @@ GLFWwindow* createWindow() {
         glfwWindowHint(GLFW_GREEN_BITS, mode->greenBits);
         glfwWindowHint(GLFW_BLUE_BITS, mode->blueBits);
         glfwWindowHint(GLFW_REFRESH_RATE, mode->refreshRate);
-
-        glfwWindowHint(GLFW_DECORATED, GLFW_FALSE);   // sin bordes y del tamaño de la pantalla: parece pantalla completa pero se graba sin cortes
+        // ventana normal con su X ocupando la pantalla; sin pantalla completa exclusiva, la grabacion no tiene pantallazos negros
+        glfwWindowHint(GLFW_MAXIMIZED, GLFW_TRUE);   
         window = glfwCreateWindow(mode->width, mode->height, "Battle Mage", nullptr, nullptr);
         if (window != nullptr) glfwSetWindowPos(window, 0, 0);
     }
@@ -237,7 +240,7 @@ void simulateCombatToReplay() {
 
 int main()
 {
-    //sendForm();   // cuando se active: antes de simular, porque es el formulario el que escribe combat.json
+    sendForm();   // cuando se active: antes de simular, porque es el formulario el que escribe combat.json
     simulateCombatToReplay();
     return createSimulation();
 }

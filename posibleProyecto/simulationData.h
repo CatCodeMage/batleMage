@@ -15,6 +15,10 @@
 #include "MapData.h"
 #include "webPage.h"
 #include "jsonManager.h"
+#include "UserInterface.h"
+#include "CameraPath.h"
+
+enum class InteractionMode { Editing, ControllingCamera };
 
 struct simulationData
 {
@@ -23,11 +27,17 @@ struct simulationData
 
     void changeLights(std::vector<SceneLight>& newLights);
 
-    void clearLastFrame(); 
+    void clearLastFrame(GLFWwindow* window, SystemInfo& sysInfo);
     
     void updateFrame(GLFWwindow* window);
 
     void procesMainBodyLoopRealTime(GLFWwindow* window, SystemInfo& sysInfo);
+
+    void updateInteractionMode(GLFWwindow* window);
+
+    void updateCamera(const SystemInfo& sysInfo);
+
+    void saveShotIfRequested();
 
     // Data
     MeshLibrary libMesh;
@@ -41,6 +51,11 @@ struct simulationData
     ShadowSystem shadows;
     Input keysInput;
     FramesData framesInfo;
+    UserInterface visualInterface;
+    InteractionMode interactionMode = InteractionMode::Editing;
+    CameraPath cameraPath;
+    CameraPathMode cameraPathMode = CameraPathMode::Recording;
+    glm::mat4 viewProjection;
 
 private:
     struct ReplayAnimator {
