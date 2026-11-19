@@ -33,6 +33,7 @@ in vec4 vColor;
 in vec2 vUV;
 flat in float vKind;
 uniform sampler2D uAlbedo;
+uniform vec3 uEmission;
 uniform int  uNumLights;
 uniform vec4 uLights[2 * MAX_LIGHTS];   // [2*i] = pos.xyz + alcance ; [2*i+1] = color.rgb + intensidad
 
@@ -111,7 +112,7 @@ void main() {
 
         lit += ci.rgb * ci.a * diff * atten * visibility;
     }
-    FragColor = vec4(base * lit, 1.0);
+    FragColor = vec4(base * lit + uEmission, 1.0);
 })";
 
 

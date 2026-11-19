@@ -7,6 +7,7 @@
 #include "hechizosGestor.h"
 #include <string>
 #include "CombatManager.h"
+#include "Collision.h"
 #include "jsonManager.h"   // readSpells
 #include <cmath>
 #include "Paths.h"
@@ -28,7 +29,7 @@ public:
     static constexpr int   MAX_COMBAT_SECONDS = 300;
 
     bool isFinished() const;
-    int  getWinnerId() const;    
+    int  getWinnerId() const;
     void printResult() const;
 
     void writeReplay(const std::filesystem::path& replayFile) const;
@@ -40,7 +41,7 @@ private:
     void createPlayers(const std::filesystem::path& combatConfigFile);
     void connectOpponents();
     size_t opponentIndexOf(size_t playerIndex) const;
-     
+
     void printSpellsInFlight() const;
 
     void applySpellHits();
@@ -50,13 +51,21 @@ private:
     void countDownHitEffects();
 
     const char* replayEntityOfPlayer(size_t playerIndex) const;
+
     // unique_ptr: la IA guarda un puntero a su rival y el personaje uno a su IA,
     // asi que sus direcciones no pueden cambiar cuando el vector crece
     std::vector<std::unique_ptr<Personaje>> m_players;
-    std::vector<std::unique_ptr<ControladorMaquinaEstados>> m_controllers;   // m_controllers[i] es la IA de m_players[i]
+    std::vector<std::unique_ptr<ControladorMaquinaEstados>> m_controllers;
+
     std::vector<int> m_hitFrames;
+
     HechizosGestor m_spells;
+
     CombatManager m_combat;
+
+    // Gestion de colisiones geometricas
+    CollisionManager m_collisionManager;
+
     int m_tick = 0;
 
     nlohmann::json m_replayFrames = nlohmann::json::array();   // un frame por tick, en el formato de generateCombat

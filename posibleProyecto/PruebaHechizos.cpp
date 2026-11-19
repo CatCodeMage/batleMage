@@ -180,9 +180,10 @@ void PruebaHechizos::dispararVaritas() {
 void PruebaHechizos::aplicarSuelo() {
     for (const std::unique_ptr<Hechizo>& spell : m_spells.getActiveHechizos()) {
         if (!spell->IsActive()) continue;
-        const float fondo = spell->getPosition().y - SPELL_HIT_RADIUS;
-        if (fondo <= ALTURA_SUELO)
-            m_spells.procesarChoqueSuperficie(spell.get(), glm::vec3(0.0f, 1.0f, 0.0f), ALTURA_SUELO - fondo);
+        const SphereCollider esfera{ spell->getPosition(), SPELL_HIT_RADIUS };
+        const CollisionInfo contacto = m_colisiones.getGroundCollisionInfo(esfera, ALTURA_SUELO);
+        if (contacto.collision)
+            m_spells.procesarChoqueSuperficie(spell.get(), contacto.normal, contacto.penetration);
     }
 }
 

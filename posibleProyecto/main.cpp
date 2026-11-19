@@ -15,7 +15,9 @@
 #include "jsonManager.h"
 #include "simulationData.h"
 #include "CombatSimulation.h"
+#include "PruebaHechizos.h"
 #include <algorithm>
+#include <string_view>
 
 int shouldContinue(GLFWwindow* window) {
     return glfwWindowShouldClose(window) == 0;
@@ -137,14 +139,14 @@ int guranteWindowCreated(GLFWwindow* window) {
     return 0;
 }
 
+
 GLFWwindow* createWindow() {
     GLFWwindow* window = nullptr;
 
     if (!glfwInit()) {
-        std::cerr << "No se pudo inicializar GLFW\n"; 
+        std::cerr << "No se pudo inicializar GLFW\n";
     }
-    else
-    {
+    else {
         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
@@ -157,13 +159,25 @@ GLFWwindow* createWindow() {
         glfwWindowHint(GLFW_BLUE_BITS, mode->blueBits);
         glfwWindowHint(GLFW_REFRESH_RATE, mode->refreshRate);
 
-        glfwWindowHint(GLFW_DECORATED, GLFW_FALSE);   // sin bordes y del tamaño de la pantalla: parece pantalla completa pero se graba sin cortes
-        window = glfwCreateWindow(mode->width, mode->height, "Battle Mage", nullptr, nullptr);
-        if (window != nullptr) glfwSetWindowPos(window, 0, 0);
+        // Pantalla completa sin bordes
+        glfwWindowHint(GLFW_DECORATED, GLFW_FALSE);
+
+        window = glfwCreateWindow(
+            mode->width,
+            mode->height,
+            "Battle Mage",
+            nullptr,
+            nullptr
+        );
+
+        if (window != nullptr)
+            glfwSetWindowPos(window, 0, 0);
     }
 
     return window;
 }
+
+
 
 // TEMPORAL (L1): se borra cuando el cargador este comprobado
 void testObjLoader() {
@@ -220,8 +234,7 @@ int createSimulation() {
 }
 
 // Simula el combate entero sin graficos y lo deja grabado para que los graficos lo reproduzcan
-#include "PruebaHechizos.h"   // PRUEBA
-
+template <typename Simulation>
 void simulateCombatToReplay() {
     CombatSimulation simulation;
     simulation.setup(dataPath("db/combat_1.json"));
@@ -234,8 +247,12 @@ void simulateCombatToReplay() {
 }
 
 
-int main()
+int main(int argc, char* argv[])
 {
-    simulateCombatToReplay();
+    //sendForm();   // cuando se active: antes de simular, porque es el formulario el que escribe combat.json
+    if (argc > 1 && std::string_view(argv[1]) == "--prueba-hechizos")
+        simulateCombatToReplay<PruebaHechizos>();
+    else
+        simulateCombatToReplay<CombatSimulation>();
     return createSimulation();
 }

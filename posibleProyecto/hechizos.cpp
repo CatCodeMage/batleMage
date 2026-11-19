@@ -1,33 +1,45 @@
+
 #include "hechizos.h"
 
 Hechizo::Hechizo(int id, const std::string& name, ElementType element,
     float cost, float damage, float cooldown,
     float speed, float radius)
 {
-    // Inicialización del componente de definición
-    //CAMBIAR: en el futuro meter casttype y movementpattern
-    hechizo = { id, name, element, CastType::Projectile, MovementPattern::Linear, cost, damage, cooldown };
+    // Definicion del hechizo
+    hechizo = {
+        id, name, element,
+        CastType::Projectile,
+        MovementPattern::Linear,
+        cost, damage, cooldown
+    };
 
-    // Inicialización del componente de movimiento (valores por defecto para posición/rotación)
+    // Estado inicial del proyectil
     movement = {
         glm::vec3(0.0f),          // translacio
         glm::vec3(0.0f),          // rotacio
         glm::vec3(1.0f),          // scale
-		glm::vec3(0.0f),          // velocity
+        glm::vec3(0.0f),          // velocity
         radius                    // radius
     };
     rapidezInicial = speed;
-    // Inicialización de estado
     isActive = false;
     maxLifeTime = 5.0f;
     currentLifeTime = 0.0f;
 }
 
-void Hechizo::cast(const glm::vec3& initialPosition, const glm::vec3& direction) {
+
+void Hechizo::cast(const glm::vec3& initialPosition,
+    const glm::vec3& direction)
+{
     movement.translacio = initialPosition;
-    movement.velocity = glm::normalize(direction) * rapidezInicial;
+    const float length = glm::length(direction);
+    movement.velocity = length > 0.0f ? direction * (rapidezInicial / length) : glm::vec3(0.0f);
+    if (hechizo.formaMovimiento == MovementPattern::Parabolic) {
+        // El proyectil parabolico sale horizontal y la gravedad modifica su velocidad.
+        movement.velocity.y = 0.0f;
+    }
     currentLifeTime = 0.0f;
-    isActive = true; // Activamos el proyectil al lanzarlo
+    isActive = true;
 }
 
 // calculo movimiento lineal
@@ -59,17 +71,13 @@ void Hechizo::update(float deltaTime) {
     if (!isActive) return;
 
     switch (hechizo.formaMovimiento) {
-        case MovementPattern::Linear:    moverLineal(deltaTime);    break;
         case MovementPattern::Parabolic: moverParabolico(deltaTime); break;
-        //case MovementPattern::Homing:    moverTeledirigido(deltaTime); break;
-        //case MovementPattern::Orbiting:  moverOrbital(deltaTime);   break;
         case MovementPattern::Static:    break;
+        default:                         moverLineal(deltaTime);   break;
     }
 
-    // Acumular tiempo
     currentLifeTime += deltaTime;
 
-    //Comprobar si ha terminado su vida
     if (hasExpired()) {
         setActive(false);
     }
@@ -88,7 +96,7 @@ void Hechizo::alChocarSuperficie(const glm::vec3& normal, float penetracion) {
         return;
     }
 
-    // Rebote 3D: refleja la dirección respecto a la normal (sirve para suelo, paredes, rocas...)
+    // Reflejar la velocidad conserva la trayectoria tras el rebote, tambien con gravedad.
     movement.velocity = glm::reflect(movement.velocity, normal);
     // Sacarlo de la superficie para que no siga "dentro"
     movement.translacio += normal * penetracion;
@@ -102,6 +110,7 @@ void Hechizo::reset() {
     movement.scale = glm::vec3(1.0f); // O 0.0f si prefieres que desaparezca por completo
     movement.radius = 0.0f;
     movement.velocity = glm::vec3(0.0f);
+    rapidezInicial = 0.0f;
     // Reiniciamos tiempos y desactivamos el hechizo
     currentLifeTime = 0.0f;
     isActive = false;

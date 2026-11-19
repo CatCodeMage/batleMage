@@ -1,5 +1,7 @@
+
 {
     "fire_ball": {
+        "movement_pattern": "parabolic",
         "cast_type": "line",
         "cooldown": 3.0,
         "element": "fire",

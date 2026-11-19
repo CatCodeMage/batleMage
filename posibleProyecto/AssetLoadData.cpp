@@ -180,6 +180,7 @@ static ObjMaterial describeMaterial(int materialId, const std::vector<tinyobj::m
     ObjMaterial material;
     material.name = source.name;
     material.color = glm::vec4(source.diffuse[0], source.diffuse[1], source.diffuse[2], 1.0f);
+    material.emission = glm::vec3(source.emission[0], source.emission[1], source.emission[2]);
 
     const bool hasAlbedoTexture = !source.diffuse_texname.empty();
     if (hasAlbedoTexture) material.albedoTexture = objFolder / source.diffuse_texname;
@@ -215,7 +216,7 @@ static Model registerPieces(const std::string& assetName, const std::vector<ObjP
         const ObjPiece& piece = pieces[pieceIndex];
         const std::string meshName = assetName + "#" + std::to_string(pieceIndex);
         const MeshId mesh = meshes.add(meshName, piece.verts, piece.idx);
-        model.parts.push_back({ mesh, piece.material.color, loadAlbedoTexture(piece.material, textures) });
+        model.parts.push_back({ mesh, piece.material.color, loadAlbedoTexture(piece.material, textures), piece.material.emission });
     }
     return model;
 }

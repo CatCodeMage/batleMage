@@ -9,6 +9,7 @@ struct ModelPart {
     MeshId    mesh          = INVALID_MESH;
     glm::vec4 color         = glm::vec4(1.0f);
     GLuint    albedoTexture = 0;
+    glm::vec3 emission      = glm::vec3(0.0f);
 };
 
 struct Model {

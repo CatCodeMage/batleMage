@@ -39,18 +39,30 @@ void HechizosGestor::devolverAlPool(Hechizo* spell) {
     libres.push_back(spell->getIndicePool());
 }
 
-void HechizosGestor::registrarHechizo(int id, const std::string& name, ElementType element, float cost,
-    float damage, float cooldown, float speed, float radius, glm::vec3 scale, float maxLifeTime) {
+bool HechizosGestor::perteneceAlPool(const Hechizo* spell) const {
+    if (!spell) return false;
+    const auto indice = static_cast<size_t>(spell->getIndicePool());
+    return indice < spellPool.size() && spellPool[indice].get() == spell;
+}
 
-    // Creamos el componente de definición estática
-    // CAMBIAR: DE MOMENTO PONGO QUE ES FULL PROYECTILES Y LINEAR
-    SpellDefinitionComponent def = { id, name, element, CastType::Projectile, MovementPattern::Linear, cost, damage, cooldown };
+void HechizosGestor::registrarHechizo(
+    int id, const std::string& name, ElementType element,
+    float cost, float damage, float cooldown,
+    float speed, float radius, glm::vec3 scale,
+    float maxLifeTime, MovementPattern pattern)
+{
+    SpellDefinitionComponent def = {
+        id, name, element,
+        CastType::Projectile,
+        pattern,
+        cost, damage, cooldown
+    };
 
-    // Lo guardamos en el catálogo junto con sus datos de movimiento
-    hechizhosCatalog[id] = { def, speed, radius, scale, maxLifeTime };
+    hechizhosCatalog[id] = {
+        def, speed, radius, scale, maxLifeTime
+    };
 
-    // NUEVO: cada hechizo de spells.json es también una carta proyectil para la varita
-    // (castDelay 0 de momento: el "cooldown" del JSON no equivale al cast delay de Noita)
+    // Cada proyectil del catalogo tambien es una carta para la varita.
     cartas[id] = std::make_unique<CartaProyectil>(id, name, cost, 0.0f);
 }
 
@@ -140,14 +152,14 @@ void HechizosGestor::update(float deltaTime) {
 
 // CAMBIO: solo si está activo (evita meter el mismo índice dos veces en la lista libre)
 void HechizosGestor::destroySpell(Hechizo* spell) {
-    if (spell && spell->IsActive()) {
+    if (perteneceAlPool(spell) && spell->IsActive()) {
         devolverAlPool(spell);
     }
 }
 
 // NUEVO: entrada para colisiones (choque con el mundo)
 void HechizosGestor::procesarChoqueSuperficie(Hechizo* spell, const glm::vec3& normal, float penetracion) {
-    if (!spell || !spell->IsActive()) return;
+    if (!perteneceAlPool(spell) || !spell->IsActive()) return;
     spell->alChocarSuperficie(normal, penetracion);
     // Si el hechizo ha decidido desaparecer, vuelve al pool
     if (!spell->IsActive()) devolverAlPool(spell);

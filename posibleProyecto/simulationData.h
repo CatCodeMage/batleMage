@@ -20,6 +20,7 @@
 struct FramesData
 {
     std::vector<std::vector <Entidad>> combat;
+    std::vector<ModelAnimation> animations;
 
     int frame;
     int lessFrames;
