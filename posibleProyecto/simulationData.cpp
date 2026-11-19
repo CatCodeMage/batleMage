@@ -1,4 +1,5 @@
 #include "simulationData.h"
+#include "CombatSimulation.h"
 
 void simulationData::changeLights(std::vector<SceneLight>& newLights) {
 	lights = newLights;
@@ -19,7 +20,7 @@ void simulationData::init(GLFWwindow* window) {
 	shadows.procesInit();
 	keysInput.init(window);
 
-	framesInfo.combat = generateCombat(libModel);
+	framesInfo.combat = generateCombat(libModel, framesInfo.animations);
 	framesInfo.frame = 0;
 	framesInfo.lessFrames = 0;
 }
@@ -54,7 +55,8 @@ void simulationData::procesMainBodyLoopRealTime(GLFWwindow* window, SystemInfo& 
 
 	submitEntidades(renderer, libModel, map.entities);
 
-	submitEntidades(renderer, libModel, framesInfo.combat[framesInfo.frame]);
+	const double replaySeconds = static_cast<double>(framesInfo.frame) / CombatSimulation::TICKS_PER_SECOND;
+	submitEntidades(renderer, libModel, framesInfo.combat[framesInfo.frame], framesInfo.animations, replaySeconds);
 
 	renderer.submitLights(lights, time);
 

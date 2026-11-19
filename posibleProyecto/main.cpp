@@ -136,14 +136,14 @@ int guranteWindowCreated(GLFWwindow* window) {
     return 0;
 }
 
+
 GLFWwindow* createWindow() {
     GLFWwindow* window = nullptr;
 
     if (!glfwInit()) {
-        std::cerr << "No se pudo inicializar GLFW\n"; 
+        std::cerr << "No se pudo inicializar GLFW\n";
     }
-    else
-    {
+    else {
         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
@@ -156,13 +156,25 @@ GLFWwindow* createWindow() {
         glfwWindowHint(GLFW_BLUE_BITS, mode->blueBits);
         glfwWindowHint(GLFW_REFRESH_RATE, mode->refreshRate);
 
-        glfwWindowHint(GLFW_DECORATED, GLFW_FALSE);   // sin bordes y del tamaño de la pantalla: parece pantalla completa pero se graba sin cortes
-        window = glfwCreateWindow(mode->width, mode->height, "Battle Mage", nullptr, nullptr);
-        if (window != nullptr) glfwSetWindowPos(window, 0, 0);
+        // Pantalla completa sin bordes
+        glfwWindowHint(GLFW_DECORATED, GLFW_FALSE);
+
+        window = glfwCreateWindow(
+            mode->width,
+            mode->height,
+            "Battle Mage",
+            nullptr,
+            nullptr
+        );
+
+        if (window != nullptr)
+            glfwSetWindowPos(window, 0, 0);
     }
 
     return window;
 }
+
+
 
 // TEMPORAL (L1): se borra cuando el cargador este comprobado
 void testObjLoader() {

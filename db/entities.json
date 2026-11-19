@@ -27,7 +27,19 @@
         "scale": [0.5, 0.5, 0.5],
         "asset": "fireball"
     },
-    "fire_ball":       { "scale": [0.5, 0.5, 0.5], "asset": "fireball" },
+    "fire_ball": {
+        "scale": [0.5, 0.5, 0.5],
+        "asset": "fireball_00",
+        "animation": {
+            "fps": 12,
+            "loop": true,
+            "assets": [
+                "fireball_00", "fireball_01", "fireball_02", "fireball_03", "fireball_04",
+                "fireball_05", "fireball_06", "fireball_07", "fireball_08", "fireball_09",
+                "fireball_10", "fireball_11", "fireball_12", "fireball_13", "fireball_14"
+            ]
+        }
+    },
     "meteor":          { "scale": [0.5, 0.5, 0.5], "asset": "fireball" },
     "flame_wall":      { "scale": [0.5, 0.5, 0.5], "asset": "fireball" },
     "ice_lance":       { "scale": [0.5, 0.5, 0.5], "asset": "ice_cube" },

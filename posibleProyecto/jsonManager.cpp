@@ -1,5 +1,6 @@
 
 #include "jsonManager.h"
+#include <cmath>
 
 using json = nlohmann::json;
 
@@ -102,111 +103,81 @@ std::vector<std::string> getPlayers() {
     }
 }
 
-Entidad generateEntity(
-    const std::vector<float>& position,
-    const std::vector<float>& rotation,
-    const EntityInfo eInfo,
-    const ModelLibrary& lib)
-{
-    if (!lib.has(eInfo.asset)) {
-        throw std::runtime_error(
-            "asset desconocido: '" + eInfo.asset + "'"
-        );
-    }
+struct EntityInfo {
+    ModelId model;
+    glm::vec3 scale;
+    AnimationId animation = NO_ANIMATION;
+};
 
-    Entidad entity;
-    entity.model = lib.find(eInfo.asset);
-
-    entity.transform.scale = glm::vec3(
-        eInfo.scale[0],
-        eInfo.scale[1],
-        eInfo.scale[2]
-    );
-
-    entity.transform.pos = glm::vec3(
-        position[0],
-        position[1],
-        position[2]
-    );
-
-    entity.transform.rot = glm::vec3(
-        rotation[0],
-        rotation[1],
-        rotation[2]
-    );
-
-    entity.kind = 0;
-
-    return entity;
+static glm::vec3 readVec3(const json& value) {
+    return glm::vec3(value.at(0).get<float>(), value.at(1).get<float>(), value.at(2).get<float>());
 }
 
-EntityInfo getEntityInfo(const std::string entityName) {
-    try {
-        std::ifstream entityFile(ENTITIES_PATH);
-
-        if (!entityFile.is_open())
-        {
-            return EntityInfo{};
-        }
-
-        json entityData;
-        entityFile >> entityData;
-
-        return EntityInfo{
-            entityData.at(entityName).at("asset"),
-            entityData.at(entityName).at("scale")
-                .get<std::vector<float>>()
-        };
-    }
-    catch (const std::exception& e) {
-        std::cout << e.what();
-        return EntityInfo{};
-    }
+static ModelId requireModel(const ModelLibrary& models, const std::string& entityName, const std::string& asset) {
+    if (!models.has(asset))
+        throw std::runtime_error("entidad '" + entityName + "': asset desconocido '" + asset + "'");
+    return models.find(asset);
 }
 
-std::vector<std::vector<Entidad>> generateCombat(
-    const ModelLibrary& modelLib)
-{
-    try {
-        std::ifstream simulationFile(COMBAT_PATH);
+static std::unordered_map<std::string, EntityInfo> loadEntityInfo(const ModelLibrary& models,
+    std::vector<ModelAnimation>& animations) {
+    std::ifstream file(ENTITIES_PATH);
+    if (!file) throw std::runtime_error("no se puede abrir " + ENTITIES_PATH);
+    const json definitions = json::parse(file);
 
-        if (!simulationFile.is_open())
-        {
-            return {};
+    std::unordered_map<std::string, EntityInfo> entities;
+    for (const auto& [name, definition] : definitions.items()) {
+        EntityInfo info{ requireModel(models, name, definition.at("asset").get<std::string>()),
+            readVec3(definition.at("scale")) };
+
+        const auto config = definition.find("animation");
+        if (config != definition.end()) {
+            ModelAnimation animation;
+            animation.fps = config->at("fps").get<double>();
+            animation.loop = config->value("loop", true);
+            const json& assets = config->at("assets");
+            if (!std::isfinite(animation.fps) || animation.fps <= 0.0 || !assets.is_array() || assets.empty())
+                throw std::runtime_error("entidad '" + name + "': animation requiere fps positivo y una lista de assets");
+            animation.frames.reserve(assets.size());
+            for (const json& asset : assets)
+                animation.frames.push_back(requireModel(models, name, asset.get<std::string>()));
+
+            info.animation = static_cast<AnimationId>(animations.size());
+            animations.push_back(std::move(animation));
         }
+        entities.emplace(name, info);
+    }
+    return entities;
+}
 
-        json simulationData;
-        std::vector<std::vector<Entidad>> combatSequence;
+std::vector<std::vector<Entidad>> generateCombat(const ModelLibrary& modelLib,
+    std::vector<ModelAnimation>& animations) {
+    std::ifstream simulationFile(COMBAT_PATH);
+    if (!simulationFile) throw std::runtime_error("no se puede abrir " + COMBAT_PATH);
+    const json simulationData = json::parse(simulationFile);
+    const json& frames = simulationData.at("frames");
+    if (!frames.is_array() || frames.empty()) throw std::runtime_error("replay sin frames: " + COMBAT_PATH);
 
-        simulationFile >> simulationData;
+    std::vector<ModelAnimation> configuredAnimations;
+    const auto definitions = loadEntityInfo(modelLib, configuredAnimations);
+    std::vector<std::vector<Entidad>> combatSequence;
+    combatSequence.reserve(frames.size());
+    for (const json& frame : frames) {
+        auto& entities = combatSequence.emplace_back();
+        entities.reserve(frame.size());
+        for (const json& sample : frame) {
+            const std::string name = sample.at(2).get<std::string>();
+            const auto info = definitions.find(name);
+            if (info == definitions.end()) throw std::runtime_error("entidad desconocida en replay: '" + name + "'");
 
-        json jsonCombat = simulationData["frames"];
-
-        for (auto& frame : jsonCombat) {
-
-            std::vector<Entidad> entities;
-
-            for (auto& entity : frame)
-            {
-                EntityInfo eInfo = getEntityInfo(entity[2]);
-
-                entities.push_back(
-                    generateEntity(
-                        entity[0].get<std::vector<float>>(),
-                        entity[1].get<std::vector<float>>(),
-                        eInfo,
-                        modelLib
-                    )
-                );
-            }
-
-            combatSequence.push_back(entities);
+            Entidad& entity = entities.emplace_back();
+            entity.model = info->second.model;
+            entity.animation = info->second.animation;
+            entity.transform.scale = info->second.scale;
+            entity.transform.pos = readVec3(sample.at(0));
+            entity.transform.rot = readVec3(sample.at(1));
         }
-
-        return combatSequence;
     }
-    catch (const std::exception& e) {
-        std::cout << e.what() << std::endl;
-        return {};
-    }
+    animations = std::move(configuredAnimations);
+    return combatSequence;
 }

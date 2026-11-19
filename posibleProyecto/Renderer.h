@@ -22,7 +22,8 @@ class Renderer {
 public:
     Renderer();
     void init(GLuint program);
-    void submit(MeshId id, GLuint albedoTexture, const glm::mat4& model, const glm::vec4& color, int kind = 0);
+    void submit(MeshId id, GLuint albedoTexture, const glm::mat4& model, const glm::vec4& color,
+        int kind = 0, const glm::vec3& emission = glm::vec3(0.0f));
     void flush(const MeshLibrary& lib, const glm::mat4& viewProj);
     void drawShadowGeometry(const MeshLibrary& lib) const;
     void submitLights(std::vector<SceneLight>& lights, const float time);
@@ -32,6 +33,10 @@ private:
     void flushLigth();
     std::vector<Light> w_lights;
     std::vector<std::vector<InstanceData>> w_batches;      
-    std::vector<GLuint> w_batchTextures;   
-    GLint w_locViewProj, w_locNumLights, w_locLights, w_locAlbedo;
+    struct BatchMaterial {
+        GLuint albedoTexture = 0;
+        glm::vec3 emission = glm::vec3(0.0f);
+    };
+    std::vector<BatchMaterial> w_batchMaterials;
+    GLint w_locViewProj, w_locNumLights, w_locLights, w_locAlbedo, w_locEmission;
 };
