@@ -6,26 +6,26 @@ Camera::Camera() {
 	w_yaw = -90.f; 
 	w_pitch = -15.f;
 
-	this->updateView();
+	updateFront();
+	updateView();
+}
+
+void Camera::setPose(const CameraPose& pose) {   // front y view se recalculan en update
+	w_pos = pose.position;
+	w_yaw = pose.yaw;
+	w_pitch = pose.pitch;
+}
+
+void Camera::update(Input& input, const SystemInfo& sysInfo, bool isFreeToMove) {
+	set_camera((float)sysInfo.getWidht(), (float)sysInfo.getHeight());
+	if (isFreeToMove) rotateWithMouse(input);   // en modo resultado el raton no debe torcer la toma
+	updateFront();
+	if (isFreeToMove) moveWithKeys(input, sysInfo.getDeltaTime());
+	updateView();
 }
 
 void Camera::set_camera(float widht, float height) {
 	w_proj = glm::perspective(glm::radians(45.0f), (float)widht / height, w_near, w_far);
-}
-
-bool Camera::procesOrders(const Input& input, float& fwd, float& strafe, float& turn) {
-	bool wDown = input.keyDown(GLFW_KEY_W);
-	bool aDown = input.keyDown(GLFW_KEY_A);
-	bool sDown = input.keyDown(GLFW_KEY_S);
-	bool dDown = input.keyDown(GLFW_KEY_D);
-	bool qDown = input.keyDown(GLFW_KEY_Q);
-	bool eDown = input.keyDown(GLFW_KEY_E);
-
-	fwd = (float)wDown - (float)sDown;   // -1, 0 o 1; W+S se anulan
-	strafe = (float)dDown - (float)aDown;
-	turn = (float)eDown - (float)qDown;
-
-	return input.keyDown(GLFW_KEY_LEFT_SHIFT);
 }
 
 void Camera::rotateWithMouse(Input& input) {
@@ -60,12 +60,4 @@ void Camera::updateFront() {
 
 void Camera::updateView() {
 	w_view = glm::lookAt(w_pos, w_pos + w_front, glm::vec3(0.f, 1.f, 0.f));
-}
-
-void Camera::update(Input& input, const SystemInfo& sysInfo, bool canMoveWithKeys) {
-	set_camera((float)sysInfo.getWidht(), (float)sysInfo.getHeight());
-	rotateWithMouse(input);
-	updateFront();                                 
-	if (canMoveWithKeys) moveWithKeys(input, sysInfo.getDeltaTime());
-	updateView();
 }

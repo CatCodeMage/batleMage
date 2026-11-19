@@ -3,17 +3,23 @@
 #include "Input.h"
 #include "systemInfo.h"
 
+struct CameraPose {   // lo minimo para reconstruir la vista; el campo de vision es fijo
+	glm::vec3 position;
+	float yaw;
+	float pitch;
+};
+
 class Camera
 {
 public:
 	Camera(); 
 	void set_camera(float widht, float height);
-	void update(Input & input, const SystemInfo& sysInfo, bool canMoveWithKeys);
-
-	bool procesOrders(const Input& input, float& fwd, float& strafe, float& turn);
 
 	glm::mat4 get_view() const { return w_view; };
 	glm::mat4 get_proj() const { return w_proj; };
+	CameraPose getPose() const { return { w_pos, w_yaw, w_pitch }; }
+	void setPose(const CameraPose& pose);
+	void update(Input& input, const SystemInfo& sysInfo, bool isFreeToMove);
 private: 
 	void updateView();
 
@@ -35,7 +41,6 @@ private:
 	const float w_near = 0.1f;
 
 	const float speed = 10.f;
-	const float rotSpeed = 40.f;
 };
 
  

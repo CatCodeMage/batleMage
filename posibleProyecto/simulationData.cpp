@@ -1,12 +1,16 @@
 #include "simulationData.h"
 #include <imgui.h>
 #include "CombatPanel.h"
+#include "CameraPathPanel.h"
 
 void simulationData::changeLights(std::vector<SceneLight>& newLights) {
 	lights = newLights;
 }
 
 void simulationData::init(GLFWwindow* window) {
+	constexpr int FIRST_FRAME = 0;
+	cameraPath.saveShot(FIRST_FRAME, viewCamera.getPose());   // toma por defecto: la camara inicial
+
 	textures.init();
 	loadAssetManifest(dataPath("db/assets.json"), libMesh, libModel, textures);
 
@@ -49,6 +53,28 @@ void simulationData::updateFrame(GLFWwindow* window) {
 	glfwPollEvents();
 }
 
+void simulationData::updateCamera(const SystemInfo& sysInfo) {
+	const bool isRecording = cameraPathMode == CameraPathMode::Recording;
+	const bool isControllingCamera = interactionMode == InteractionMode::ControllingCamera;
+	const bool isFreeToMove = isRecording && isControllingCamera;
+
+	if (!isRecording) viewCamera.setPose(cameraPath.poseAtFrame(framesInfo.frame));
+	viewCamera.update(keysInput, sysInfo, isFreeToMove);
+	if (isRecording) saveShotIfRequested();
+
+	viewProjection = viewCamera.get_proj() * viewCamera.get_view();
+}
+
+void simulationData::saveShotIfRequested() {
+	const bool hasPressedSave = keysInput.wasKeyPressed(GLFW_KEY_SPACE);
+	const bool isTypingInPanel = visualInterface.isUsingKeyboard();   // p. ej. escribiendo el frame exacto
+	if (!hasPressedSave || isTypingInPanel) return;
+
+	cameraPath.saveShot(framesInfo.frame, viewCamera.getPose());
+	std::cout << "Toma guardada en el frame " << framesInfo.frame
+		<< " (" << cameraPath.getShots().size() << " tomas)\n";
+}
+
 void simulationData::procesMainBodyLoopRealTime(GLFWwindow* window, SystemInfo& sysInfo) {
 	clearLastFrame(window, sysInfo);
 
@@ -61,10 +87,7 @@ void simulationData::procesMainBodyLoopRealTime(GLFWwindow* window, SystemInfo& 
 	updateInteractionMode(window);
 
 	// Camara
-	const bool canCameraMove = interactionMode == InteractionMode::ControllingCamera;   // en modo edicion la camara se queda quieta
-	viewCamera.update(keysInput, sysInfo, canCameraMove);
-
-	glm::mat4 vp = viewCamera.get_proj() * viewCamera.get_view();
+	updateCamera(sysInfo);
 
 	// Submit to queue
 	submitEntidades(renderer, libModel, map.entities);
@@ -77,11 +100,17 @@ void simulationData::procesMainBodyLoopRealTime(GLFWwindow* window, SystemInfo& 
 	shadows.render(lights, [&]() { renderer.drawShadowGeometry(libMesh);});
 	shadows.bindForLighting(program);
 
-	// Pintar
-	renderer.flush(libMesh, vp);
+	// Pintar simulacion 
+	renderer.flush(libMesh, viewProjection);
 
-	if (arePanelsVisible) drawCombatPanel(framesInfo);
-	else                  visualInterface.drawCameraModeHint();
+	// Pintar la UI
+	if (arePanelsVisible) {
+		drawCombatPanel(framesInfo);
+		drawCameraPathPanel(cameraPathMode, cameraPath, viewCamera, framesInfo);
+	}
+	else visualInterface.drawCameraModeHint();
+
+	// Mostrar el resultado
 	updateFrame(window);
 }
 

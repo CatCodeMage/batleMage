@@ -42,11 +42,3 @@ void Input::consumeMouseDelta(float& dx, float& dy) {
     dx = w_dx;  dy = w_dy;     // entrega lo acumulado...
     w_dx = w_dy = 0.f;         // ...y lo pone a cero para el siguiente frame
 }
-
-void Input::toggleCursor(GLFWwindow* window) {
-    w_captured = !w_captured;
-    glfwSetInputMode(window, GLFW_CURSOR,
-        w_captured ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL);
-    w_firstMouse = true;      // la primera lectura tras el cambio no debe dar un salto
-    w_dx = w_dy = 0.f;        // descarta lo acumulado antes del cambio
-}

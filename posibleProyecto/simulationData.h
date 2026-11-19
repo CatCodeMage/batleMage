@@ -16,6 +16,7 @@
 #include "webPage.h"
 #include "jsonManager.h"
 #include "UserInterface.h"
+#include "CameraPath.h"
 
 enum class InteractionMode { Editing, ControllingCamera };
 
@@ -43,6 +44,10 @@ struct simulationData
     void destroy();
     
     void updateInteractionMode(GLFWwindow* window);
+
+    void updateCamera(const SystemInfo& sysInfo);
+
+    void saveShotIfRequested();
     // Data
     MeshLibrary libMesh;
     ModelLibrary libModel;
@@ -57,5 +62,8 @@ struct simulationData
     FramesData framesInfo;
     UserInterface visualInterface;
     InteractionMode interactionMode = InteractionMode::Editing;
+    CameraPath cameraPath;
+    CameraPathMode cameraPathMode = CameraPathMode::Recording;
+    glm::mat4 viewProjection;
 };
 

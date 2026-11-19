@@ -16,7 +16,6 @@ public:
 private:
     static void onKey(GLFWwindow* w, int key, int scancode, int action, int mods);
     static void onCursorPos(GLFWwindow* w, double x, double y);
-    void toggleCursor(GLFWwindow* w);
     void setCursorCaptured(GLFWwindow* window, bool isCaptured);
 
     bool   w_pressedThisFrame[GLFW_KEY_LAST + 1] = {};
