@@ -60,9 +60,6 @@
     <ClCompile Include="hechizosGestor.cpp">
       <Filter>Archivos de recursos\Archivos de origen</Filter>
     </ClCompile>
-    <ClCompile Include="webPage.cpp">
-      <Filter>Archivos de recursos\Archivos de origen</Filter>
-    </ClCompile>
     <ClCompile Include="AssetLoadData.cpp">
       <Filter>Archivos de recursos\Archivos de origen</Filter>
     </ClCompile>

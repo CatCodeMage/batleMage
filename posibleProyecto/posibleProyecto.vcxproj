@@ -199,7 +199,6 @@
     <ClCompile Include="PointShadowMap.cpp" />
     <ClCompile Include="ShadowSystem.cpp" />
     <ClCompile Include="varita.cpp" />
-    <ClCompile Include="webPage.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AssetLoadData.h" />

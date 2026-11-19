@@ -20,33 +20,14 @@
           "manaMax": 0,
           "manaActual": 0,
           "recargaMana": 15,
-          "capacidad": 6,
+          "capacidad": 5,
           "dispersion": 2,
           "ranuras": [
+            "ice_lance",
+            "poison_cloud",
             "arcane_ray",
             "lightning_bolt",
-            "arcane_ray",
-            "poison_cloud",
-            "meteor",
-            "frost_nova"
-          ],
-          "indiceActual": 0,
-          "tiempoEspera": 0
-        },
-        {
-          "nombre": "Varita 2",
-          "castDelay": 0.15,
-          "rechargeTime": 0.8,
-          "manaMax": 0,
-          "manaActual": 0,
-          "recargaMana": 15,
-          "capacidad": 4,
-          "dispersion": 2,
-          "ranuras": [
-            "fire_ball",
-            "fire_ball",
-            "fire_ball",
-            "fire_ball"
+            "poison_cloud"
           ],
           "indiceActual": 0,
           "tiempoEspera": 0
@@ -61,7 +42,7 @@
         1,
         0
       ],
-      "type": "tank_mage",
+      "type": "ice_mage",
       "wands": [],
       "basicSpell": null,
       "aiWands": true

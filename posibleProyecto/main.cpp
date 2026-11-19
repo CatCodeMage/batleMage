@@ -12,7 +12,6 @@
 #include "ShadowSystem.h"
 #include "AssetLoadData.h"
 #include "MapData.h"
-#include "webPage.h"
 #include "jsonManager.h"
 #include "simulationData.h"
 #include "CombatSimulation.h"
@@ -234,7 +233,6 @@ void simulateCombatToReplay() {
 
 int main()
 {
-    //sendForm();   // cuando se active: antes de simular, porque es el formulario el que escribe combat.json
     simulateCombatToReplay();
     return createSimulation();
 }
