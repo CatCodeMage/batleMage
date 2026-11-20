@@ -236,7 +236,7 @@ int createSimulation() {
 // Simula el combate entero sin graficos y lo deja grabado para que los graficos lo reproduzcan
 template <typename Simulation>
 void simulateCombatToReplay() {
-    CombatSimulation simulation;
+    Simulation simulation;
     simulation.setup(dataPath("db/combat_1.json"));
     while (!simulation.isFinished()) {
         simulation.step();
@@ -247,10 +247,14 @@ void simulateCombatToReplay() {
 }
 
 
+// true = PruebaHechizos (varitas con cartas, sin IA) | false = combate normal (CombatSimulation)
+// OJO: dejar en false antes de hacer commit, o a todo el equipo le arrancará la prueba
+constexpr bool USAR_PRUEBA_HECHIZOS = false;
+
 int main(int argc, char* argv[])
 {
     //sendForm();   // cuando se active: antes de simular, porque es el formulario el que escribe combat.json
-    if (argc > 1 && std::string_view(argv[1]) == "--prueba-hechizos")
+    if (USAR_PRUEBA_HECHIZOS || (argc > 1 && std::string_view(argv[1]) == "--prueba-hechizos"))
         simulateCombatToReplay<PruebaHechizos>();
     else
         simulateCombatToReplay<CombatSimulation>();

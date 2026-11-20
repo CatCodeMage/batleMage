@@ -111,14 +111,14 @@ void PruebaHechizos::crearVaritas() {
     v1.castDelay = 0.3f;
     v1.recarga = 1.0f;
 
-    // Mago 2 (azul): [triple][rebote x4][ice_shard x3]
-    //   -> abanico de 3 que van hacia el suelo, rebotan y siguen en arco hacia el rival
+    // Mago 2 (azul): [triple][rebote x4][fire_ball x3]
+    //   -> abanico de 3 bolas de fuego parabólicas que botan hacia el rival
     VaritaPrueba& v2 = m_varitas[1];
-    const int shard = idPorNombre("ice_shard");
-    v2.ranuras = { idPorNombre("triple_spell"), idPorNombre("bounce"), shard, shard, shard };
+    const int bola = idPorNombre("fire_ball");
+    v2.ranuras = { idPorNombre("triple_spell"), idPorNombre("bounce"), bola, bola, bola };
     v2.castDelay = 0.4f;
     v2.recarga = 1.5f;
-    v2.inclinacionY = -0.5f;   // hacia el suelo: rebota y hace arcos por la gravedad
+    v2.inclinacionY = 0.6f;    // hacia arriba: la gravedad dibuja la parábola
 }
 
 // =====================================================================

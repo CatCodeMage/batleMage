@@ -34,10 +34,6 @@ void Hechizo::cast(const glm::vec3& initialPosition,
     movement.translacio = initialPosition;
     const float length = glm::length(direction);
     movement.velocity = length > 0.0f ? direction * (rapidezInicial / length) : glm::vec3(0.0f);
-    if (hechizo.formaMovimiento == MovementPattern::Parabolic) {
-        // El proyectil parabolico sale horizontal y la gravedad modifica su velocidad.
-        movement.velocity.y = 0.0f;
-    }
     currentLifeTime = 0.0f;
     isActive = true;
 }
