@@ -52,39 +52,6 @@ void updateShadowInput(GLFWwindow* window, ShadowSystem& shadows, std::vector<Sc
     f7PreviouslyPressed = f7Pressed;
 }*/
  
-std::vector<SceneLight> setLights() {
-    std::vector<SceneLight> lights = {
-        {
-            {
-                glm::vec3(0.0f),
-                8.0f,
-                glm::vec3(1.0f, 0.8f, 0.5f),
-                2.0f
-            },
-            true  // Luz que orbita: proyecta sombras
-        },
-        {
-            {
-                glm::vec3(-3.0f, 2.0f, 0.0f),
-                6.0f,
-                glm::vec3(0.3f, 0.5f, 1.0f),
-                2.0f
-            },
-            false // Luz fija: no proyecta sombras
-        },
-        {
-            {
-                glm::vec3(-80.0f, 200.0f, -60.0f),   // sol: muy alto y lejos, asi su luz llega casi paralela a toda la arena
-                1000.0f,                             // alcance muy por encima de la distancia: apenas se atenua
-                glm::vec3(1.0f, 0.95f, 0.85f),       // blanco calido
-                1.2f
-            },
-            false   // sin sombras: un cubemap repartido en 100 m da sombras muy bastas
-        }
-    };
-    return lights;
-}
-
 constexpr float MAX_SECONDS_PER_SCREEN_FRAME = 0.25f;
 
 void buclePrincipaLTiempoReal(GLFWwindow* window, SystemInfo& sysInfo) {
@@ -92,8 +59,6 @@ void buclePrincipaLTiempoReal(GLFWwindow* window, SystemInfo& sysInfo) {
     simData.init(window);
 
     // Parte temporar, cuando leamos el JSON de luces deberia hacerse en el init de simData
-    std::vector<SceneLight> data = setLights();
-    simData.changeLights(data);
 
     const float secondsPerCombatFrame = CombatSimulation::SECONDS_PER_TICK;   // el replay graba un frame por tick
     float unplayedSeconds = 0.0f;   // tiempo real que aun no se ha convertido en frames del combate

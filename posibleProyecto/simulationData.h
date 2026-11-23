@@ -14,7 +14,6 @@
 #include "AssetLoadData.h"
 #include "MapData.h"
 #include "jsonManager.h"
-#include "simulationData.h"
 #include "Mp4Exporter.h"
 
 struct FramesData
@@ -38,6 +37,8 @@ struct simulationData
     void procesMainBodyLoopRealTime(GLFWwindow* window, SystemInfo& sysInfo);
 
     void destroy();
+
+    std::vector<SceneLight> setLights();
     
     // Data
     MeshLibrary libMesh;
