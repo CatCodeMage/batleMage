@@ -132,13 +132,22 @@ FramesData generateCombat(const ModelLibrary& modelLib, const std::filesystem::p
         std::vector<Entidad> entities;
         entities.reserve(frame.size());
         std::unordered_set<int> characterIds;
+        std::unordered_set<EntityId> entityIds;   // un id no puede repetirse en el mismo frame
         for (const auto& record : frame) {
             Entidad entity;
             entity.transform.pos = replayVector(record.at(0));
             entity.transform.rot = replayVector(record.at(1));
             const json* definition = nullptr;
 
-            if (record.size() > 3 && record[3].is_object()) {
+            // 4o elemento opcional: {"id"} en hechizos; {"id","entity","animation",...} en magos
+            const json* extra = (record.size() > 3 && record[3].is_object()) ? &record[3] : nullptr;
+            if (extra) {
+                entity.id = extra->value("id", INVALID_ENTITY);
+                if (entity.id != INVALID_ENTITY && !entityIds.insert(entity.id).second)
+                    throw std::runtime_error("id de entidad repetido en un frame del replay");
+            }
+
+            if (extra && extra->contains("animation")) {   // combatiente con animacion (como antes)
                 const auto& character = record[3];
                 entity.characterId = character.at("id").get<int>();
                 entity.animation = character.at("animation").get<std::string>();

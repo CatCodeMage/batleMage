@@ -59,6 +59,7 @@ private:
         ReplayAnimationState animation;
     };
     std::vector<PlayerReplayState> m_playerReplayStates;
+    GeneradorIds   m_ids;      // dueño de los ids; DEBE ir antes que m_spells
     HechizosGestor m_spells;
     CombatManager m_combat;
     int m_tick = 0;

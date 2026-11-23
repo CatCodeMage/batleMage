@@ -69,6 +69,7 @@ private:
     int m_disparos = 0;
     int m_proyectiles = 0;
 
+    GeneradorIds     m_ids;        // antes que m_spells
     HechizosGestor   m_spells;
     CombatManager    m_combat;
     CollisionManager m_colisiones;

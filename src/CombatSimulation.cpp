@@ -20,7 +20,7 @@ constexpr float SPELL_HIT_RADIUS = 0.5f;
 constexpr const char* REPLAY_PLAYER_ENTITIES[] = { "player_red", "player_blue" };
 constexpr const char* REPLAY_DEAD_ENTITIES[] = { "dead_red",   "dead_blue" };
 
-CombatSimulation::CombatSimulation() : m_spells(SPELL_POOL_SIZE) {}
+CombatSimulation::CombatSimulation() : m_spells(SPELL_POOL_SIZE, m_ids) {}
 
 static bool isAlive(const Personaje& player) {
     return player.getVida() > 0.0f;
@@ -93,10 +93,9 @@ void CombatSimulation::createPlayers(const std::filesystem::path& combatConfigFi
     if (!in) throw std::runtime_error("no se puede abrir " + combatConfigFile.string());
     const json config = json::parse(in);
 
-    int nextPlayerId = 1;
     for (const json& player : config.at("players"))   // player_1, player_2 (nlohmann los ordena)
     {
-        m_players.push_back(std::make_unique<Personaje>(nextPlayerId++, readPosition(player)));
+        m_players.push_back(std::make_unique<Personaje>(m_ids.nuevo(), readPosition(player)));
         m_players.back()->setGestorHechizos(&m_spells);   // el personaje crea sus propios hechizos al lanzar
 
         const std::string playerType = player.value("type", "sphere");
@@ -199,7 +198,10 @@ void CombatSimulation::recordFrame(bool ending) {
 
     for (const std::unique_ptr<Hechizo>& spell : m_spells.getActiveHechizos()) {
         if (!spell->IsActive()) continue;
-        frame.push_back(replayEntity(spell->getPosition(), yawOf(spell->getDirection()), spell->getName().c_str()));
+        json entry = replayEntity(spell->getPosition(), yawOf(spell->getDirection()), spell->getName().c_str());
+        // 4o elemento como el de los magos, pero solo con el id (los hechizos no tienen animacion)
+        entry.push_back(json{ { "id", spell->getIdEntidad() } });
+        frame.push_back(std::move(entry));
     }
 
     m_replayFrames.push_back(std::move(frame));

@@ -5,7 +5,7 @@
 #include "MeshLibrary.h"
 #include "ModelLibrary.h"
 
-inline constexpr const char* REPLAY_FORMAT_VERSION = "1.8";
+inline constexpr const char* REPLAY_FORMAT_VERSION = "1.9";   // 1.9: los hechizos llevan {"id"}
 
 struct ReplayAnimationState {
 	std::string action;
