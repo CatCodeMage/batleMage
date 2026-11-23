@@ -249,7 +249,7 @@ void simulateCombatToReplay() {
 
 // true = PruebaHechizos (varitas con cartas, sin IA) | false = combate normal (CombatSimulation)
 // OJO: dejar en false antes de hacer commit, o a todo el equipo le arrancará la prueba
-constexpr bool USAR_PRUEBA_HECHIZOS = true;
+constexpr bool USAR_PRUEBA_HECHIZOS = false;
 
 int main(int argc, char* argv[])
 {
