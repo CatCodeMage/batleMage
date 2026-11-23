@@ -11,12 +11,6 @@
         "speed": 6, "radious": 1, "scale": [1.0, 1.0, 1.0],
         "zone": { "shape": "sphere", "radius": 3.0, "duration": 4.0, "tick_interval": 1.0 }
     },
-    "frost_burst": {
-        "cast_type": "area",
-        "element": "ice", "damage": 15.0, "cost": 18.0, "cooldown": 5.0,
-        "speed": 0, "radious": 1, "scale": [1.0, 1.0, 1.0],
-        "zone": { "shape": "sphere", "radius": 6.0, "scale_start": 0.1, "duration": 0.3 }
-    },
     "dragon_breath": {
         "cast_type": "area",
         "element": "fire", "damage": 6.0, "cost": 15.0, "cooldown": 3.0,
