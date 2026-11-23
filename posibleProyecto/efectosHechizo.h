@@ -12,8 +12,11 @@
 struct Esfera { float radio = 0.0f; };
 struct Cono   { float alcance = 0.0f; float angulo = 60.0f; float altura = 100.0f; };   // cuña: sector + grosor
 struct Caja   { float ancho = 0.0f; float alto = 100.0f; float largo = 0.0f; };       // empieza en posicion y se alarga 'largo' hacia delante
+// Embudo vertical: punta en 'posicion' (donde se lanza) y parte ancha a 'altura' por encima.
+// A una altura h sobre la punta, su radio es radioArriba * h / altura.
+struct Tornado { float radioArriba = 0.0f; float altura = 4.0f; };
 
-using FormaZona = std::variant<std::monostate, Esfera, Cono, Caja>;   // monostate = sin zona
+using FormaZona = std::variant<std::monostate, Esfera, Cono, Caja, Tornado>;   // monostate = sin zona
 
 // ---------- Datos fijos de la zona (JSON -> catálogo) ----------
 struct DatosZona {
@@ -21,6 +24,7 @@ struct DatosZona {
     float escalaInicial = 1.0f;      // tamaño al aparecer respecto al final (crece radio / alcance / largo)
     float duracion = 0.0f;           // segundos que dura / crece; 0 = instantánea
     float intervaloDano = 0.0f;      // 0 = cada mago recibe daño 1 vez; >0 = daño cada X s mientras esté dentro
+    float velocidadAvance = 0.0f;    // >0 = la zona avanza en horizontal hacia 'direccion' (unidades/s)
     bool tieneZona() const { return !std::holds_alternative<std::monostate>(forma); }
 };
 

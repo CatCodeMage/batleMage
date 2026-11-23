@@ -38,10 +38,21 @@ static float yawOf(const glm::vec3& dir) { return std::atan2(dir.x, dir.z); }
 // Visual PROVISIONAL de una zona. El replay no guarda escala, así que el tamaño va en el nombre:
 // esferas por tramos (crecen "a saltos"); cajas y conos con una entidad por hechizo.
 // Cajas y conos empiezan en 'posicion' y el modelo está centrado: se desplaza medio largo hacia delante.
-static void entidadDeZona(const EfectoZona& z, const HechizosGestor& gestor, glm::vec3& pos, std::string& nombre) {
+static void entidadDeZona(const EfectoZona& z, const HechizosGestor& gestor, glm::vec3& pos, std::string& nombre,
+    float& giroX) {
     glm::vec3 delante(z.direccion.x, 0.0f, z.direccion.z);
     if (glm::length(delante) > 0.0001f) delante = glm::normalize(delante);
     pos = z.posicion;
+    giroX = 0.0f;
+    // Tornado: rock_cone tiene la punta en +Z; girado 90° en X queda vertical con la punta abajo.
+    // El modelo está centrado: se sube media altura para que la punta quede en el punto de lanzamiento.
+    if (const Tornado* t = std::get_if<Tornado>(&z.datos.forma)) {
+        constexpr float NOVENTA_GRADOS = 1.5707963f;
+        pos.y += t->altura * 0.5f;
+        giroX = NOVENTA_GRADOS;   // si sale con la punta arriba: -NOVENTA_GRADOS
+        nombre = "zona_" + gestor.getCatalogoHechizos().at(z.carga.idHechizo).definition.name;
+        return;
+    }
     if (const Esfera* e = std::get_if<Esfera>(&z.datos.forma)) {
         const float r = e->radio * z.escalaActual();
         // Tramos disponibles en entities.json (el replay no guarda escala): se usa el más cercano
@@ -62,10 +73,22 @@ static void entidadDeZona(const EfectoZona& z, const HechizosGestor& gestor, glm
 }
 
 // [[x, y, z], [giroX, giroY, giroZ], "entidad"]
-static json replayEntity(const glm::vec3& pos, float yaw, const char* entityName) {
+static json replayEntity(const glm::vec3& pos, float yaw, const char* entityName, float giroX = 0.0f) {
     return json::array({ json::array({ pos.x, pos.y, pos.z }),
-                         json::array({ 0.0f, yaw, 0.0f }),
+                         json::array({ giroX, yaw, 0.0f }),
                          entityName });
+}
+
+// Embudo con la punta en z.posicion. Se mide en la parte más alta del mago que queda dentro
+// del embudo (ahí es más ancho): radio = radioArriba * h / altura
+static bool tocaTornado(const EfectoZona& z, const Tornado& t, const Personaje& mago) {
+    const glm::vec3 p = mago.getPosicion();
+    const float abajo  = p.y - mago.getRadio() - z.posicion.y;   // pies del mago respecto a la punta
+    const float arriba = p.y + mago.getRadio() - z.posicion.y;   // cabeza (colliderOf: media altura = radio)
+    if (arriba < 0.0f || abajo > t.altura) return false;
+    const float h = std::min(arriba, t.altura);
+    const float radio = t.radioArriba * z.escalaActual() * h / t.altura;
+    return glm::length(glm::vec2(p.x - z.posicion.x, p.z - z.posicion.z)) <= radio + mago.getRadio();
 }
 
 PruebaHechizos::PruebaHechizos() : m_spells(POOL_HECHIZOS) {}
@@ -130,19 +153,19 @@ void PruebaHechizos::crearVaritas() {
     m_varitas.assign(m_players.size(), VaritaPrueba{});
 
     // Mago 1 (rojo): hechizos de zona (spells_zone.json), uno por disparo
-    //   bomba (explota creciendo) -> chorro de agua -> aliento de dragón
+    //   tornado (avanza hacia el rival) -> bomba -> chorro de agua -> aliento de dragón
     VaritaPrueba& v1 = m_varitas[0];
-    v1.ranuras = { idPorNombre("bomb"), idPorNombre("water_beam"),
+    v1.ranuras = { idPorNombre("tornado"), idPorNombre("bomb"), idPorNombre("water_beam"),
                    idPorNombre("dragon_breath") };
-    v1.castDelay = 1.2f;          // tiempo para ver cada zona
-    v1.recarga = 1.5f;
+    v1.castDelay = 3.0f;          // tiempo para ver cada zona sin que se amontonen
+    v1.recarga = 3.0f;
     v1.inclinacionY = 0.05f;      // la bomba (parabólica) cae cerca del rival
 
     // Mago 2 (azul): nube de veneno -> muro de fuego -> curación (aún sin aplicar)
     VaritaPrueba& v2 = m_varitas[1];
     v2.ranuras = { idPorNombre("poison_bomb"), idPorNombre("fire_wall"), idPorNombre("self_heal") };
-    v2.castDelay = 1.5f;
-    v2.recarga = 2.0f;
+    v2.castDelay = 3.5f;          // algo distinto del rojo para que no lancen siempre a la vez
+    v2.recarga = 3.5f;
     v2.inclinacionY = 0.15f;      // la bomba de veneno cae cerca del rival
 }
 
@@ -247,12 +270,15 @@ void PruebaHechizos::informarZonas() {
     const auto& catalogo = m_spells.getCatalogoHechizos();
     for (EfectoZona& z : m_spells.getEfectosZona()) {
         const Esfera* e = std::get_if<Esfera>(&z.datos.forma);
-        if (!e) continue;
-        const SphereCollider esfera{ z.posicion, e->radio * z.escalaActual() };
+        const Tornado* tor = std::get_if<Tornado>(&z.datos.forma);
+        if (!e && !tor) continue;   // cajas y conos: aún sin aviso
         for (const auto& mago : m_players) {
             const int id = mago->getId();
             if (id == z.idLanzador || z.haGolpeado(id)) continue;
-            if (m_colisiones.checkCollision(esfera, colliderOf(*mago))) {
+            const bool toca = e ? m_colisiones.checkCollision(SphereCollider{ z.posicion, e->radio * z.escalaActual() },
+                                                              colliderOf(*mago))
+                                : tocaTornado(z, *tor, *mago);
+            if (toca) {
                 z.marcarGolpeado(id);
                 std::cout << "[PRUEBA] zona de " << catalogo.at(z.carga.idHechizo).definition.name
                           << " toca al jugador " << id << " (dano " << z.carga.dano << ", sin aplicar)\n";
@@ -295,9 +321,10 @@ void PruebaHechizos::recordFrame() {
         frame.push_back(replayEntity(spell->getPosition(), yawOf(spell->getDirection()), spell->getName().c_str()));
     }
     for (const EfectoZona& z : m_spells.getEfectosZona()) {
-        glm::vec3 pos; std::string nombre;
-        entidadDeZona(z, m_spells, pos, nombre);
-        frame.push_back(replayEntity(pos, yawOf(z.direccion), nombre.c_str()));
+        glm::vec3 pos; std::string nombre; float giroX;
+        entidadDeZona(z, m_spells, pos, nombre, giroX);
+        // Con giro en X el yaw va a 0 (el cono es simétrico) para no depender del orden de giros
+        frame.push_back(replayEntity(pos, giroX != 0.0f ? 0.0f : yawOf(z.direccion), nombre.c_str(), giroX));
     }
     m_replayFrames.push_back(std::move(frame));
 }

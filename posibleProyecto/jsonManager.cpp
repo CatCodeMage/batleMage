@@ -27,7 +27,7 @@ static CastType parseCastType(const std::string& s) {
     return CastType::Projectile;
 }
 
-// "zone": { "shape": "sphere"|"cone"|"box", medidas…, "scale_start"?, "duration"?, "tick_interval"? }
+// "zone": { "shape": "sphere"|"cone"|"box"|"tornado", medidas…, "scale_start"?, "duration"?, "tick_interval"?, "move_speed"? }
 static DatosZona parseZona(const json& z, const std::string& nombreHechizo) {
     DatosZona d;
     const std::string shape = z.value("shape", std::string("sphere"));
@@ -38,6 +38,8 @@ static DatosZona parseZona(const json& z, const std::string& nombreHechizo) {
     } else if (shape == "box") {
         const auto s = z.at("size").get<std::vector<float>>();   // [ancho, alto, largo]
         d.forma = Caja{ s.at(0), s.at(1), s.at(2) };
+    } else if (shape == "tornado") {
+        d.forma = Tornado{ z.at("radius_top").get<float>(), z.value("height", 4.0f) };
     } else {
         std::cerr << "[spells] " << nombreHechizo << ": forma de zona desconocida \"" << shape << "\"\n";
         return d;   // sin zona
@@ -45,6 +47,7 @@ static DatosZona parseZona(const json& z, const std::string& nombreHechizo) {
     d.escalaInicial = z.value("scale_start", 1.0f);
     d.duracion      = z.value("duration", 0.0f);
     d.intervaloDano = z.value("tick_interval", 0.0f);
+    d.velocidadAvance = z.value("move_speed", 0.0f);
     return d;
 }
 

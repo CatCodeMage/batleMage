@@ -84,5 +84,6 @@
 
     "zona_water_beam":    { "scale": [1.5, 2.0, 3.2],  "asset": "ice_cube" },
     "zona_fire_wall":     { "scale": [6.0, 2.0, 0.27], "asset": "ice_cube" },
-    "zona_dragon_breath": { "scale": [2.1, 1.0, 2.5],  "asset": "rock_cone" }
+    "zona_dragon_breath": { "scale": [2.1, 1.0, 2.5],  "asset": "rock_cone" },
+    "zona_tornado":       { "scale": [2.0, 2.0, 2.0],  "asset": "rock_cone" }
 }

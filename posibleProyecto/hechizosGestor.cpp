@@ -126,7 +126,11 @@ int HechizosGestor::spawnDisparo(const EstadoDisparo& disparo, const glm::vec3& 
         }
         // Zona directa (nova, aliento, chorro, muro…): sin proyectil, sale de la varita hacia donde apunta
         if (t.definition.casteo == CastType::AreaOfEffect) {
-            if (t.zona.tieneZona()) crearZona(t.zona, origen, direccion, carga, idLanzador);
+            if (t.zona.tieneZona()) {
+                DatosZona datos = t.zona;
+                datos.velocidadAvance *= m.multVelocidad;   // speed_up también acelera las zonas que avanzan
+                crearZona(datos, origen, direccion, carga, idLanzador);
+            }
             ++lanzados;
             continue;
         }
@@ -212,6 +216,11 @@ void HechizosGestor::crearZona(const DatosZona& datos, const glm::vec3& posicion
     z.datos = datos;
     z.posicion = posicion;
     z.direccion = direccion;
+    // Las zonas que avanzan lo hacen en horizontal, a la altura desde la que se lanzaron
+    if (datos.velocidadAvance > 0.0f) {
+        const glm::vec3 plana(direccion.x, 0.0f, direccion.z);
+        if (glm::length(plana) > 0.0001f) z.direccion = glm::normalize(plana);
+    }
     z.carga = carga;
     z.idLanzador = idLanzador;
     efectosZona.push_back(std::move(z));
@@ -230,7 +239,10 @@ void HechizosGestor::crearZonaAlTerminar(const Hechizo* spell, const glm::vec3& 
 void HechizosGestor::envejecerZonas(float deltaTime) {
     efectosZona.erase(std::remove_if(efectosZona.begin(), efectosZona.end(),
         [](const EfectoZona& z) { return z.terminado(); }), efectosZona.end());
-    for (EfectoZona& z : efectosZona) z.tiempo += deltaTime;
+    for (EfectoZona& z : efectosZona) {
+        z.tiempo += deltaTime;
+        z.posicion += z.direccion * (z.datos.velocidadAvance * deltaTime);   // 0 = quieta
+    }
 }
 
 const std::unordered_map<int, hechizosTemplate>& HechizosGestor::getCatalogoHechizos() const {

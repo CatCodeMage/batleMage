@@ -34,5 +34,12 @@
         "cast_type": "self",
         "element": "water", "damage": -25.0, "cost": 15.0, "cooldown": 6.0,
         "speed": 0, "radious": 1, "scale": [1.0, 1.0, 1.0]
+    },
+    "tornado": {
+        "cast_type": "area",
+        "element": "physical", "damage": 4.0, "cost": 18.0, "cooldown": 6.0,
+        "speed": 0, "radious": 1, "scale": [1.0, 1.0, 1.0],
+        "zone": { "shape": "tornado", "radius_top": 2.0, "height": 4.0,
+                  "move_speed": 2.0, "duration": 5.0, "tick_interval": 0.5 }
     }
 }
