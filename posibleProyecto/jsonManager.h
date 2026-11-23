@@ -29,4 +29,9 @@ std::vector<std::string> getPlayers();
 
 void writeCombat();
 
-FramesData generateCombat(const ModelLibrary& modelLib, const std::filesystem::path& replayFile);
+Entidad generateEntity(const std::vector<float>& position, const std::vector<float>& rotation,
+	const EntityInfo eInfo, const ModelLibrary& lib);
+
+EntityInfo getEntityInfo(const std::string entityName);
+
+std::vector<std::vector <Entidad>> generateCombat(const ModelLibrary& modelLib);

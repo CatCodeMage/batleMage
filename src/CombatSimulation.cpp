@@ -88,18 +88,84 @@ void CombatSimulation::step() {
     countDownHitEffects();
 }
 
+std::vector<Varita> CombatSimulation::createWands() {
+    std::vector<Varita> aiWands;
+    int numWands = 1 + rand() % 4;
+
+    const auto& catalog = m_spells.getCatalogoHechizos();
+    if (catalog.empty()) {
+        return aiWands;
+    }
+    for (int i = 0; i < numWands; i++)
+    {
+        int capacity = 4 + rand() % 7;
+        float totalMana = 0.0f;
+        float totalCastDelay = 0.20f;
+        float totalRecharge = 0.80f;
+        float totalDispersion = 2.0f;
+        std::vector<int> ranuras;
+
+        for (int j = 0; j < capacity; j++)
+        {
+            int spellId = rand() % catalog.size();
+            ranuras.push_back(spellId);
+
+            const auto& def = catalog.at(spellId).definition;
+            totalMana += def.cost;
+        }
+
+        Varita v("Varita " + std::to_string(i + 1), totalCastDelay, totalRecharge, totalMana, 15.0f, capacity, totalDispersion);
+
+        aiWands.push_back(v);
+    }
+
+    return aiWands;
+
+}
+
 void CombatSimulation::createPlayers(const std::filesystem::path& combatConfigFile) {
     std::ifstream in(combatConfigFile);
     if (!in) throw std::runtime_error("no se puede abrir " + combatConfigFile.string());
     const json config = json::parse(in);
 
+    std::unordered_map<std::string, int> nameToId;
+    for (const auto& [id, t] : m_spells.getCatalogoHechizos()) {
+        nameToId[t.definition.name] = t.definition.id;
+    }
+
     int nextPlayerId = 1;
     for (const json& player : config.at("players"))   // player_1, player_2 (nlohmann los ordena)
     {
-        m_players.push_back(std::make_unique<Personaje>(nextPlayerId++, readPosition(player)));
-        m_players.back()->setGestorHechizos(&m_spells);   // el personaje crea sus propios hechizos al lanzar
+        std::vector<Varita> playerWands;
+        if (player.at("aiWands")) {
+            playerWands = createWands(); // Generara varetes de forma random, caldria modificar-ho en un futur
+        }
+        else {
+            //esperar a que player estigui completa
+            for (const auto& wand : player.at("wands"))
+            {
+                Varita v(wand.value("nombre", "Varita"),
+                    wand.value("castDelay", 0.2f),
+                    wand.value("rechargeTime", 0.8f),
+                    wand.value("manaMax", 100.0f),
+                    wand.value("recargaMana", 15.0f),
+                    wand.value("capacidad", 4),
+                    wand.value("dispersion", 2.0f));
 
-        const std::string playerType = player.value("type", "sphere");
+                std::vector<int> ranuras;
+                for (const auto& spellName : wand.at("ranuras"))
+                {
+                    std::string name = spellName.get<std::string>();
+                    ranuras.push_back(nameToId[name]);
+                }
+
+                playerWands.push_back(v);
+            }
+        }
+        //m_players.back()->setGestorHechizos(&m_spells);   // el personaje crea sus propios hechizos al lanzar
+        m_players.push_back(std::make_unique<Personaje>(nextPlayerId++, readPosition(player), 1.0f, &m_spells, playerWands));
+        // TODO: Afegir més obj, de moment no es toca
+        const std::string playerType = player.value("type", "sphere"); 
         if (!m_players.back()->cargarDesdeJson(dataPath("db/players.json").string(), playerType))
             throw std::runtime_error(combatConfigFile.string() + ": tipo de mago desconocido \"" + playerType + "\"");
     }

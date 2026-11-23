@@ -180,6 +180,7 @@
     <ClCompile Include="libs\imgui\imgui_widgets.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MapData.cpp" />
+    <ClCompile Include="MaterialLibrary.cpp" />
     <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="MeshLibrary.cpp" />
     <ClCompile Include="ModelLibrary.cpp" />
@@ -197,7 +198,10 @@
     <ClInclude Include="controladorMaquinaEstados.h" />
     <ClInclude Include="controladorPersonaje.h" />
     <ClInclude Include="lanzadorHechizos.h" />
+    <ClInclude Include="Material.h" />
+    <ClInclude Include="MaterialLibrary.h" />
     <ClInclude Include="ModelLibrary.h" />
+    <ClCompile Include="Mp4Exporter.cpp" />
     <ClCompile Include="Paths.cpp" />
     <ClCompile Include="personaje.cpp" />
     <ClCompile Include="PruebaHechizos.cpp" />
@@ -217,6 +221,7 @@
     <ClCompile Include="skeleton_animation\SkinnedRenderer.cpp" />
     <ClCompile Include="UserInterface.cpp" />
     <ClCompile Include="webPage.cpp" />
+    <ClCompile Include="varita.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AssetLoadData.h" />
@@ -232,6 +237,7 @@
     <ClInclude Include="MapData.h" />
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="MeshLibrary.h" />
+    <ClInclude Include="Mp4Exporter.h" />
     <ClInclude Include="Paths.h" />
     <ClInclude Include="personaje.h" />
     <ClInclude Include="PruebaHechizos.h" />
@@ -251,6 +257,7 @@
     <ClInclude Include="skeleton_animation\SkinnedMesh.h" />
     <ClInclude Include="skeleton_animation\SkinnedRenderer.h" />
     <ClInclude Include="UserInterface.h" />
+    <ClInclude Include="varita.h" />
     <ClInclude Include="webPage.h" />
   </ItemGroup>
   <ItemGroup>

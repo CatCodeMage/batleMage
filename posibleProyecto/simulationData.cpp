@@ -7,6 +7,15 @@ void simulationData::changeLights(std::vector<SceneLight>& newLights) {
 	lights = newLights;
 }
 
+std::vector<SceneLight> simulationData::setLights() {
+	std::vector<SceneLight> sceneLights;
+	sceneLights = map.m_lights;
+
+	// se deja asi por si hay que cargar luces dinamicas
+
+	return sceneLights;
+}
+
 void simulationData::init(GLFWwindow* window) {
 	constexpr int FIRST_FRAME = 0;
 	cameraPath.saveShot(FIRST_FRAME, viewCamera.getPose());   // toma por defecto: la camara inicial
@@ -17,7 +26,7 @@ void simulationData::init(GLFWwindow* window) {
 
 	map.load(dataPath("db/map.json"), libModel);
 
-	//lights = setLights();, en teoria mas adelante deberiamos cargar las lights por el JSON, lo dejo como aviso
+	lights = setLights(); // en teoria mas adelante deberiamos cargar las lights por el JSON, lo dejo como aviso
 	//de momento un parche en main pero tiene que cambiar.
 
 	program = setShaders();
