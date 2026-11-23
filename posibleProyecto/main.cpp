@@ -212,7 +212,6 @@ void simulateCombatToReplay() {
 int main(int argc, char* argv[])
 {
     if (argc > 1 && std::string_view(argv[1]) == "--combate") {
-        sendForm();   // el formulario escribe combat.json antes de simular
         simulateCombatToReplay<CombatSimulation>();
     } else {
         simulateCombatToReplay<PruebaHechizos>();

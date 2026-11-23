@@ -4,6 +4,7 @@
 #include "systemInfo.h"
 #include "camera.h"
 #include "MeshLibrary.h"
+#include "ModelLibrary.h"
 #include "Input.h"
 #include "Renderer.h"
 #include "Transform.h"

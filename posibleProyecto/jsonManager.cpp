@@ -104,65 +104,65 @@ std::vector<std::string> getPlayers() {
 }
 
 static glm::vec3 replayVector(const json& values) {
-    return { values.at(0).get<float>(), values.at(1).get<float>(), values.at(2).get<float>() };
+	return { values.at(0).get<float>(), values.at(1).get<float>(), values.at(2).get<float>() };
 }
 
 static ModelId entityModel(const json& definition, const ModelLibrary& models) {
-    const auto& asset = definition.at("asset").get_ref<const std::string&>();
-    if (!models.has(asset)) throw std::runtime_error("asset desconocido: '" + asset + "'");
-    return models.find(asset);
+	const auto& asset = definition.at("asset").get_ref<const std::string&>();
+	if (!models.has(asset)) throw std::runtime_error("asset desconocido: '" + asset + "'");
+	return models.find(asset);
 }
 
 FramesData generateCombat(const ModelLibrary& modelLib, const std::filesystem::path& replayFile) {
-    std::ifstream replayStream(replayFile), entitiesStream(ENTITIES_PATH);
-    if (!replayStream) throw std::runtime_error("no se puede abrir " + replayFile.string());
-    if (!entitiesStream) throw std::runtime_error("no se puede abrir " + ENTITIES_PATH);
+	std::ifstream replayStream(replayFile), entitiesStream(ENTITIES_PATH);
+	if (!replayStream) throw std::runtime_error("no se puede abrir " + replayFile.string());
+	if (!entitiesStream) throw std::runtime_error("no se puede abrir " + ENTITIES_PATH);
 
-    const json replay = json::parse(replayStream);
-    const json catalog = json::parse(entitiesStream);
-    const auto& frames = replay.at("frames");
-    FramesData result;
-    result.ticksPerSecond = replay.value("metadata", json::object())
-        .value("ticksPerSecond", CombatSimulation::TICKS_PER_SECOND);
-    if (!frames.is_array() || frames.empty() || result.ticksPerSecond <= 0)
-        throw std::runtime_error("replay sin frames o con frecuencia invalida: " + replayFile.string());
+	const json replay = json::parse(replayStream);
+	const json catalog = json::parse(entitiesStream);
+	const auto& frames = replay.at("frames");
+	FramesData result;
+	result.ticksPerSecond = replay.value("metadata", json::object())
+		.value("ticksPerSecond", CombatSimulation::TICKS_PER_SECOND);
+	if (!frames.is_array() || frames.empty() || result.ticksPerSecond <= 0)
+		throw std::runtime_error("replay sin frames o con frecuencia invalida: " + replayFile.string());
 
-    result.combat.reserve(frames.size());
-    for (const auto& frame : frames) {
-        std::vector<Entidad> entities;
-        entities.reserve(frame.size());
-        std::unordered_set<int> characterIds;
-        for (const auto& record : frame) {
-            Entidad entity;
-            entity.transform.pos = replayVector(record.at(0));
-            entity.transform.rot = replayVector(record.at(1));
-            const json* definition = nullptr;
+	result.combat.reserve(frames.size());
+	for (const auto& frame : frames) {
+		std::vector<Entidad> entities;
+		entities.reserve(frame.size());
+		std::unordered_set<int> characterIds;
+		for (const auto& record : frame) {
+			Entidad entity;
+			entity.transform.pos = replayVector(record.at(0));
+			entity.transform.rot = replayVector(record.at(1));
+			const json* definition = nullptr;
 
-            if (record.size() > 3 && record[3].is_object()) {
-                const auto& character = record[3];
-                entity.characterId = character.at("id").get<int>();
-                entity.animation = character.at("animation").get<std::string>();
-                entity.animationStartFrame = character.at("animationStartFrame").get<int>();
-                if (entity.characterId <= 0 || !characterIds.insert(entity.characterId).second ||
-                    entity.animationStartFrame < 0 || size_t(entity.animationStartFrame) > result.combat.size()) {
-                    throw std::runtime_error("id o inicio de animacion invalido en el replay");
-                }
+			if (record.size() > 3 && record[3].is_object()) {
+				const auto& character = record[3];
+				entity.characterId = character.at("id").get<int>();
+				entity.animation = character.at("animation").get<std::string>();
+				entity.animationStartFrame = character.at("animationStartFrame").get<int>();
+				if (entity.characterId <= 0 || !characterIds.insert(entity.characterId).second ||
+					entity.animationStartFrame < 0 || size_t(entity.animationStartFrame) > result.combat.size()) {
+					throw std::runtime_error("id o inicio de animacion invalido en el replay");
+				}
 
-                const auto& base = catalog.at(character.at("entity").get_ref<const std::string&>());
-                const ModelId baseModel = entityModel(base, modelLib);
-                if (modelLib.get(baseModel).skinned) {
-                    entity.model = baseModel;
-                    definition = &base;
-                }
-            }
-            if (!definition) {
-                definition = &catalog.at(record.at(2).get_ref<const std::string&>());
-                entity.model = entityModel(*definition, modelLib);
-            }
-            entity.transform.scale = replayVector(definition->at("scale"));
-            entities.push_back(std::move(entity));
-        }
-        result.combat.push_back(std::move(entities));
-    }
-    return result;
+				const auto& base = catalog.at(character.at("entity").get_ref<const std::string&>());
+				const ModelId baseModel = entityModel(base, modelLib);
+				if (modelLib.get(baseModel).skinned) {
+					entity.model = baseModel;
+					definition = &base;
+				}
+			}
+			if (!definition) {
+				definition = &catalog.at(record.at(2).get_ref<const std::string&>());
+				entity.model = entityModel(*definition, modelLib);
+			}
+			entity.transform.scale = replayVector(definition->at("scale"));
+			entities.push_back(std::move(entity));
+		}
+		result.combat.push_back(std::move(entities));
+	}
+	return result;
 }
