@@ -3,7 +3,7 @@
         "cast_type": "line", "movement_pattern": "parabolic",
         "element": "fire", "damage": 30.0, "cost": 20.0, "cooldown": 4.0,
         "speed": 8, "radious": 1, "scale": [1.0, 1.0, 1.0],
-        "zone": { "shape": "sphere", "radius": 4.0, "scale_start": 0.05, "duration": 2.0 }
+        "zone": { "shape": "sphere", "radius": 6.0, "scale_start": 0.05, "duration": 2.0 }
     },
     "poison_bomb": {
         "cast_type": "line", "movement_pattern": "parabolic",
@@ -21,20 +21,20 @@
         "cast_type": "area",
         "element": "fire", "damage": 6.0, "cost": 15.0, "cooldown": 3.0,
         "speed": 0, "radious": 1, "scale": [1.0, 1.0, 1.0],
-        "zone": { "shape": "cone", "range": 8.0, "angle": 60.0, "height": 2.0,
+        "zone": { "shape": "cone", "range": 5.0, "angle": 45.0, "height": 2.0,
                   "duration": 1.0, "tick_interval": 0.25 }
     },
     "water_beam": {
         "cast_type": "area",
         "element": "water", "damage": 10.0, "cost": 12.0, "cooldown": 2.0,
         "speed": 0, "radious": 1, "scale": [1.0, 1.0, 1.0],
-        "zone": { "shape": "box", "size": [1.5, 2.0, 10.0], "scale_start": 0.1, "duration": 0.3 }
+        "zone": { "shape": "box", "size": [1.5, 2.0, 6.0], "scale_start": 0.1, "duration": 0.3 }
     },
     "fire_wall": {
         "cast_type": "area",
         "element": "fire", "damage": 8.0, "cost": 20.0, "cooldown": 6.0,
         "speed": 0, "radious": 1, "scale": [1.0, 1.0, 1.0],
-        "zone": { "shape": "box", "size": [6.0, 2.0, 1.5], "duration": 5.0, "tick_interval": 1.0 }
+        "zone": { "shape": "box", "size": [6.0, 2.0, 0.5], "duration": 5.0, "tick_interval": 1.0 }
     },
     "self_heal": {
         "cast_type": "self",

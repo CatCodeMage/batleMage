@@ -248,6 +248,9 @@
     <ClInclude Include="MaterialLibrary.h">
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
+    <ClInclude Include="efectosHechizo.h">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="posibleProyecto.rc">

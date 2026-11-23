@@ -182,6 +182,7 @@
     <ClInclude Include="..\src\logica\mapa.h" />
     <ClInclude Include="controladorMaquinaEstados.h" />
     <ClInclude Include="controladorPersonaje.h" />
+    <ClInclude Include="efectosHechizo.h" />
     <ClInclude Include="lanzadorHechizos.h" />
     <ClInclude Include="Material.h" />
     <ClInclude Include="MaterialLibrary.h" />

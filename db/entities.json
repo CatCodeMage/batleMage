@@ -82,7 +82,7 @@
     "zona_esfera_7": { "scale": [7, 7, 7], "asset": "fireball_00",
         "animation": { "fps": 24, "loop": true, "assets": ["fireball_00","fireball_01","fireball_02","fireball_03","fireball_04","fireball_05","fireball_06","fireball_07","fireball_08","fireball_09","fireball_10","fireball_11","fireball_12","fireball_13","fireball_14"] } },
 
-    "zona_water_beam":    { "scale": [1.5, 2.0, 10.0], "asset": "ice_cube" },
-    "zona_fire_wall":     { "scale": [6.0, 2.0, 1.5],  "asset": "ice_cube" },
-    "zona_dragon_breath": { "scale": [4.0, 2.0, 8.0],  "asset": "rock_cone" }
+    "zona_water_beam":    { "scale": [1.5, 2.0, 3.2],  "asset": "ice_cube" },
+    "zona_fire_wall":     { "scale": [6.0, 2.0, 0.27], "asset": "ice_cube" },
+    "zona_dragon_breath": { "scale": [2.1, 1.0, 2.5],  "asset": "rock_cone" }
 }

@@ -130,10 +130,10 @@ void PruebaHechizos::crearVaritas() {
     m_varitas.assign(m_players.size(), VaritaPrueba{});
 
     // Mago 1 (rojo): hechizos de zona (spells_zone.json), uno por disparo
-    //   bomba (explota creciendo) -> chorro de agua -> aliento de dragón -> nova de hielo
+    //   bomba (explota creciendo) -> chorro de agua -> aliento de dragón
     VaritaPrueba& v1 = m_varitas[0];
     v1.ranuras = { idPorNombre("bomb"), idPorNombre("water_beam"),
-                   idPorNombre("dragon_breath"), idPorNombre("frost_burst") };
+                   idPorNombre("dragon_breath") };
     v1.castDelay = 1.2f;          // tiempo para ver cada zona
     v1.recarga = 1.5f;
     v1.inclinacionY = 0.05f;      // la bomba (parabólica) cae cerca del rival
