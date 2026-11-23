@@ -49,6 +49,7 @@ private:
     void dispararVaritas();
     void aplicarSuelo();
     void aplicarImpactos();
+    void informarZonas();   // provisional: informa de zonas y vacía efectos sobre el lanzador
     void countDownHitEffects();
     void recordFrame();
 

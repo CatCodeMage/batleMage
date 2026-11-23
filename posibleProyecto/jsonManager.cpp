@@ -5,6 +5,7 @@
 using json = nlohmann::json;
 
 const std::string SPELLS_PATH = "../db/spells.json";
+const std::string SPELLS_ZONE_PATH = "../db/spells_zone.json";   // hechizos con zona (de momento aparte)
 const std::string PLAYERS_PATH = "../db/players.json";
 const std::string COMBAT_PATH = "../db/combate_generado.json";
 const std::string ENTITIES_PATH = "../db/entities.json";
@@ -19,64 +20,107 @@ ElementType parseElement(std::string element) {
     return ElementType::Fire;
 }
 
-void readSpells(HechizosGestor& spellManager) {
+// "line" (y el "cone" antiguo) -> proyectil
+static CastType parseCastType(const std::string& s) {
+    if (s == "area") return CastType::AreaOfEffect;
+    if (s == "self") return CastType::Self;
+    return CastType::Projectile;
+}
+
+// "zone": { "shape": "sphere"|"cone"|"box", medidas…, "scale_start"?, "duration"?, "tick_interval"? }
+static DatosZona parseZona(const json& z, const std::string& nombreHechizo) {
+    DatosZona d;
+    const std::string shape = z.value("shape", std::string("sphere"));
+    if (shape == "sphere") {
+        d.forma = Esfera{ z.at("radius").get<float>() };
+    } else if (shape == "cone") {
+        d.forma = Cono{ z.at("range").get<float>(), z.value("angle", 60.0f), z.value("height", 100.0f) };
+    } else if (shape == "box") {
+        const auto s = z.at("size").get<std::vector<float>>();   // [ancho, alto, largo]
+        d.forma = Caja{ s.at(0), s.at(1), s.at(2) };
+    } else {
+        std::cerr << "[spells] " << nombreHechizo << ": forma de zona desconocida \"" << shape << "\"\n";
+        return d;   // sin zona
+    }
+    d.escalaInicial = z.value("scale_start", 1.0f);
+    d.duracion      = z.value("duration", 0.0f);
+    d.intervaloDano = z.value("tick_interval", 0.0f);
+    return d;
+}
+
+// Lee un archivo de hechizos. 'id' continúa entre archivos para que no se repitan.
+static void leerArchivoHechizos(const std::string& ruta, HechizosGestor& spellManager, int& id, bool obligatorio) {
     constexpr float DEFAULT_SPELL_COST = 10.0f;
 
     // La IA calcula el alcance como velocidad x tiempo de vida.
     constexpr float SPELL_LIFETIME_SECONDS = 3.0f;
 
-    std::ifstream spells(SPELLS_PATH);
+    std::ifstream spells(ruta);
+    if (!spells.is_open()) {
+        if (obligatorio) std::cout << "No file found: " << ruta << std::endl;
+        return;
+    }
 
-    if (spells.is_open())
-    {
-        json j;
-        spells >> j;
+    json j;
+    spells >> j;
 
-        int id = 0;
-
-        for (auto& [name, spell] : j.items()) {
-            ElementType elem = parseElement(spell["element"]);
-
-            glm::vec3 scaleVec(
-                spell["scale"][0].get<float>(),
-                spell["scale"][1].get<float>(),
-                spell["scale"][2].get<float>()
-            );
-
-            // NUEVO: leer el tipo de movimiento del JSON.
-            // Si no se especifica, el movimiento sera lineal.
-            std::string movementName = spell.value(
-                "movement_pattern",
-                std::string("linear")
-            );
-
-            MovementPattern pattern = MovementPattern::Linear;
-
-            if (movementName == "parabolic") {
-                pattern = MovementPattern::Parabolic;
-            }
-
-            spellManager.registrarHechizo(
-                id,
-                name,
-                elem,
-                spell.value<float>("cost", DEFAULT_SPELL_COST),
-                spell["damage"].get<float>(),
-                spell["cooldown"].get<float>(),
-                spell["speed"].get<float>(),
-                spell["radious"].get<float>(),
-                scaleVec,
-                SPELL_LIFETIME_SECONDS,
-                pattern
-            );
-
-            id++;
+    for (auto& [name, spell] : j.items()) {
+        if (spellManager.idPorNombre(name) >= 0) {
+            std::cerr << "[" << ruta << "] hechizo repetido \"" << name << "\", se ignora\n";
+            continue;
         }
+
+        ElementType elem = parseElement(spell["element"]);
+
+        glm::vec3 scaleVec(
+            spell["scale"][0].get<float>(),
+            spell["scale"][1].get<float>(),
+            spell["scale"][2].get<float>()
+        );
+
+        // Tipo de movimiento. Si no se especifica, el movimiento sera lineal.
+        std::string movementName = spell.value(
+            "movement_pattern",
+            std::string("linear")
+        );
+
+        MovementPattern pattern = MovementPattern::Linear;
+
+        if (movementName == "parabolic") {
+            pattern = MovementPattern::Parabolic;
+        }
+
+        // Cómo se entrega ("line" / "area" / "self") y qué zona deja (opcional)
+        CastType castType = parseCastType(spell.value("cast_type", std::string("line")));
+        const DatosZona zona = spell.contains("zone") ? parseZona(spell["zone"], name) : DatosZona{};
+
+        // Compatibilidad con spells.json: "area" sin "zone" sigue siendo proyectil, como hasta ahora
+        if (castType == CastType::AreaOfEffect && !zona.tieneZona()) castType = CastType::Projectile;
+
+        spellManager.registrarHechizo(
+            id,
+            name,
+            elem,
+            spell.value<float>("cost", DEFAULT_SPELL_COST),
+            spell["damage"].get<float>(),
+            spell["cooldown"].get<float>(),
+            spell["speed"].get<float>(),
+            spell["radious"].get<float>(),
+            scaleVec,
+            SPELL_LIFETIME_SECONDS,
+            pattern,
+            castType,
+            zona
+        );
+
+        id++;
     }
-    else
-    {
-        std::cout << "No file found" << std::endl;
-    }
+}
+
+void readSpells(HechizosGestor& spellManager) {
+    int id = 0;
+    leerArchivoHechizos(SPELLS_PATH, spellManager, id, true);
+    leerArchivoHechizos(SPELLS_ZONE_PATH, spellManager, id, false);   // opcional: si no existe, no pasa nada
 }
 
 static uint32_t parseEtiqueta(const std::string& tag) {

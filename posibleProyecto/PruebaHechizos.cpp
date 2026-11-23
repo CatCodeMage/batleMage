@@ -35,6 +35,32 @@ static CylinderCollider colliderOf(const Personaje& p) {
 
 static float yawOf(const glm::vec3& dir) { return std::atan2(dir.x, dir.z); }
 
+// Visual PROVISIONAL de una zona. El replay no guarda escala, así que el tamaño va en el nombre:
+// esferas por tramos (crecen "a saltos"); cajas y conos con una entidad por hechizo.
+// Cajas y conos empiezan en 'posicion' y el modelo está centrado: se desplaza medio largo hacia delante.
+static void entidadDeZona(const EfectoZona& z, const HechizosGestor& gestor, glm::vec3& pos, std::string& nombre) {
+    glm::vec3 delante(z.direccion.x, 0.0f, z.direccion.z);
+    if (glm::length(delante) > 0.0001f) delante = glm::normalize(delante);
+    pos = z.posicion;
+    if (const Esfera* e = std::get_if<Esfera>(&z.datos.forma)) {
+        const float r = e->radio * z.escalaActual();
+        // Tramos disponibles en entities.json (el replay no guarda escala): se usa el más cercano
+        static const std::pair<float, const char*> tramos[] = {
+            {0.25f, "zona_esfera_025"}, {0.5f, "zona_esfera_05"}, {1.0f, "zona_esfera_1"}, {1.5f, "zona_esfera_15"},
+            {2.0f, "zona_esfera_2"}, {2.5f, "zona_esfera_25"}, {3.0f, "zona_esfera_3"}, {4.0f, "zona_esfera_4"},
+            {5.0f, "zona_esfera_5"}, {6.0f, "zona_esfera_6"}, {7.0f, "zona_esfera_7"} };
+        const auto* mejor = &tramos[0];
+        for (const auto& t : tramos) if (std::abs(t.first - r) < std::abs(mejor->first - r)) mejor = &t;
+        nombre = mejor->second;
+        return;
+    }
+    float largo = 0.0f;
+    if (const Caja* c = std::get_if<Caja>(&z.datos.forma)) largo = c->largo * z.escalaActual();
+    if (const Cono* c = std::get_if<Cono>(&z.datos.forma)) largo = c->alcance * z.escalaActual();
+    pos += delante * (largo * 0.5f);
+    nombre = "zona_" + gestor.getCatalogoHechizos().at(z.carga.idHechizo).definition.name;
+}
+
 // [[x, y, z], [giroX, giroY, giroZ], "entidad"]
 static json replayEntity(const glm::vec3& pos, float yaw, const char* entityName) {
     return json::array({ json::array({ pos.x, pos.y, pos.z }),
@@ -103,22 +129,21 @@ void PruebaHechizos::crearMagos(const std::filesystem::path& combatConfigFile) {
 void PruebaHechizos::crearVaritas() {
     m_varitas.assign(m_players.size(), VaritaPrueba{});
 
-    // Mago 1 (rojo): [doble][+10 daño][fire_ball][lightning_bolt]
-    //   -> 2 proyectiles distintos a la vez, con +10 de daño cada uno
+    // Mago 1 (rojo): hechizos de zona (spells_zone.json), uno por disparo
+    //   bomba (explota creciendo) -> chorro de agua -> aliento de dragón -> nova de hielo
     VaritaPrueba& v1 = m_varitas[0];
-    v1.ranuras = { idPorNombre("double_spell"), idPorNombre("damage_plus"),
-                   idPorNombre("fire_ball"), idPorNombre("lightning_bolt") };
-    v1.castDelay = 0.3f;
-    v1.recarga = 1.0f;
+    v1.ranuras = { idPorNombre("bomb"), idPorNombre("water_beam"),
+                   idPorNombre("dragon_breath"), idPorNombre("frost_burst") };
+    v1.castDelay = 1.2f;          // tiempo para ver cada zona
+    v1.recarga = 1.5f;
+    v1.inclinacionY = 0.05f;      // la bomba (parabólica) cae cerca del rival
 
-    // Mago 2 (azul): [triple][rebote x4][fire_ball x3]
-    //   -> abanico de 3 bolas de fuego parabólicas que botan hacia el rival
+    // Mago 2 (azul): nube de veneno -> muro de fuego -> curación (aún sin aplicar)
     VaritaPrueba& v2 = m_varitas[1];
-    const int bola = idPorNombre("fire_ball");
-    v2.ranuras = { idPorNombre("triple_spell"), idPorNombre("bounce"), bola, bola, bola };
-    v2.castDelay = 0.4f;
-    v2.recarga = 1.5f;
-    v2.inclinacionY = 0.6f;    // hacia arriba: la gravedad dibuja la parábola
+    v2.ranuras = { idPorNombre("poison_bomb"), idPorNombre("fire_wall"), idPorNombre("self_heal") };
+    v2.castDelay = 1.5f;
+    v2.recarga = 2.0f;
+    v2.inclinacionY = 0.15f;      // la bomba de veneno cae cerca del rival
 }
 
 // =====================================================================
@@ -129,6 +154,7 @@ void PruebaHechizos::step() {
     m_spells.update(SECONDS_PER_TICK);
     aplicarSuelo();
     aplicarImpactos();
+    informarZonas();
     ++m_tick;
     recordFrame();
     countDownHitEffects();
@@ -215,6 +241,30 @@ void PruebaHechizos::aplicarImpactos() {
     }
 }
 
+// SOLO INFORMATIVO (la aplicación real es de Alex): avisa la 1ª vez que una esfera toca a un mago
+// y vacía los efectos sobre el lanzador para que la lista no crezca.
+void PruebaHechizos::informarZonas() {
+    const auto& catalogo = m_spells.getCatalogoHechizos();
+    for (EfectoZona& z : m_spells.getEfectosZona()) {
+        const Esfera* e = std::get_if<Esfera>(&z.datos.forma);
+        if (!e) continue;
+        const SphereCollider esfera{ z.posicion, e->radio * z.escalaActual() };
+        for (const auto& mago : m_players) {
+            const int id = mago->getId();
+            if (id == z.idLanzador || z.haGolpeado(id)) continue;
+            if (m_colisiones.checkCollision(esfera, colliderOf(*mago))) {
+                z.marcarGolpeado(id);
+                std::cout << "[PRUEBA] zona de " << catalogo.at(z.carga.idHechizo).definition.name
+                          << " toca al jugador " << id << " (dano " << z.carga.dano << ", sin aplicar)\n";
+            }
+        }
+    }
+    for (const EfectoSobreLanzador& e : m_spells.getEfectosSobreLanzador())
+        std::cout << "[PRUEBA] jugador " << e.idLanzador << " se lanza "
+                  << catalogo.at(e.carga.idHechizo).definition.name << " (sin aplicar)\n";
+    m_spells.limpiarEfectosSobreLanzador();
+}
+
 void PruebaHechizos::countDownHitEffects() {
     for (int& f : m_hitFrames) if (f > 0) --f;
 }
@@ -243,6 +293,11 @@ void PruebaHechizos::recordFrame() {
     for (const std::unique_ptr<Hechizo>& spell : m_spells.getActiveHechizos()) {
         if (!spell->IsActive()) continue;
         frame.push_back(replayEntity(spell->getPosition(), yawOf(spell->getDirection()), spell->getName().c_str()));
+    }
+    for (const EfectoZona& z : m_spells.getEfectosZona()) {
+        glm::vec3 pos; std::string nombre;
+        entidadDeZona(z, m_spells, pos, nombre);
+        frame.push_back(replayEntity(pos, yawOf(z.direccion), nombre.c_str()));
     }
     m_replayFrames.push_back(std::move(frame));
 }

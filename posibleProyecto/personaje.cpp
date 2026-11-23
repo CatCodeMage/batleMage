@@ -190,7 +190,7 @@ void Personaje::lanzarHechizo(int idHechizo)
         }
         float distanciaSeparacion = m_radio + radioHechizo + m_margenCasteo;
         glm::vec3 posicionOrigenHechizo = m_posicion + direccionDisparo * distanciaSeparacion;
-        m_gestorHechizos->spawnSpell(idHechizo, posicionOrigenHechizo, direccionDisparo);
+        m_gestorHechizos->spawnSpell(idHechizo, posicionOrigenHechizo, direccionDisparo, m_id);
     }
 }
 
