@@ -4,20 +4,16 @@ constexpr GLint ALBEDO_TEXTURE_UNIT = 0;
 
 Renderer::Renderer() {
     w_locViewProj = -1;
-    w_locNumLights = -1;
-    w_locLights = -1;
-    w_locAlbedo = -1;
 }
 
 void Renderer::init(GLuint program) {
+    w_program = program;
     w_locViewProj = glGetUniformLocation(program, "uViewProj");
-    w_locNumLights = glGetUniformLocation(program, "uNumLights");
-    w_locLights = glGetUniformLocation(program, "uLights[0]");
-    w_locAlbedo = glGetUniformLocation(program, "uAlbedo");
-    glUniform1i(w_locAlbedo, ALBEDO_TEXTURE_UNIT);
+    glUniform1i(glGetUniformLocation(program, "uAlbedo"), ALBEDO_TEXTURE_UNIT);
 }
 
 void Renderer::submitLights(std::vector<SceneLight>& lights, const float time) {
+    if (lights.empty()) return;
     lights[0].light.pos = glm::vec3(3.0f * cos(time), 3.0f, 3.0f * sin(time));    // UPDATE
     for (const SceneLight& l : lights) this->submitLight(l.light);
 }
@@ -43,10 +39,11 @@ void Renderer::drawShadowGeometry(const MeshLibrary& lib) const {
     }
 }
 
-void Renderer::flushLigth() {
-    glUniform1i(w_locNumLights, (GLint)w_lights.size());
+void Renderer::applyLights(GLuint program) const {
+    glUniform1i(glGetUniformLocation(program, "uNumLights"), (GLint)w_lights.size());
     if (!w_lights.empty())
-        glUniform4fv(w_locLights, (GLsizei)(w_lights.size() * 2), (const GLfloat*)w_lights.data());
+        glUniform4fv(glGetUniformLocation(program, "uLights[0]"),
+            (GLsizei)(w_lights.size() * 2), (const GLfloat*)w_lights.data());
 } 
 
 void Renderer::getActualViewProj(const glm::mat4& viewProj) {
@@ -56,9 +53,7 @@ void Renderer::getActualViewProj(const glm::mat4& viewProj) {
 void Renderer::flush(const MeshLibrary& lib, const glm::mat4& viewProj) {
     getActualViewProj(viewProj);
 
-    flushLigth();
-
-    drawShadowGeometry(lib);
+    applyLights(w_program);
     
     glActiveTexture(GL_TEXTURE0 + ALBEDO_TEXTURE_UNIT);
     for (MeshId i = 0; i < w_batches.size(); ++i) {

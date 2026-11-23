@@ -7,6 +7,7 @@
 #include "hechizosGestor.h"
 #include "Collision.h"
 #include "CombatManager.h"
+#include "jsonManager.h"
 
 // ---------------------------------------------------------------------
 // COMBATE DE PRUEBA SOLO PARA HECHIZOS (no sustituye a CombatSimulation).
@@ -42,6 +43,7 @@ private:
         float castDelay = 0.3f;
         float recarga = 1.2f;
         float inclinacionY = 0.0f;       // > 0 hacia arriba, < 0 hacia abajo
+        int castFrames = 0;
     };
 
     void registrarCartas();
@@ -50,7 +52,7 @@ private:
     void dispararVaritas();
     void aplicarSuelo();
     void aplicarImpactos();
-    void countDownHitEffects();
+    void countDownEffects();
     void recordFrame();
 
     int         idPorNombre(const std::string& nombre) const;
@@ -61,6 +63,7 @@ private:
     std::vector<std::unique_ptr<Personaje>> m_players;
     std::vector<VaritaPrueba> m_varitas;          // m_varitas[i] es la de m_players[i]
     std::vector<int>   m_hitFrames;
+    std::vector<ReplayAnimationState> m_animations;
     std::vector<int>   m_impactosRecibidos;
     std::vector<float> m_danoRecibido;
     int m_disparos = 0;

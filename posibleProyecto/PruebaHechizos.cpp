@@ -1,6 +1,5 @@
 #include "PruebaHechizos.h"
 #include "lanzadorHechizos.h"
-#include "jsonManager.h"   // readSpells
 #include "Paths.h"         // dataPath
 #include <algorithm>
 #include <cmath>
@@ -25,8 +24,8 @@ constexpr int CARTA_TRIPLE = 201;
 constexpr size_t      POOL_HECHIZOS = 256;
 constexpr float       SPELL_HIT_RADIUS = 0.5f;
 constexpr int         HIT_EFFECT_FRAMES = static_cast<int>(PruebaHechizos::TICKS_PER_SECOND * 0.3f);
+constexpr int         CAST_EFFECT_FRAMES = static_cast<int>(PruebaHechizos::TICKS_PER_SECOND * 0.3f);
 constexpr const char* REPLAY_HIT_ENTITY = "hit";
-constexpr const char* REPLAY_FORMAT_VERSION = "1.7";
 constexpr const char* REPLAY_PLAYER_ENTITIES[] = { "player_red", "player_blue" };
 constexpr const char* REPLAY_DEAD_ENTITIES[] = { "dead_red",   "dead_blue" };
 
@@ -67,6 +66,7 @@ void PruebaHechizos::setup(const std::filesystem::path& combatConfigFile) {
     crearVaritas();
 
     m_hitFrames.assign(m_players.size(), 0);
+    m_animations.resize(m_players.size());
     m_impactosRecibidos.assign(m_players.size(), 0);
     m_danoRecibido.assign(m_players.size(), 0.0f);
     recordFrame();
@@ -148,7 +148,7 @@ void PruebaHechizos::step() {
     aplicarImpactos();
     ++m_tick;
     recordFrame();
-    countDownHitEffects();
+    countDownEffects();
 }
 
 bool PruebaHechizos::isFinished() const {
@@ -184,6 +184,7 @@ void PruebaHechizos::dispararVaritas() {
         if (r.hayQueRecargar) v.espera = std::max(v.espera, v.recarga + r.recarga);
 
         if (r.disparado) {
+            v.castFrames = CAST_EFFECT_FRAMES;
             ++m_disparos;
             m_proyectiles += r.proyectilesLanzados;
             std::cout << "[PRUEBA] t=" << static_cast<float>(m_tick) / TICKS_PER_SECOND << "s jugador "
@@ -231,8 +232,9 @@ void PruebaHechizos::aplicarImpactos() {
     }
 }
 
-void PruebaHechizos::countDownHitEffects() {
+void PruebaHechizos::countDownEffects() {
     for (int& f : m_hitFrames) if (f > 0) --f;
+    for (auto& varita : m_varitas) if (varita.castFrames > 0) --varita.castFrames;
 }
 
 size_t PruebaHechizos::countAlive() const {
@@ -254,7 +256,22 @@ void PruebaHechizos::recordFrame() {
     json frame = json::array();
     for (size_t i = 0; i < m_players.size(); ++i) {
         const Personaje& p = *m_players[i];
-        frame.push_back(replayEntity(p.getPosicion(), p.getRotacion().y, replayEntityOfPlayer(i)));
+        const char* action = "idle";
+        bool restart = false;
+        if (!isAlive(p)) {
+            action = "death";
+        } else if (m_hitFrames[i] > 0) {
+            action = "hit";
+            restart = m_hitFrames[i] == HIT_EFFECT_FRAMES;
+        } else if (m_varitas[i].castFrames > 0) {
+            action = "cast";
+            restart = m_varitas[i].castFrames == CAST_EFFECT_FRAMES;
+        }
+
+        json entry = replayEntity(p.getPosicion(), p.getRotacion().y, replayEntityOfPlayer(i));
+        entry.push_back(m_animations[i].record(p.getId(), REPLAY_PLAYER_ENTITIES[i],
+            action, m_replayFrames.size(), restart));
+        frame.push_back(std::move(entry));
     }
     for (const std::unique_ptr<Hechizo>& spell : m_spells.getActiveHechizos()) {
         if (!spell->IsActive()) continue;
@@ -265,8 +282,9 @@ void PruebaHechizos::recordFrame() {
 
 void PruebaHechizos::recordEnding() {
     m_spells.emptySpells();
+    for (auto& varita : m_varitas) varita.castFrames = 0;
     const int ticks = 2 * TICKS_PER_SECOND;
-    for (int t = 0; t < ticks; ++t) { countDownHitEffects(); recordFrame(); }
+    for (int t = 0; t < ticks; ++t) { countDownEffects(); recordFrame(); }
 }
 
 std::string PruebaHechizos::describeWinner() const {

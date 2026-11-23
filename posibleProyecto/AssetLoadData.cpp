@@ -1,6 +1,9 @@
 #include "AssetLoadData.h"
 #include "Paths.h"
 
+#include <algorithm>
+#include <cctype>
+
 // La implementacion de tinyobjloader se compila aqui y en ningun otro .cpp.
 // fast_float desactivado: la version que trae la libreria no compila en C++20
 // con MSVC (error C3615 en loop_parse_if_eight_digits).
@@ -220,8 +223,37 @@ static Model registerPieces(const std::string& assetName, const std::vector<ObjP
     return model;
 }
 
+static Model loadSkinnedModel(const std::filesystem::path& file, const json& config,
+    TextureLibrary& textures, size_t maxBones) {
+    using namespace bm::anim;
+    const auto imported = std::make_shared<const ImportedModel>(AssimpModelLoader::load(file));
+    for (const ImportedMesh& mesh : imported->meshes) {
+        if (mesh.bones.size() > maxBones)
+            throw std::runtime_error(file.string() + ": la submalla '" + mesh.name + "' tiene " +
+                std::to_string(mesh.bones.size()) + " huesos, el limite es " + std::to_string(maxBones));
+    }
+
+    Model model;
+    model.skinned = std::make_unique<SkinnedModel>(imported);
+    auto& skinned = *model.skinned;
+    if (config.contains("animations"))
+        skinned.animations = config.at("animations").get<decltype(skinned.animations)>();
+
+    const bool hasIdle = bool(skinned.findClip("idle"));
+    for (const std::string action : { "idle", "move", "cast", "hit", "death" }) {
+        if (!skinned.findClip(action))
+            std::cerr << "[Animacion] " << file << ": falta el clip para '" << action << "' (se usa "
+                      << (hasIdle && action != "death" ? "idle" : "la pose de reposo") << ")\n";
+    }
+
+    skinned.parts.reserve(imported->meshes.size());
+    for (const ImportedMesh& mesh : imported->meshes)
+        skinned.parts.push_back({ SkinnedMesh(mesh), textures.load(mesh.material.albedo, file) });
+    return model;
+}
+
 int loadAssetManifest(const std::filesystem::path& manifest, MeshLibrary& meshes, ModelLibrary& models,
-    TextureLibrary& textures) {
+    TextureLibrary& textures, size_t maxBones) {
 
     std::ifstream in(manifest);
     if (!in) throw std::runtime_error("no se puede abrir " + std::filesystem::absolute(manifest).string());
@@ -232,10 +264,21 @@ int loadAssetManifest(const std::filesystem::path& manifest, MeshLibrary& meshes
         const std::string& name = it.key();
         try {
             if (models.has(name)) throw std::runtime_error("nombre repetido");
-            std::string path = it.value().at("path").get<std::string>();
+            const json& config = it.value();
+            const auto file = dataPath(config.at("path").get<std::string>());
+            std::string extension = file.extension().string();
+            std::transform(extension.begin(), extension.end(), extension.begin(),
+                [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
 
-            const std::vector<ObjPiece> pieces = loadObj(dataPath(path));
-            models.add(name, registerPieces(name, pieces, meshes, textures));
+            const bool skinnedFormat = extension == ".glb" || extension == ".gltf" || extension == ".fbx";
+            if (config.value("type", "") == "skinned" && !skinnedFormat)
+                throw std::runtime_error("el tipo skinned requiere un archivo GLB, glTF o FBX");
+
+            if (skinnedFormat) {
+                models.add(name, loadSkinnedModel(file, config, textures, maxBones));
+            } else {
+                models.add(name, registerPieces(name, loadObj(file), meshes, textures));
+            }
             ++cargados;
         }
         catch (const std::exception& ex) {

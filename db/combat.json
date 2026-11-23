@@ -19,7 +19,7 @@
                 1,
                 20
             ],
-            "type": "tank_mage"
+            "type": "dwarf"
         }
     },
     "spells": "../db/spells.json"

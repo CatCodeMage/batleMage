@@ -115,34 +115,70 @@ void main() {
 })";
 
 
-GLuint compileShader(GLenum type, const char* src)
-{
+const char* depthFragmentSrc = R"GLSL(#version 330 core
+in vec3 vWorldPos;
+uniform vec3 uLightPosition;
+uniform float uFarPlane;
+
+void main() {
+    float distanceToLight = length(vWorldPos - uLightPosition);
+    gl_FragDepth = clamp(distanceToLight / uFarPlane, 0.0, 1.0);
+}
+)GLSL";
+
+static GLuint compileShader(GLenum type, const char* src) {
     GLuint shader = glCreateShader(type);
     glShaderSource(shader, 1, &src, nullptr);
     glCompileShader(shader);
 
-    GLint ok;
+    GLint ok = GL_FALSE;
     glGetShaderiv(shader, GL_COMPILE_STATUS, &ok);
     if (!ok) {
-        char log[512];
-        glGetShaderInfoLog(shader, 512, nullptr, log);
-        std::cerr << "Error de shader:\n" << log << "\n";
+        GLint length = 0;
+        glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &length);
+        std::string log(length + 1, '\0');
+        glGetShaderInfoLog(shader, static_cast<GLsizei>(log.size()), nullptr, log.data());
+        glDeleteShader(shader);
+        throw std::runtime_error(std::string("Error de shader: ") + log.c_str());
     }
     return shader;
 }
 
-GLuint setShaders() { // Set shaders
-    GLuint vs = compileShader(GL_VERTEX_SHADER, vertexSrc);
-    GLuint fs = compileShader(GL_FRAGMENT_SHADER, fragmentSrc);
+GLuint createShaderProgram(const char* vertex, const char* fragment) {
+    GLuint vs = compileShader(GL_VERTEX_SHADER, vertex);
+    GLuint fs;
+    try {
+        fs = compileShader(GL_FRAGMENT_SHADER, fragment);
+    } catch (...) {
+        glDeleteShader(vs);
+        throw;
+    }
 
     GLuint program = glCreateProgram();
     glAttachShader(program, vs);
     glAttachShader(program, fs);
     glLinkProgram(program);
 
+    glDetachShader(program, vs);
+    glDetachShader(program, fs);
     glDeleteShader(vs);
     glDeleteShader(fs);
 
+    GLint linked = GL_FALSE;
+    glGetProgramiv(program, GL_LINK_STATUS, &linked);
+    if (linked != GL_TRUE) {
+        GLint length = 0;
+        glGetProgramiv(program, GL_INFO_LOG_LENGTH, &length);
+        std::string log(length + 1, '\0');
+        glGetProgramInfoLog(program, static_cast<GLsizei>(log.size()), nullptr, log.data());
+        glDeleteProgram(program);
+        throw std::runtime_error(std::string("Error enlazando shaders: ") + log.c_str());
+    }
+    return program;
+}
+
+GLuint setShaders() {
+    const GLuint program = createShaderProgram(vertexSrc, fragmentSrc);
     glEnable(GL_DEPTH_TEST); // Z-Buffer
 
     glUseProgram(program);

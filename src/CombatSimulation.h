@@ -34,7 +34,7 @@ public:
     void recordEnding();
 
 private:
-    void recordFrame();
+    void recordFrame(bool ending = false);
     std::string describeWinner() const;
     void createPlayers(const std::filesystem::path& combatConfigFile);
     void connectOpponents();
@@ -54,6 +54,11 @@ private:
     std::vector<std::unique_ptr<Personaje>> m_players;
     std::vector<std::unique_ptr<ControladorMaquinaEstados>> m_controllers;   // m_controllers[i] es la IA de m_players[i]
     std::vector<int> m_hitFrames;
+    struct PlayerReplayState {
+        glm::vec3 position{0.0f};
+        ReplayAnimationState animation;
+    };
+    std::vector<PlayerReplayState> m_playerReplayStates;
     HechizosGestor m_spells;
     CombatManager m_combat;
     int m_tick = 0;

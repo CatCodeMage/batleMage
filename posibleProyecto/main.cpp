@@ -16,7 +16,9 @@
 #include "jsonManager.h"
 #include "simulationData.h"
 #include "CombatSimulation.h"
+#include "PruebaHechizos.h"
 #include <algorithm>
+#include <string_view>
 
 int shouldContinue(GLFWwindow* window) {
     return glfwWindowShouldClose(window) == 0;
@@ -96,11 +98,14 @@ void buclePrincipaLTiempoReal(GLFWwindow* window, SystemInfo& sysInfo) {
     std::vector<SceneLight> data = setLights();
     simData.changeLights(data);
 
-    const float secondsPerCombatFrame = CombatSimulation::SECONDS_PER_TICK;   // el replay graba un frame por tick
+    const float secondsPerCombatFrame = 1.0f / simData.framesInfo.ticksPerSecond;
     float unplayedSeconds = 0.0f;   // tiempo real que aun no se ha convertido en frames del combate
 
     while (shouldContinue(window)) {
-        unplayedSeconds += (std::min) (sysInfo.getDeltaTime(), MAX_SECONDS_PER_SCREEN_FRAME);
+
+        if (!simData.framesInfo.isPaused)
+            unplayedSeconds += (std::min)(sysInfo.getDeltaTime(), MAX_SECONDS_PER_SCREEN_FRAME);
+
         while (unplayedSeconds >= secondsPerCombatFrame) {
             simData.framesInfo.frame++;
             unplayedSeconds -= secondsPerCombatFrame;
@@ -111,8 +116,6 @@ void buclePrincipaLTiempoReal(GLFWwindow* window, SystemInfo& sysInfo) {
 
         simData.procesMainBodyLoopRealTime(window, sysInfo);
     }
-
-    simData.destroy();
 }
 
 int guranteWindowCreated(GLFWwindow* window) {
@@ -155,8 +158,8 @@ GLFWwindow* createWindow() {
         glfwWindowHint(GLFW_GREEN_BITS, mode->greenBits);
         glfwWindowHint(GLFW_BLUE_BITS, mode->blueBits);
         glfwWindowHint(GLFW_REFRESH_RATE, mode->refreshRate);
-
-        glfwWindowHint(GLFW_DECORATED, GLFW_FALSE);   // sin bordes y del tamaño de la pantalla: parece pantalla completa pero se graba sin cortes
+        // ventana normal con su X ocupando la pantalla; sin pantalla completa exclusiva, la grabacion no tiene pantallazos negros
+        glfwWindowHint(GLFW_MAXIMIZED, GLFW_TRUE);
         window = glfwCreateWindow(mode->width, mode->height, "Battle Mage", nullptr, nullptr);
         if (window != nullptr) glfwSetWindowPos(window, 0, 0);
     }
@@ -206,12 +209,20 @@ int createSimulation() {
 
     sysInfo.getCurrentState(window);
 
-    if (guranteWindowCreated(window) != 0)
+    if (guranteWindowCreated(window) != 0) {
+        glfwTerminate();
         return -1;
+    }
 
     glViewport(0, 0, sysInfo.getWidht(), sysInfo.getHeight());
 
-    buclePrincipaLTiempoReal(window, sysInfo);
+    try {
+        buclePrincipaLTiempoReal(window, sysInfo);
+    } catch (const std::exception& ex) {
+        std::cerr << "[Battle Mage] " << ex.what() << '\n';
+        glfwTerminate();
+        return -1;
+    }
 
     glfwTerminate();
 
@@ -219,12 +230,9 @@ int createSimulation() {
 }
 
 // Simula el combate entero sin graficos y lo deja grabado para que los graficos lo reproduzcan
-#include "PruebaHechizos.h"   // PRUEBA
-
+template <typename Simulation>
 void simulateCombatToReplay() {
-    //CombatSimulation simulation;
-	PruebaHechizos simulation;           // para probar hechizos sin IA, sin varitas y sin movimiento de magos
-
+    Simulation simulation;
     simulation.setup(dataPath("db/combat.json"));
     while (!simulation.isFinished())
         simulation.step();
@@ -234,9 +242,13 @@ void simulateCombatToReplay() {
 }
 
 
-int main()
+int main(int argc, char* argv[])
 {
-    //sendForm();   // cuando se active: antes de simular, porque es el formulario el que escribe combat.json
-    simulateCombatToReplay();
+    if (argc > 1 && std::string_view(argv[1]) == "--combate") {
+        sendForm();   // el formulario escribe combat.json antes de simular
+        simulateCombatToReplay<CombatSimulation>();
+    } else {
+        simulateCombatToReplay<PruebaHechizos>();
+    }
     return createSimulation();
 }

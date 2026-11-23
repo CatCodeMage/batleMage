@@ -81,6 +81,24 @@
     <ClCompile Include="ShadowSystem.cpp">
       <Filter>Archivos de recursos\Archivos de origen</Filter>
     </ClCompile>
+    <ClCompile Include="skeleton_animation\AssimpModelLoader.cpp">
+      <Filter>Archivos de origen</Filter>
+    </ClCompile>
+    <ClCompile Include="skeleton_animation\Skeleton.cpp">
+      <Filter>Archivos de origen</Filter>
+    </ClCompile>
+    <ClCompile Include="skeleton_animation\AnimationClip.cpp">
+      <Filter>Archivos de origen</Filter>
+    </ClCompile>
+    <ClCompile Include="skeleton_animation\Animator.cpp">
+      <Filter>Archivos de origen</Filter>
+    </ClCompile>
+    <ClCompile Include="skeleton_animation\SkinnedMesh.cpp">
+      <Filter>Archivos de origen</Filter>
+    </ClCompile>
+    <ClCompile Include="skeleton_animation\SkinnedRenderer.cpp">
+      <Filter>Archivos de origen</Filter>
+    </ClCompile>
     <ClCompile Include="simulationData.cpp">
       <Filter>Archivos de recursos\Archivos de origen</Filter>
     </ClCompile>
@@ -106,6 +124,39 @@
       <Filter>Archivos de recursos\Archivos de origen</Filter>
     </ClCompile>
     <ClCompile Include="..\src\CombatSimulation.cpp">
+      <Filter>Archivos de recursos\Archivos de origen</Filter>
+    </ClCompile>
+    <ClCompile Include="libs\imgui\imgui.cpp">
+      <Filter>Archivos de recursos\Archivos de origen</Filter>
+    </ClCompile>
+    <ClCompile Include="libs\imgui\imgui_demo.cpp">
+      <Filter>Archivos de recursos\Archivos de origen</Filter>
+    </ClCompile>
+    <ClCompile Include="libs\imgui\imgui_draw.cpp">
+      <Filter>Archivos de recursos\Archivos de origen</Filter>
+    </ClCompile>
+    <ClCompile Include="libs\imgui\imgui_tables.cpp">
+      <Filter>Archivos de recursos\Archivos de origen</Filter>
+    </ClCompile>
+    <ClCompile Include="libs\imgui\imgui_widgets.cpp">
+      <Filter>Archivos de recursos\Archivos de origen</Filter>
+    </ClCompile>
+    <ClCompile Include="UserInterface.cpp">
+      <Filter>Archivos de recursos\Archivos de origen</Filter>
+    </ClCompile>
+    <ClCompile Include="libs\imgui\backends\imgui_impl_glfw.cpp">
+      <Filter>Archivos de recursos\Archivos de origen</Filter>
+    </ClCompile>
+    <ClCompile Include="libs\imgui\backends\imgui_impl_opengl3.cpp">
+      <Filter>Archivos de recursos\Archivos de origen</Filter>
+    </ClCompile>
+    <ClCompile Include="CombatPanel.cpp">
+      <Filter>Archivos de recursos\Archivos de origen</Filter>
+    </ClCompile>
+    <ClCompile Include="CameraPath.cpp">
+      <Filter>Archivos de recursos\Archivos de origen</Filter>
+    </ClCompile>
+    <ClCompile Include="CameraPathPanel.cpp">
       <Filter>Archivos de recursos\Archivos de origen</Filter>
     </ClCompile>
   </ItemGroup>
@@ -182,6 +233,24 @@
     <ClInclude Include="ShadowSystem.h">
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
+    <ClInclude Include="skeleton_animation\AssimpModelLoader.h">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
+    <ClInclude Include="skeleton_animation\Skeleton.h">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
+    <ClInclude Include="skeleton_animation\AnimationClip.h">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
+    <ClInclude Include="skeleton_animation\Animator.h">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
+    <ClInclude Include="skeleton_animation\SkinnedMesh.h">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
+    <ClInclude Include="skeleton_animation\SkinnedRenderer.h">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
     <ClInclude Include="simulationData.h">
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
@@ -216,6 +285,18 @@
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
     <ClInclude Include="..\src\CombatSimulation.h">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
+    <ClInclude Include="UserInterface.h">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
+    <ClInclude Include="CombatPanel.h">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
+    <ClInclude Include="CameraPath.h">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
+    <ClInclude Include="CameraPathPanel.h">
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
   </ItemGroup>

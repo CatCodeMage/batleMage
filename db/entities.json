@@ -5,7 +5,7 @@
     },
     "player_red": {
         "scale": [1, 1, 1],
-        "asset": "spirit_red"
+        "asset": "elaina"
     },
     "player_blue": {
         "scale": [1, 1, 1],
