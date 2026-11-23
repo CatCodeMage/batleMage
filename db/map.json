@@ -4,11 +4,6 @@
   "position": [ 0, 0, 0 ],
   "kind": 0,
   "asset": "ground_grass",
-  "lights": [
-      [[[0.0, 0.0, 0.0], 8.0, [1.0, 0.8, 0.5], 2.0], true], 
-      [[[-3.0, 2.0, 0.0], 6.0, [0.3, 0.5, 1.0], 2.0], false], 
-      [[[-80.0, 200.0, -60.0], 1000.0, [1.0, 0.95, 0.85], 1.2], false]
-    ],
   "entities": {
     "arena_floor": { "asset": "path_stoneCircle", "position": [ 0, 0, 0 ], "rotation": [ 0, 0, 0 ], "scale": [ 60, 1, 60 ] },
     "arena_column_01": { "asset": "statue_column", "position": [ 34, 0, 0 ], "rotation": [ 0, 0, 0 ], "scale": [ 5, 5, 5 ] },

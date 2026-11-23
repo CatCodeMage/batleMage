@@ -12,6 +12,7 @@
 #include "ShadowSystem.h"
 #include "AssetLoadData.h"
 #include "MapData.h"
+#include "webPage.h"
 #include "jsonManager.h"
 #include "simulationData.h"
 #include "CombatSimulation.h"
@@ -54,6 +55,39 @@ void updateShadowInput(GLFWwindow* window, ShadowSystem& shadows, std::vector<Sc
     f7PreviouslyPressed = f7Pressed;
 }*/
  
+std::vector<SceneLight> setLights() {
+    std::vector<SceneLight> lights = {
+        {
+            {
+                glm::vec3(0.0f),
+                8.0f,
+                glm::vec3(1.0f, 0.8f, 0.5f),
+                2.0f
+            },
+            true  // Luz que orbita: proyecta sombras
+        },
+        {
+            {
+                glm::vec3(-3.0f, 2.0f, 0.0f),
+                6.0f,
+                glm::vec3(0.3f, 0.5f, 1.0f),
+                2.0f
+            },
+            false // Luz fija: no proyecta sombras
+        },
+        {
+            {
+                glm::vec3(-80.0f, 200.0f, -60.0f),   // sol: muy alto y lejos, asi su luz llega casi paralela a toda la arena
+                1000.0f,                             // alcance muy por encima de la distancia: apenas se atenua
+                glm::vec3(1.0f, 0.95f, 0.85f),       // blanco calido
+                1.2f
+            },
+            false   // sin sombras: un cubemap repartido en 100 m da sombras muy bastas
+        }
+    };
+    return lights;
+}
+
 constexpr float MAX_SECONDS_PER_SCREEN_FRAME = 0.25f;
 
 void buclePrincipaLTiempoReal(GLFWwindow* window, SystemInfo& sysInfo) {
@@ -61,10 +95,11 @@ void buclePrincipaLTiempoReal(GLFWwindow* window, SystemInfo& sysInfo) {
     simData.init(window);
 
     // Parte temporar, cuando leamos el JSON de luces deberia hacerse en el init de simData
+    std::vector<SceneLight> data = setLights();
+    simData.changeLights(data);
 
     const float secondsPerCombatFrame = 1.0f / simData.framesInfo.ticksPerSecond;
     float unplayedSeconds = 0.0f;   // tiempo real que aun no se ha convertido en frames del combate
-    bool combatEnded = false;
 
     while (shouldContinue(window)) {
 
@@ -77,7 +112,6 @@ void buclePrincipaLTiempoReal(GLFWwindow* window, SystemInfo& sysInfo) {
         }
         if (simData.framesInfo.frame >= simData.framesInfo.combat.size()) {
             simData.framesInfo.frame = 0;
-            combatEnded = true;
         }
 
         simData.procesMainBodyLoopRealTime(window, sysInfo);
@@ -198,11 +232,10 @@ int createSimulation() {
 // Simula el combate entero sin graficos y lo deja grabado para que los graficos lo reproduzcan
 template <typename Simulation>
 void simulateCombatToReplay() {
-    CombatSimulation simulation;
-    simulation.setup(dataPath("db/combat_1.json"));
-    while (!simulation.isFinished()) {
+    Simulation simulation;
+    simulation.setup(dataPath("db/combat.json"));
+    while (!simulation.isFinished())
         simulation.step();
-    }
     simulation.printResult();
     simulation.recordEnding();
     simulation.writeReplay(dataPath("db/combate_generado.json"));

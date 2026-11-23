@@ -60,6 +60,9 @@
     <ClCompile Include="hechizosGestor.cpp">
       <Filter>Archivos de recursos\Archivos de origen</Filter>
     </ClCompile>
+    <ClCompile Include="webPage.cpp">
+      <Filter>Archivos de recursos\Archivos de origen</Filter>
+    </ClCompile>
     <ClCompile Include="AssetLoadData.cpp">
       <Filter>Archivos de recursos\Archivos de origen</Filter>
     </ClCompile>
@@ -154,19 +157,6 @@
       <Filter>Archivos de recursos\Archivos de origen</Filter>
     </ClCompile>
     <ClCompile Include="CameraPathPanel.cpp">
-    <ClCompile Include="Mp4Exporter.cpp">
-      <Filter>Archivos de recursos\Archivos de origen</Filter>
-    </ClCompile>
-    <ClCompile Include="lanzadorHechizos.cpp">
-      <Filter>Archivos de recursos\Archivos de origen</Filter>
-    </ClCompile>
-    <ClCompile Include="PruebaHechizos.cpp">
-      <Filter>Archivos de recursos\Archivos de origen</Filter>
-    </ClCompile>
-    <ClCompile Include="varita.cpp">
-      <Filter>Archivos de recursos\Archivos de origen</Filter>
-    </ClCompile>
-    <ClCompile Include="MaterialLibrary.cpp">
       <Filter>Archivos de recursos\Archivos de origen</Filter>
     </ClCompile>
   </ItemGroup>
@@ -307,22 +297,6 @@
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
     <ClInclude Include="CameraPathPanel.h">
-    <ClInclude Include="Mp4Exporter.h">
-      <Filter>Archivos de encabezado</Filter>
-    </ClInclude>
-    <ClInclude Include="lanzadorHechizos.h">
-      <Filter>Archivos de encabezado</Filter>
-    </ClInclude>
-    <ClInclude Include="PruebaHechizos.h">
-      <Filter>Archivos de encabezado</Filter>
-    </ClInclude>
-    <ClInclude Include="varita.h">
-      <Filter>Archivos de encabezado</Filter>
-    </ClInclude>
-    <ClInclude Include="Material.h">
-      <Filter>Archivos de encabezado</Filter>
-    </ClInclude>
-    <ClInclude Include="MaterialLibrary.h">
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
   </ItemGroup>

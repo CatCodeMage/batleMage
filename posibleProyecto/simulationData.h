@@ -13,10 +13,10 @@
 #include "ShadowSystem.h"
 #include "AssetLoadData.h"
 #include "MapData.h"
+#include "webPage.h"
 #include "jsonManager.h"
 #include "UserInterface.h"
 #include "CameraPath.h"
-#include "Mp4Exporter.h"
 
 enum class InteractionMode { Editing, ControllingCamera };
 
@@ -39,10 +39,6 @@ struct simulationData
 
     void saveShotIfRequested();
 
-    void destroy();
-
-    std::vector<SceneLight> setLights();
-    
     // Data
     MeshLibrary libMesh;
     ModelLibrary libModel;

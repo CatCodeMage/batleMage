@@ -3,7 +3,7 @@
 #include <fstream>
 using namespace std;
 
-Personaje::Personaje(int id, glm::vec3 posicionInicial, float radio, HechizosGestor* gestorHechizos, const std::vector<Varita>& varitasIniciales)
+Personaje::Personaje(int id, glm::vec3 posicionInicial, float radio, HechizosGestor* gestorHechizos)
 {
     this->m_id = id;
     this->m_posicion = posicionInicial;
@@ -15,15 +15,14 @@ Personaje::Personaje(int id, glm::vec3 posicionInicial, float radio, HechizosGes
     this->m_vidaMax = 100.0f;
     this->m_vida = this->m_vidaMax;
     this->m_manaMax = 50.0f;
-    this->m_mana = this->m_manaMax; 
+    this->m_mana = this->m_manaMax;
     this->m_tiempoQuemado = 0.0f;
     this->m_tiempoCongelado = 0.0f;
     this->m_danoQuemadura = 5.0f;
     anadirEstado(EstadoPersonaje::IDLE);
     m_controlador = nullptr;
     m_gestorHechizos = gestorHechizos;
-    m_varitas = varitasIniciales;
-    m_varitaActual = m_varitas.empty() ? -1 : 0;
+
 }
 
 void Personaje::anadirEstado(EstadoPersonaje nuevoEstado, float duracion)
@@ -93,10 +92,6 @@ void Personaje::update(float deltaTime)
     {
         m_controlador->actualizar(*this, deltaTime);
     }
-    for(Varita& varita : m_varitas)
-    {
-        varita.update(deltaTime);
-    }
 }
 
 void Personaje::moverse(const glm::vec3& desplazamiento)
@@ -163,18 +158,15 @@ void Personaje::disminuirMana(float cantidad)
     if(m_mana < 0) m_mana = 0;
 }
 
-void Personaje::lanzarHechizo()
-{
-    dispararVaritaActual();
-}
-
 void Personaje::lanzarHechizo(int idHechizo)
 {
     if (yaTieneEstado(EstadoPersonaje::MUERTO) || yaTieneEstado(EstadoPersonaje::CONGELADO)) return;
-
+    
     anadirEstado(EstadoPersonaje::CASTEANDO);
-
+    
+    //direccion normalizada donde mira el pj
     float longitud = std::sqrt(m_direccion.x * m_direccion.x + m_direccion.y * m_direccion.y + m_direccion.z * m_direccion.z);
+
     glm::vec3 direccionDisparo(0.0f, 0.0f, 1.0f);
     if (longitud > 0.0001f)
     {
@@ -182,60 +174,21 @@ void Personaje::lanzarHechizo(int idHechizo)
     }
 
     if (m_gestorHechizos != nullptr) {
-        float radioHechizo = 0.5f;
-        const auto& catalogo = m_gestorHechizos->getCatalogoHechizos();
-        auto it = catalogo.find(idHechizo);
-        if (it != catalogo.end()) {
-            radioHechizo = it->second.radius;
-        }
+        // El hechizo nace con su centro fuera del mago: si no, su propio radio ya lo toca y se da a si mismo
+        const float radioHechizo = m_gestorHechizos->getCatalogoHechizos().at(idHechizo).radius;
         float distanciaSeparacion = m_radio + radioHechizo + m_margenCasteo;
-        glm::vec3 posicionOrigenHechizo = m_posicion + direccionDisparo * distanciaSeparacion;
-        m_gestorHechizos->spawnSpell(idHechizo, posicionOrigenHechizo, direccionDisparo);
-    }
-}
 
-void Personaje::anadirVarita(const Varita& varita)
-{
-    if (m_varitas.size() < MAX_VARITAS) {
-        m_varitas.push_back(varita);
-        if (m_varitaActual < 0) {
-            m_varitaActual = 0;
+        glm::vec3 posicionOrigenHechizo(
+            m_posicion.x + direccionDisparo.x * distanciaSeparacion,
+            m_posicion.y + direccionDisparo.y * distanciaSeparacion,
+            m_posicion.z + direccionDisparo.z * distanciaSeparacion
+        );
+
+        if (m_gestorHechizos != nullptr)
+        {
+            m_gestorHechizos->spawnSpell(idHechizo, posicionOrigenHechizo, direccionDisparo);
         }
     }
-}
-
-void Personaje::cambiarVarita(int indice)
-{
-    if (indice >= 0 && indice < static_cast<int>(m_varitas.size())) {
-        m_varitaActual = indice;
-    }
-}
-
-Varita* Personaje::getVaritaActual()
-{
-    if (m_varitaActual >= 0 && m_varitaActual < static_cast<int>(m_varitas.size())) {
-        return &m_varitas[m_varitaActual];
-    }
-    return nullptr;
-}
-
-bool Personaje::dispararVaritaActual()
-{
-    if (yaTieneEstado(EstadoPersonaje::MUERTO) || yaTieneEstado(EstadoPersonaje::CONGELADO)) return false;
-    if (m_gestorHechizos == nullptr || m_varitaActual < 0 || m_varitaActual >= static_cast<int>(m_varitas.size())) return false;
-
-    float longitud = std::sqrt(m_direccion.x * m_direccion.x + m_direccion.y * m_direccion.y + m_direccion.z * m_direccion.z);
-    glm::vec3 direccionDisparo(0.0f, 0.0f, 1.0f);
-    if (longitud > 0.0001f)
-    {
-        direccionDisparo = glm::vec3(m_direccion.x / longitud, m_direccion.y / longitud, m_direccion.z / longitud);
-    }
-
-    bool disparado = m_varitas[m_varitaActual].intentarDisparar(m_posicion, m_radio, m_margenCasteo, direccionDisparo, m_gestorHechizos, m_id);
-    if (disparado) {
-        anadirEstado(EstadoPersonaje::CASTEANDO);
-    }
-    return disparado;
 }
 
 void Personaje::setControlador(ControladorPersonaje* nuevoControlador)
@@ -247,11 +200,7 @@ int Personaje::getId() const { return m_id; }
 
 float Personaje::getVida() const { return m_vida; }
 
-float Personaje::getMana() const 
-{ 
-    if (m_varitas.empty()) return 0.0f;
-    return m_varitas[m_varitaActual].getManaActual(); 
-}
+float Personaje::getMana() const { return m_mana; }
 
 float Personaje::getRadio() const { return m_radio; }
 

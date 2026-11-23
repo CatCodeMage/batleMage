@@ -10,7 +10,6 @@
 #include "jsonManager.h"   // readSpells
 #include <cmath>
 #include "Paths.h"
-#include "varita.h"
 
 // Combate sin graficos: los personajes con su IA y los hechizos en vuelo.
 // No toca OpenGL, para poder ejecutarse sin ventana.
@@ -65,7 +64,4 @@ private:
     int m_tick = 0;
 
     nlohmann::json m_replayFrames = nlohmann::json::array();   // un frame por tick, en el formato de generateCombat
-
-    std::vector<Varita> createWands();
-
 };

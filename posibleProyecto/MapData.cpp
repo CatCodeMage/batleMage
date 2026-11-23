@@ -47,21 +47,6 @@ bool MapData::load(const std::filesystem::path& file, const ModelLibrary& lib) {
          
         entities.push_back(loadEntityJSON(mapaJSON, lib));
 
-        for (auto& currentLight : mapaJSON.at("lights")) {
-            SceneLight sceneLight;
-
-            //acceder a la ultima posicion
-            const json& lightData = currentLight.at(0);
-            sceneLight.light.pos = aVec3(lightData.at(0));
-            sceneLight.light.radius = lightData.at(1).get<float>();
-            sceneLight.light.color = aVec3(lightData.at(2));
-            sceneLight.light.intensity = lightData.at(3).get<float>();
-            
-            sceneLight.castsShadow = currentLight[1];
-
-            m_lights.push_back(sceneLight);
-        }
-
         const json& listEntities = mapaJSON.at("entities");
         for (json::const_iterator it = listEntities.begin(); it != listEntities.end(); ++it) {
             const std::string& id = it.key();       

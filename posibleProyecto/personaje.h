@@ -6,7 +6,6 @@
 #include "hechizosGestor.h"     // HechizosGestor*: el personaje crea sus propios hechizos
 #include <glm/glm.hpp>
 #include <nlohmann/json.hpp>
-#include "varita.h"
 using json = nlohmann::json;
 
 // CombatSimulation aun usa Vector3; se quita al adaptarla a este Personaje
@@ -52,17 +51,13 @@ private:
     std::vector<EstadoPersonaje> m_estadosActuales;
     ControladorPersonaje* m_controlador;
     HechizosGestor* m_gestorHechizos;
-    static constexpr int MAX_VARITAS = 4;
-    std::vector<Varita> m_varitas;
-    int m_varitaActual;
 
 public:
-    Personaje(int id, glm::vec3 posicionInicial, float radio, HechizosGestor* gestorHechizos, const std::vector<Varita>& varitasIniciales = {});
+    Personaje(int id, glm::vec3 posicionInicial, float radio = 1.0f, HechizosGestor* gestorHechizos = nullptr);
     void update(float deltaTime);
 
     void moverse(const glm::vec3& desplazamiento);
     void rotar(const glm::vec3& deltaRotacion);
-    void lanzarHechizo();
     void lanzarHechizo(int idHechizo);
     void recibirDano(float cantidadDano);
     void aumentarVida(float cantidad);
@@ -88,11 +83,6 @@ public:
     void setDireccion(const glm::vec3& nuevaDireccion);
     void setRadio(float radio);
     void setControlador(ControladorPersonaje* nuevoControlador);
-    void anadirVarita(const Varita& varita);
-    void cambiarVarita(int indice);
-    Varita* getVaritaActual();
-    const std::vector<Varita>& getVaritas() const {return m_varitas;}
-    bool dispararVaritaActual();
 
     void setGestorHechizos(HechizosGestor* gestor);
     HechizosGestor* getGestorHechizos() const;
