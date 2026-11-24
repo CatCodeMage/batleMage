@@ -163,6 +163,7 @@
     <ClCompile Include="Entidad.cpp" />
     <ClCompile Include="hechizos.cpp" />
     <ClCompile Include="hechizosGestor.cpp" />
+    <ClCompile Include="IceLanceVFX.cpp" />
     <ClCompile Include="Input.cpp" />
     <ClCompile Include="jsonManager.cpp" />
     <ClCompile Include="lanzadorHechizos.cpp" />
@@ -205,6 +206,7 @@
     <ClInclude Include="hechizoDatos.h" />
     <ClInclude Include="hechizos.h" />
     <ClInclude Include="hechizosGestor.h" />
+    <ClInclude Include="IceLanceVFX.h" />
     <ClInclude Include="Input.h" />
     <ClInclude Include="jsonManager.h" />
     <ClInclude Include="MapData.h" />

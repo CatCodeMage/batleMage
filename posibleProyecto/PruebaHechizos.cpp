@@ -18,6 +18,7 @@ constexpr float DISTANCIA_MAGOS = 10.0f;   // los hechizos alcanzan 12-30 (veloc
 // Ids de las cartas de prueba (no chocan con los de spells.json, 0..15)
 constexpr int CARTA_MAS_DANO = 100;
 constexpr int CARTA_REBOTE = 101;
+constexpr int CARTA_ICE_LANCE_PARABOLICA = 102;
 constexpr int CARTA_DOBLE = 200;
 constexpr int CARTA_TRIPLE = 201;
 
@@ -26,7 +27,7 @@ constexpr size_t      POOL_HECHIZOS = 256;
 constexpr float       SPELL_HIT_RADIUS = 0.5f;
 constexpr int         HIT_EFFECT_FRAMES = static_cast<int>(PruebaHechizos::TICKS_PER_SECOND * 0.3f);
 constexpr const char* REPLAY_HIT_ENTITY = "hit";
-constexpr const char* REPLAY_FORMAT_VERSION = "1.7";
+constexpr const char* REPLAY_FORMAT_VERSION = "1.8";
 constexpr const char* REPLAY_PLAYER_ENTITIES[] = { "player_red", "player_blue" };
 constexpr const char* REPLAY_DEAD_ENTITIES[] = { "dead_red",   "dead_blue" };
 
@@ -41,10 +42,22 @@ static CylinderCollider colliderOf(const Personaje& p) {
 
 static float yawOf(const glm::vec3& dir) { return std::atan2(dir.x, dir.z); }
 
+static float pitchOf(const glm::vec3& dir) {
+    const float horiz = std::sqrt(dir.x * dir.x + dir.z * dir.z);
+    if (horiz < 0.0001f && std::abs(dir.y) < 0.0001f) return 0.0f;
+    return std::atan2(-dir.y, horiz);
+}
+
 // [[x, y, z], [giroX, giroY, giroZ], "entidad"]
 static json replayEntity(const glm::vec3& pos, float yaw, const char* entityName) {
     return json::array({ json::array({ pos.x, pos.y, pos.z }),
                          json::array({ 0.0f, yaw, 0.0f }),
+                         entityName });
+}
+
+static json replaySpellEntity(const glm::vec3& pos, float pitch, float yaw, const char* entityName) {
+    return json::array({ json::array({ pos.x, pos.y, pos.z }),
+                         json::array({ pitch, yaw, 0.0f }),
                          entityName });
 }
 
@@ -78,11 +91,26 @@ void PruebaHechizos::registrarCartas() {
     ModificadoresDisparo masDano; masDano.danoExtra = 10.0f;
     m_spells.registrarModificador(CARTA_MAS_DANO, "damage_plus", 5.0f, 0.08f, masDano);
 
-    ModificadoresDisparo rebote;  rebote.rebotes = 4; rebote.etiquetas = ETQ_REBOTE; rebote.lifetimeExtra = 3.0f;
+    ModificadoresDisparo rebote;  rebote.rebotes = 2; rebote.etiquetas = ETQ_REBOTE; rebote.lifetimeExtra = 3.0f;
     m_spells.registrarModificador(CARTA_REBOTE, "bounce", 0.0f, 0.0f, rebote);
 
     m_spells.registrarMulticast(CARTA_DOBLE, "double_spell", 0.0f, 0.0f, 2);
     m_spells.registrarMulticast(CARTA_TRIPLE, "triple_spell", 2.0f, 0.03f, 3);
+
+    // Variante parabolica de ice_lance exclusiva para probar la curva y el rebote en --prueba-hechizos
+    m_spells.registrarHechizo(
+        CARTA_ICE_LANCE_PARABOLICA,
+        "ice_lance",
+        ElementType::ICE,
+        10.0f,
+        18.0f,
+        2.4f,
+        5.5f,
+        1.0f,
+        glm::vec3(0.8f, 0.8f, 1.5f),
+        3.5f,
+        MovementPattern::Parabolic
+    );
 }
 
 // Mismos tipos de mago y altura que el combate normal (combat.json + players.json), pero sin IA
@@ -121,21 +149,42 @@ void PruebaHechizos::crearMagos(const std::filesystem::path& combatConfigFile) {
 void PruebaHechizos::crearVaritas() {
     m_varitas.assign(m_players.size(), VaritaPrueba{});
 
-    // Mago 1 (rojo): [doble][+10 daño][fire_ball][lightning_bolt]
-    //   -> 2 proyectiles distintos a la vez, con +10 de daño cada uno
-    VaritaPrueba& v1 = m_varitas[0];
-    v1.ranuras = { CARTA_DOBLE, CARTA_MAS_DANO, idPorNombre("fire_ball"), idPorNombre("lightning_bolt") };
-    v1.castDelay = 0.3f;
-    v1.recarga = 1.0f;
+    const int iceLance = idPorNombre("ice_lance");
+    const int fireBall = idPorNombre("fire_ball");
 
-    // Mago 2 (azul): [triple][rebote x4][ice_shard x3]
-    //   -> abanico de 3 que van hacia el suelo, rebotan y siguen en arco hacia el rival
+    // Mago 1 (rojo, izquierda):
+    // 1) Ice Lance lineal recto -> impacta contra Mago 2
+    // 2) Ice Lance parabolico -> curva hacia el suelo e impacta con normal (0,1,0)
+    // 3) Dos Ice Lance simultaneos -> estelas e impactos independientes
+    // 4) Ice Lance parabolico con rebote -> rebota en el suelo sin destruirse y explota al agotar rebotes
+    // 5) Fire Ball + Ice Lance -> verifica que fire_ball sigue funcionando junto con ice_lance
+    VaritaPrueba& v1 = m_varitas[0];
+    v1.ranuras = {
+        fireBall,
+        CARTA_REBOTE, fireBall,
+        iceLance,
+        CARTA_ICE_LANCE_PARABOLICA,
+        CARTA_DOBLE, iceLance, iceLance,
+        CARTA_REBOTE, CARTA_ICE_LANCE_PARABOLICA,
+        CARTA_DOBLE, CARTA_MAS_DANO, fireBall, iceLance
+    };
+    v1.castDelay = 0.65f;
+    v1.recarga = 1.2f;
+
+    // Mago 2 (azul, derecha): apunta hacia el suelo entre ambos magos
+    // 1) Ice Lance directo al suelo sin rebote -> impacto completo con normal (0,1,0)
+    // 2) Ice Lance con rebote -> rebota en el suelo y sigue volando en arco
+    // 3) Fire Ball con rebote -> rebota en el suelo y alcanza al Mago 1
     VaritaPrueba& v2 = m_varitas[1];
-    const int shard = idPorNombre("ice_shard");
-    v2.ranuras = { CARTA_TRIPLE, CARTA_REBOTE, shard, shard, shard };
-    v2.castDelay = 0.4f;
-    v2.recarga = 1.5f;
-    v2.inclinacionY = -0.5f;   // hacia el suelo: rebota y hace arcos por la gravedad
+    v2.ranuras = {
+        iceLance,
+        CARTA_REBOTE, fireBall,
+        CARTA_REBOTE, iceLance,
+        CARTA_DOBLE, CARTA_REBOTE, iceLance, iceLance
+    };
+    v2.castDelay = 0.75f;
+    v2.recarga = 1.4f;
+    v2.inclinacionY = -0.36f;   // hacia el suelo para ver impactos en suelo y rebotes
 }
 
 // =====================================================================
@@ -199,9 +248,38 @@ void PruebaHechizos::aplicarSuelo() {
         if (!spell->IsActive()) continue;
         const SphereCollider esfera{ spell->getPosition(), SPELL_HIT_RADIUS };
         const CollisionInfo contacto = m_colisiones.getGroundCollisionInfo(esfera, ALTURA_SUELO);
-        if (contacto.collision)
+        if (contacto.collision) {
+            const bool wasApproaching = glm::dot(spell->getVelocityVector(), contacto.normal) < 0.0f;
+            const glm::vec3 hitPos = spell->getPosition() + contacto.normal * (contacto.penetration - SPELL_HIT_RADIUS);
+            const std::string spellName = spell->getName();
+
             m_spells.procesarChoqueSuperficie(spell.get(), contacto.normal, contacto.penetration);
+
+            if (spellName == "ice_lance" || spellName == "fire_ball") {
+                const float fullDuration = (spellName == "fire_ball") ? 3.18f : 1.9f;
+                if (!spell->IsActive()) {
+                    recordImpactVFX(spellName, hitPos, contacto.normal, fullDuration);
+                } else if (wasApproaching) {
+                    recordImpactVFX(spellName + "_bounce", hitPos, contacto.normal, 0.45f);
+                }
+            }
+        }
     }
+}
+
+void PruebaHechizos::recordImpactVFX(
+    const std::string& type,
+    const glm::vec3& position,
+    const glm::vec3& normal,
+    float duration)
+{
+    m_replayImpacts.push_back({
+        { "type", type },
+        { "position", json::array({ position.x, position.y, position.z }) },
+        { "normal", json::array({ normal.x, normal.y, normal.z }) },
+        { "startTick", m_tick },
+        { "duration", duration }
+    });
 }
 
 // Golpes a magos. Usa el daño del propio hechizo (getDefinition), así se ven los modificadores
@@ -225,6 +303,18 @@ void PruebaHechizos::aplicarImpactos() {
 
             if (!MAGOS_INMORTALES)
                 m_combat.procesarImpacto(esfera, colliderOf(mago), spell->getDefinition(), mago);
+
+            if (spell->getName() == "ice_lance" || spell->getName() == "fire_ball") {
+                const glm::vec3 delta = spell->getPosition() - mago.getPosicion();
+                const glm::vec3 horiz(delta.x, 0.0f, delta.z);
+                const glm::vec3 dir = spell->getDirection();
+                const glm::vec3 hitNormal = glm::length(horiz) > 0.0001f
+                    ? glm::normalize(horiz)
+                    : (glm::length(dir) > 0.0001f ? -dir : glm::vec3(0.0f, 1.0f, 0.0f));
+                const glm::vec3 hitPos = mago.getPosicion() + glm::vec3(0.0f, delta.y, 0.0f) + hitNormal * mago.getRadio();
+                const float fullDuration = (spell->getName() == "fire_ball") ? 3.18f : 1.9f;
+                recordImpactVFX(spell->getName(), hitPos, hitNormal, fullDuration);
+            }
 
             m_spells.destroySpell(spell.get());
             break;
@@ -259,7 +349,13 @@ void PruebaHechizos::recordFrame() {
     }
     for (const std::unique_ptr<Hechizo>& spell : m_spells.getActiveHechizos()) {
         if (!spell->IsActive()) continue;
-        frame.push_back(replayEntity(spell->getPosition(), yawOf(spell->getDirection()), spell->getName().c_str()));
+        const glm::vec3 dir = spell->getDirection();
+        json sample = replaySpellEntity(spell->getPosition(), pitchOf(dir), yawOf(dir), spell->getName().c_str());
+        // El primer estado visible se graba despues de actualizar el tick de lanzamiento.
+        const double ageTicks = std::round(static_cast<double>(spell->getCurrentLifeTime()) * TICKS_PER_SECOND);
+        sample.push_back((std::max)(0.0, ageTicks - 1.0) / TICKS_PER_SECOND);
+        sample.push_back(spell->getIndicePool());
+        frame.push_back(std::move(sample));
     }
     m_replayFrames.push_back(std::move(frame));
 }
@@ -293,7 +389,8 @@ void PruebaHechizos::writeReplay(const std::filesystem::path& replayFile) const 
             { "ticksPerSecond", TICKS_PER_SECOND },
             { "rotationOrder", "XYZ" },
             { "rotationUnit", "radians" } } },
-        { "frames", m_replayFrames } };
+        { "frames", m_replayFrames },
+        { "impacts", m_replayImpacts } };
 
     std::ofstream out(replayFile);
     if (!out) throw std::runtime_error("no se puede escribir " + replayFile.string());

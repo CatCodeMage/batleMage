@@ -1,0 +1,90 @@
+#pragma once
+// Adaptacion a OpenGL 3.3 C++ del VFX procedural de Ice Lance e Impact Shards de GLACILUX Lite.
+// Basado en glacilux_meshes.gd, glacilux_projectile_3d.gd y glacilux_impact_3d.gd
+// Copyright (c) 2026 gennai (https://gennai.itch.io) — MIT License.
+
+#include "global.h"
+#include "MeshLibrary.h"
+#include "TextureLibrary.h"
+#include "Renderer.h"
+#include "Entidad.h"
+#include "camera.h"
+
+class IceLanceVFX {
+public:
+    void init(MeshLibrary& meshes, const TextureLibrary& textures);
+
+    void submitFrame(
+        Renderer& renderer,
+        const std::vector<std::vector<Entidad>>& combatFrames,
+        const std::vector<ImpactVFX>& impacts,
+        int currentFrame,
+        const Camera& camera,
+        double timeSeconds) const;
+
+private:
+    void submitFlightAndTrails(
+        Renderer& renderer,
+        const std::vector<std::vector<Entidad>>& combatFrames,
+        int currentFrame,
+        const glm::vec3& camPos,
+        const glm::vec3& camRight,
+        const glm::vec3& camUp,
+        const glm::vec3& camForward,
+        double timeSeconds) const;
+
+    void submitImpacts(
+        Renderer& renderer,
+        const std::vector<ImpactVFX>& impacts,
+        int currentFrame,
+        const glm::vec3& camPos,
+        const glm::vec3& camRight,
+        const glm::vec3& camUp,
+        const glm::vec3& camForward,
+        double timeSeconds) const;
+
+    void submitSingleImpact(
+        Renderer& renderer,
+        const ImpactVFX& impact,
+        float age,
+        bool isBounceOnly,
+        const glm::vec3& camPos,
+        const glm::vec3& camRight,
+        const glm::vec3& camUp,
+        const glm::vec3& camForward,
+        double timeSeconds) const;
+
+    void submitFireCastAndFlight(
+        Renderer& renderer,
+        const std::vector<std::vector<Entidad>>& combatFrames,
+        int currentFrame,
+        const glm::vec3& camPos,
+        const glm::vec3& camRight,
+        const glm::vec3& camUp,
+        const glm::vec3& camForward,
+        double timeSeconds) const;
+
+    void submitFireImpact(
+        Renderer& renderer,
+        const ImpactVFX& impact,
+        float age,
+        bool isBounceOnly,
+        const glm::vec3& camPos,
+        const glm::vec3& camRight,
+        const glm::vec3& camUp,
+        const glm::vec3& camForward) const;
+
+    MeshId m_lanceBodyMesh   = INVALID_MESH;
+    MeshId m_crownSpikeMesh  = INVALID_MESH;
+    MeshId m_shardBoxMesh    = INVALID_MESH;
+    MeshId m_shardWedgeMesh  = INVALID_MESH;
+    MeshId m_frostQuadMesh   = INVALID_MESH;
+    MeshId m_mistQuadMesh    = INVALID_MESH;
+    MeshId m_sparkleQuadMesh = INVALID_MESH;
+    MeshId m_fireDecalMesh   = INVALID_MESH;
+    MeshId m_fireSmokeMesh   = INVALID_MESH;
+    MeshId m_fireOrbMesh     = INVALID_MESH;
+    MeshId m_fireFlameMesh   = INVALID_MESH;
+    MeshId m_fireFlashMesh   = INVALID_MESH;
+    GLuint m_whiteTexture    = 0;
+};

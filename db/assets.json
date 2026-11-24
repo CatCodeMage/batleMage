@@ -67,6 +67,21 @@
   "fireball_14": {
     "path": "./posibleProyecto/assets/fireball_vfx/fireball_14.obj"
   },
+  "fireball_15": {
+    "path": "./posibleProyecto/assets/fireball_vfx/fireball_15.obj"
+  },
+  "fireball_16": {
+    "path": "./posibleProyecto/assets/fireball_vfx/fireball_16.obj"
+  },
+  "fireball_17": {
+    "path": "./posibleProyecto/assets/fireball_vfx/fireball_17.obj"
+  },
+  "fireball_18": {
+    "path": "./posibleProyecto/assets/fireball_vfx/fireball_18.obj"
+  },
+  "fireball_19": {
+    "path": "./posibleProyecto/assets/fireball_vfx/fireball_19.obj"
+  },
   "hit": {
     "path": "./posibleProyecto/assets/hit.obj",
     "hitbox": "sphere"

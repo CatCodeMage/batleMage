@@ -50,6 +50,7 @@ private:
     void dispararVaritas();
     void aplicarSuelo();
     void aplicarImpactos();
+    void recordImpactVFX(const std::string& type, const glm::vec3& position, const glm::vec3& normal, float duration = 1.9f);
     void countDownHitEffects();
     void recordFrame();
 
@@ -72,4 +73,5 @@ private:
     int m_tick = 0;
 
     nlohmann::json m_replayFrames = nlohmann::json::array();
+    nlohmann::json m_replayImpacts = nlohmann::json::array();
 };

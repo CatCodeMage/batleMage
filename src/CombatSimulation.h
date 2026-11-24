@@ -45,6 +45,7 @@ private:
 
     void applySpellHits();
     bool tryHitAnyPlayer(Hechizo& spell);
+    void recordImpactVFX(const std::string& type, const glm::vec3& position, const glm::vec3& normal, float duration = 1.9f);
     size_t countAlivePlayers() const;
 
     void countDownHitEffects();
@@ -68,5 +69,7 @@ private:
     int m_tick = 0;
 
     nlohmann::json m_replayFrames =
+        nlohmann::json::array();
+    nlohmann::json m_replayImpacts =
         nlohmann::json::array();
 };

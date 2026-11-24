@@ -8,6 +8,7 @@ void simulationData::changeLights(std::vector<SceneLight>& newLights) {
 void simulationData::init(GLFWwindow* window) {
 	textures.init();
 	loadAssetManifest(dataPath("db/assets.json"), libMesh, libModel, textures);
+	iceLanceVfx.init(libMesh, textures);
 
 	map.load(dataPath("db/map.json"), libModel);
 
@@ -20,7 +21,7 @@ void simulationData::init(GLFWwindow* window) {
 	shadows.procesInit();
 	keysInput.init(window);
 
-	framesInfo.combat = generateCombat(libModel, framesInfo.animations);
+	framesInfo.combat = generateCombat(libModel, framesInfo.animations, &framesInfo.impacts);
 	framesInfo.frame = 0;
 	framesInfo.lessFrames = 0;
 }
@@ -59,6 +60,7 @@ void simulationData::procesMainBodyLoopRealTime(GLFWwindow* window, SystemInfo& 
 	submitEntidades(renderer, libModel, framesInfo.combat[framesInfo.frame], framesInfo.animations, replaySeconds);
 
 	renderer.submitLights(lights, time);
+	iceLanceVfx.submitFrame(renderer, framesInfo.combat, framesInfo.impacts, framesInfo.frame, viewCamera, replaySeconds);
 
 	//renderizar sombras
 	shadows.render(lights, [&]() { renderer.drawShadowGeometry(libMesh);});

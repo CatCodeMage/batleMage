@@ -3,7 +3,7 @@
 Camera::Camera() {
 	w_pos = glm::vec3(0.f, 2.f, 6.f);
 
-	w_yaw = -90.f; 
+	w_yaw = -90.f;
 	w_pitch = -15.f;
 
 	this->updateView();

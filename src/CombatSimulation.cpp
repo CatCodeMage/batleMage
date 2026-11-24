@@ -3,7 +3,7 @@
 
 // Nombres de db/entities.json: generateCombat los usa para saber que modelo dibujar
 constexpr const char* REPLAY_HIT_ENTITY = "hit";
-constexpr const char* REPLAY_FORMAT_VERSION = "1.7";   // la de combate_chorras.json
+constexpr const char* REPLAY_FORMAT_VERSION = "1.8";   // los proyectiles incluyen su edad visual
 
 // constantes para contar los frames en que esta en estado "hit"
 constexpr float HIT_EFFECT_SECONDS = 0.3f;
@@ -97,6 +97,15 @@ static float yawOf(
     );
 }
 
+static float pitchOf(
+    const Vector3& direction)
+{
+    const float horiz = std::sqrt(direction.x * direction.x + direction.z * direction.z);
+    if (horiz < 0.0001f && std::abs(direction.y) < 0.0001f)
+        return 0.0f;
+    return std::atan2(-direction.y, horiz);
+}
+
 
 // [[x, y, z], [giroX, giroY, giroZ], "entidad"]
 static json replayEntity(
@@ -113,6 +122,29 @@ static json replayEntity(
 
         json::array({
             0.0f,
+            yaw,
+            0.0f
+        }),
+
+        entityName
+        });
+}
+
+static json replaySpellEntity(
+    const Vector3& position,
+    float pitch,
+    float yaw,
+    const char* entityName)
+{
+    return json::array({
+        json::array({
+            position.x,
+            position.y,
+            position.z
+        }),
+
+        json::array({
+            pitch,
             yaw,
             0.0f
         }),
@@ -335,9 +367,42 @@ void CombatSimulation::applySpellHits()
             m_collisionManager.getGroundCollisionInfo(spellCollider, GROUND_HEIGHT);
         if (info.collision)
         {
+            const bool wasApproaching = glm::dot(spell->getVelocityVector(), info.normal) < 0.0f;
+            const glm::vec3 hitPos = spell->getPosition() + info.normal * (info.penetration - SPELL_HIT_RADIUS);
+            const std::string spellName = spell->getName();
+
             m_spells.procesarChoqueSuperficie(spell.get(), info.normal, info.penetration);
+
+            if (spellName == "ice_lance" || spellName == "fire_ball")
+            {
+                const float fullDuration = (spellName == "fire_ball") ? 3.18f : 1.9f;
+                if (!spell->IsActive())
+                {
+                    recordImpactVFX(spellName, hitPos, info.normal, fullDuration);
+                }
+                else if (wasApproaching)
+                {
+                    recordImpactVFX(spellName + "_bounce", hitPos, info.normal, 0.45f);
+                }
+            }
         }
     }
+}
+
+
+void CombatSimulation::recordImpactVFX(
+    const std::string& type,
+    const glm::vec3& position,
+    const glm::vec3& normal,
+    float duration)
+{
+    m_replayImpacts.push_back({
+        { "type", type },
+        { "position", json::array({ position.x, position.y, position.z }) },
+        { "normal", json::array({ normal.x, normal.y, normal.z }) },
+        { "startTick", m_tick },
+        { "duration", duration }
+    });
 }
 
 
@@ -376,6 +441,19 @@ bool CombatSimulation::tryHitAnyPlayer(
             // con el modelo "hit"
             m_hitFrames[playerIndex] =
                 HIT_EFFECT_FRAMES;
+
+            if (spell.getName() == "ice_lance" || spell.getName() == "fire_ball")
+            {
+                const glm::vec3 delta = spell.getPosition() - player.getPosicion();
+                const glm::vec3 horiz(delta.x, 0.0f, delta.z);
+                const glm::vec3 dir = spell.getDirection();
+                const glm::vec3 hitNormal = glm::length(horiz) > 0.0001f
+                    ? glm::normalize(horiz)
+                    : (glm::length(dir) > 0.0001f ? -dir : glm::vec3(0.0f, 1.0f, 0.0f));
+                const glm::vec3 hitPos = player.getPosicion() + glm::vec3(0.0f, delta.y, 0.0f) + hitNormal * player.getRadio();
+                const float fullDuration = (spell.getName() == "fire_ball") ? 3.18f : 1.9f;
+                recordImpactVFX(spell.getName(), hitPos, hitNormal, fullDuration);
+            }
 
             m_spells.destroySpell(
                 &spell
@@ -503,15 +581,13 @@ void CombatSimulation::recordFrame()
             continue;
         }
 
-        frame.push_back(
-            replayEntity(
-                spell->getPosition(),
-                yawOf(
-                    spell->getDirection()
-                ),
-                spell->getName().c_str()
-            )
-        );
+        const Vector3 dir = spell->getDirection();
+        json sample = replaySpellEntity(spell->getPosition(), pitchOf(dir), yawOf(dir), spell->getName().c_str());
+        // El primer estado visible se graba despues de actualizar el tick de lanzamiento.
+        const double ageTicks = std::round(static_cast<double>(spell->getCurrentLifeTime()) * TICKS_PER_SECOND);
+        sample.push_back((std::max)(0.0, ageTicks - 1.0) / TICKS_PER_SECOND);
+        sample.push_back(spell->getIndicePool());
+        frame.push_back(std::move(sample));
     }
 
     m_replayFrames.push_back(
@@ -593,6 +669,11 @@ void CombatSimulation::writeReplay(
         {
             "frames",
             m_replayFrames
+        },
+
+        {
+            "impacts",
+            m_replayImpacts
         }
     };
 

@@ -28,6 +28,7 @@ public:
     void drawShadowGeometry(const MeshLibrary& lib) const;
     void submitLights(std::vector<SceneLight>& lights, const float time);
     void submitLight(const Light& light);
+    void setCameraPos(const glm::vec3& camPos) { w_camPos = camPos; }
 private:
     void getActualViewProj(const glm::mat4& viewProj);
     void flushLigth();
@@ -38,5 +39,6 @@ private:
         glm::vec3 emission = glm::vec3(0.0f);
     };
     std::vector<BatchMaterial> w_batchMaterials;
-    GLint w_locViewProj, w_locNumLights, w_locLights, w_locAlbedo, w_locEmission;
+    glm::vec3 w_camPos = glm::vec3(0.0f, 2.0f, 6.0f);
+    GLint w_locViewProj, w_locNumLights, w_locLights, w_locAlbedo, w_locEmission, w_locCamPos;
 };

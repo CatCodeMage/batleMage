@@ -14,4 +14,5 @@ std::vector<std::string> getPlayers();
 void writeCombat();
 
 std::vector<std::vector<Entidad>> generateCombat(const ModelLibrary& modelLib,
-    std::vector<ModelAnimation>& animations);
+    std::vector<ModelAnimation>& animations,
+    std::vector<ImpactVFX>* impacts = nullptr);

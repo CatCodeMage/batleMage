@@ -134,6 +134,7 @@ static std::unordered_map<std::string, EntityInfo> loadEntityInfo(const ModelLib
         if (config != definition.end()) {
             ModelAnimation animation;
             animation.fps = config->at("fps").get<double>();
+            animation.spinRadiansPerSecond = glm::radians(config->value("spinDegreesPerSecond", 0.0));
             animation.loop = config->value("loop", true);
             const json& assets = config->at("assets");
             if (!std::isfinite(animation.fps) || animation.fps <= 0.0 || !assets.is_array() || assets.empty())
@@ -151,7 +152,8 @@ static std::unordered_map<std::string, EntityInfo> loadEntityInfo(const ModelLib
 }
 
 std::vector<std::vector<Entidad>> generateCombat(const ModelLibrary& modelLib,
-    std::vector<ModelAnimation>& animations) {
+    std::vector<ModelAnimation>& animations,
+    std::vector<ImpactVFX>* impacts) {
     std::ifstream simulationFile(COMBAT_PATH);
     if (!simulationFile) throw std::runtime_error("no se puede abrir " + COMBAT_PATH);
     const json simulationData = json::parse(simulationFile);
@@ -173,11 +175,39 @@ std::vector<std::vector<Entidad>> generateCombat(const ModelLibrary& modelLib,
             Entidad& entity = entities.emplace_back();
             entity.model = info->second.model;
             entity.animation = info->second.animation;
+            entity.isIceLance = (name == "ice_lance");
+            entity.isFireBall = (name == "fire_ball");
+            if (sample.size() >= 4)
+                entity.animationAge = sample.at(3).get<double>();
+            if (sample.size() >= 5 && sample.at(4).is_number_integer())
+                entity.poolIndex = sample.at(4).get<int>();
             entity.transform.scale = info->second.scale;
             entity.transform.pos = readVec3(sample.at(0));
             entity.transform.rot = readVec3(sample.at(1));
         }
     }
+
+    if (impacts != nullptr) {
+        impacts->clear();
+        const auto itImpacts = simulationData.find("impacts");
+        if (itImpacts != simulationData.end() && itImpacts->is_array()) {
+            impacts->reserve(itImpacts->size());
+            for (const json& item : *itImpacts) {
+                ImpactVFX vfx;
+                vfx.type = item.value("type", std::string("ice_lance"));
+                vfx.position = readVec3(item.at("position"));
+                vfx.normal = readVec3(item.at("normal"));
+                if (glm::length(vfx.normal) > 0.0001f)
+                    vfx.normal = glm::normalize(vfx.normal);
+                else
+                    vfx.normal = glm::vec3(0.0f, 1.0f, 0.0f);
+                vfx.startTick = item.value("startTick", 0);
+                vfx.duration = item.value("duration", 1.9f);
+                impacts->push_back(std::move(vfx));
+            }
+        }
+    }
+
     animations = std::move(configuredAnimations);
     return combatSequence;
 }

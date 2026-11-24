@@ -15,12 +15,14 @@
 #include "MapData.h"
 #include "webPage.h"
 #include "jsonManager.h"
+#include "IceLanceVFX.h"
 #include "simulationData.h"
 
 struct FramesData
 {
     std::vector<std::vector <Entidad>> combat;
     std::vector<ModelAnimation> animations;
+    std::vector<ImpactVFX> impacts;
 
     int frame;
     int lessFrames;
@@ -52,5 +54,6 @@ struct simulationData
     ShadowSystem shadows;
     Input keysInput;
     FramesData framesInfo;
+    IceLanceVFX iceLanceVfx;
 };
 

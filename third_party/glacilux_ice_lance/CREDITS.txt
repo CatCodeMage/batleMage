@@ -1,0 +1,20 @@
+Ice & Frost VFX for Godot 4 (code name GLACILUX Lite) - credits and provenance
+
+Original Author:
+  Copyright (c) 2026 gennai (https://gennai.itch.io)
+  Licensed under the MIT License (see LICENSE.txt).
+
+BattleMage OpenGL 3.3 C++ / GLSL Adaptation:
+  Adapted from GLACILUX Lite v1.0.8 (glacilux_meshes.gd, glacilux_projectile_3d.gd,
+  glacilux_impact_3d.gd, glacilux_noise.gdshaderinc, glacilux_spike.gdshader,
+  glacilux_trail.gdshader, glacilux_shards.gdshader, glacilux_ground.gdshader,
+  glacilux_mist.gdshader, glacilux_sparkle.gdshader) into BattleMage's OpenGL 3.3
+  instanced renderer (posibleProyecto/IceLanceVFX.h, posibleProyecto/IceLanceVFX.cpp,
+  posibleProyecto/shaders.cpp).
+
+Original Pack Notes:
+- All GDScript code and shaders in the original pack were written specifically for it.
+  Techniques are standard, first-principles graphics methods: integer hashing, value
+  noise, fBm, ridged noise and voronoi written from scratch in the shaders; camera-facing
+  billboards, prisms and convex chunks; analytic ballistic paths with bounces for the shards.
+- No external textures, image files or imported meshes are used by the effect.
