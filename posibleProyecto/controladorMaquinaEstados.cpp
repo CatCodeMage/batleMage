@@ -89,6 +89,10 @@ void ControladorMaquinaEstados::actualizar(Personaje& personaje, float deltaTime
 
 void ControladorMaquinaEstados::evaluarTransiciones(const Personaje& personaje, float distanciaAlObjetivo) 
 {
+    if (personaje.yaTieneEstado(EstadoPersonaje::CASTEANDO))
+    {
+        return;
+    }
     m_hechizosLanzables.clear();
     std::vector<InfoHechizo> hechizosConMana;
     float manaAct = personaje.getMana();
@@ -166,34 +170,32 @@ void ControladorMaquinaEstados::ejecutarEstado(Personaje& personaje,const glm::v
 
         case EstadoIA::ATACANDO:
         {
-            personaje.borrarEstado(EstadoPersonaje::VOLANDO);
-            apuntarHacia(personaje, direccionHaciaObjetivo);
-
-            constexpr float DISTANCIA_COMBATE_PREFERIDA = 12.0f;   // mayor que el safeDistance maximo (9): no se pone a huir
-            if (distancia > DISTANCIA_COMBATE_PREFERIDA)
-                acercarseAlObjetivo(personaje, direccionHaciaObjetivo, deltaTime);   // se acerca mientras lanza: entran mas hechizos en alcance
-
-            rodearObjetivo(personaje, direccionHaciaObjetivo, deltaTime);
-
-            if (m_tiempoDesdeUltAtaque >= m_cooldownAtaque)
+            if (personaje.yaTieneEstado(EstadoPersonaje::CASTEANDO))
             {
-                personaje.borrarEstado(EstadoPersonaje::IDLE);
-
-                //ELEGIMOS UNO RANDOM DE LOS LANZABLES DE MOMENTO
-                int indiceRandom = std::rand() % m_hechizosLanzables.size();
-                InfoHechizo hechizoElegido = m_hechizosLanzables[indiceRandom];
-                personaje.disminuirMana(hechizoElegido.costeMana);
-                apuntarHacia(personaje, calcularDireccionAnticipada(personaje, hechizoElegido.velocidad));
-                personaje.lanzarHechizo(hechizoElegido.id);
-
-                m_cooldownAtaque = hechizoElegido.cooldown;
-                m_tiempoDesdeUltAtaque = 0.0f;
-            } else {
                 if (m_tiempoDesdeUltAtaque > 0.3f) 
                 {
                     personaje.borrarEstado(EstadoPersonaje::CASTEANDO);
                     personaje.anadirEstado(EstadoPersonaje::IDLE);
                 }
+                break;
+            }
+            personaje.borrarEstado(EstadoPersonaje::VOLANDO);
+            apuntarHacia(personaje, direccionHaciaObjetivo);
+            constexpr float DISTANCIA_COMBATE_PREFERIDA = 12.0f;   
+            if (distancia > DISTANCIA_COMBATE_PREFERIDA)
+                acercarseAlObjetivo(personaje, direccionHaciaObjetivo, deltaTime);  
+            rodearObjetivo(personaje, direccionHaciaObjetivo, deltaTime);
+            if (m_tiempoDesdeUltAtaque >= m_cooldownAtaque)
+            {
+                personaje.borrarEstado(EstadoPersonaje::IDLE);
+                int indiceRandom = std::rand() % m_hechizosLanzables.size();
+                InfoHechizo hechizoElegido = m_hechizosLanzables[indiceRandom];
+                personaje.disminuirMana(hechizoElegido.costeMana);
+                
+                apuntarHacia(personaje, calcularDireccionAnticipada(personaje, hechizoElegido.velocidad));
+                personaje.lanzarHechizo(hechizoElegido.id);
+                m_cooldownAtaque = hechizoElegido.cooldown;
+                m_tiempoDesdeUltAtaque = 0.0f;
             }
             break;
         }

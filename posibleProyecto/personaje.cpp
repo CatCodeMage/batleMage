@@ -111,8 +111,7 @@ void Personaje::moverse(const glm::vec3& desplazamiento)
 
 void Personaje::rotar(const glm::vec3& rotacion)
 {
-    if (yaTieneEstado(EstadoPersonaje::MUERTO) || yaTieneEstado(EstadoPersonaje::CONGELADO)) return;
-
+    if (yaTieneEstado(EstadoPersonaje::MUERTO) || yaTieneEstado(EstadoPersonaje::CONGELADO) || yaTieneEstado(EstadoPersonaje::CASTEANDO)) return;
     m_rotacion  = m_rotacion + rotacion;
 }
 
@@ -256,8 +255,18 @@ float Personaje::getMana() const
 float Personaje::getRadio() const { return m_radio; }
 
 glm::vec3 Personaje::getPosicion() const { return m_posicion; }
-glm::vec3 Personaje::getRotacion() const { return m_rotacion; }
-glm::vec3 Personaje::getDireccion() const { return m_direccion; }
+
+void Personaje::setRotacion(const glm::vec3& nuevaRotacion) 
+{ 
+    if (yaTieneEstado(EstadoPersonaje::MUERTO) || yaTieneEstado(EstadoPersonaje::CONGELADO) || yaTieneEstado(EstadoPersonaje::CASTEANDO)) return;
+    m_rotacion = nuevaRotacion; 
+}
+
+void Personaje::setDireccion(const glm::vec3& nuevaDireccion) 
+{ 
+    if (yaTieneEstado(EstadoPersonaje::MUERTO) || yaTieneEstado(EstadoPersonaje::CONGELADO) || yaTieneEstado(EstadoPersonaje::CASTEANDO)) return;
+    m_direccion = nuevaDireccion; 
+}
 
 void Personaje::setPosicion(const glm::vec3& nuevaPosicion) { m_posicion = nuevaPosicion; }
 void Personaje::setRotacion(const glm::vec3& nuevaRotacion) { m_rotacion = nuevaRotacion; }
