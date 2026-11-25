@@ -108,6 +108,7 @@ void Hechizo::reset() {
 
     // NUEVO: limpiamos comportamientos y lanzador (indicePool NO se toca)
     idLanzador = -1;
+    idEntidad = INVALID_ENTITY;   // el id era de ese lanzamiento: al volver al pool deja de valer
     etiquetas = ETQ_NINGUNA;
     rebotesRestantes = 0;
 }
