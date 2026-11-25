@@ -2,6 +2,10 @@
 #include <imgui.h>
 #include "CombatPanel.h"
 #include "CameraPathPanel.h"
+#include "sistema_particulas/ParticleEffect.h"
+#include "sistema_particulas/ParticleTestScene.h"
+
+#include <utility>
 
 void simulationData::changeLights(std::vector<SceneLight>& newLights) {
 	lights = newLights;
@@ -36,12 +40,23 @@ void simulationData::init(GLFWwindow* window) {
 	keysInput.init(window);
 
 	framesInfo = generateCombat(libModel, dataPath("db/combate_generado.json"));
+
+	constexpr auto PARTICLE_TEST_SCENARIO = bm::particles::ParticleTestScene::Scenario::Smoke;
+	const auto frameCount = framesInfo.combat.size();
+	if (frameCount > 0 && std::in_range<int>(frameCount) && framesInfo.ticksPerSecond > 0) {
+		particleModule.initialize(bm::particles::presets::makeCatalog());
+		particleModule.setFrames(bm::particles::ParticleTestScene::makeFrames(
+			PARTICLE_TEST_SCENARIO, static_cast<int>(frameCount), framesInfo.ticksPerSecond),
+			framesInfo.ticksPerSecond);
+	}
+
 	visualInterface.init(window);
 }
 
 simulationData::~simulationData() {
 	visualInterface.destroy();
 	glUseProgram(0);
+	particleModule.shutdown();
 	skinnedRenderer.destroy();
 	animators.clear();
 	shadows.destroy();
@@ -158,6 +173,10 @@ void simulationData::procesMainBodyLoopRealTime(GLFWwindow* window, SystemInfo& 
 	renderer.flush(libMesh, viewProjection);
 	skinnedRenderer.drawLighting(viewProjection);
 	skinnedRenderer.clear();
+
+	// El tick del combate fija el estado de las particulas, incluso en pausa.
+	particleModule.seek(framesInfo.frame);
+	particleModule.render(viewCamera.get_view(), viewCamera.get_proj());
 
 	// Pintar la UI
 	if (arePanelsVisible) {

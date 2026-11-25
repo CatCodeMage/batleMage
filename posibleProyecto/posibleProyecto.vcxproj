@@ -219,6 +219,12 @@
     <ClCompile Include="skeleton_animation\Animator.cpp" />
     <ClCompile Include="skeleton_animation\SkinnedMesh.cpp" />
     <ClCompile Include="skeleton_animation\SkinnedRenderer.cpp" />
+    <ClCompile Include="sistema_particulas\ParticleEffect.cpp" />
+    <ClCompile Include="sistema_particulas\ParticleModule.cpp" />
+    <ClCompile Include="sistema_particulas\ParticlePlayback.cpp" />
+    <ClCompile Include="sistema_particulas\ParticleRendererGL.cpp" />
+    <ClCompile Include="sistema_particulas\ParticleSystem.cpp" />
+    <ClCompile Include="sistema_particulas\ParticleTestScene.cpp" />
     <ClCompile Include="UserInterface.cpp" />
     <ClCompile Include="webPage.cpp" />
     <ClCompile Include="varita.cpp" />
@@ -256,6 +262,14 @@
     <ClInclude Include="skeleton_animation\Animator.h" />
     <ClInclude Include="skeleton_animation\SkinnedMesh.h" />
     <ClInclude Include="skeleton_animation\SkinnedRenderer.h" />
+    <ClInclude Include="sistema_particulas\Particle.h" />
+    <ClInclude Include="sistema_particulas\ParticleEffect.h" />
+    <ClInclude Include="sistema_particulas\ParticleFrame.h" />
+    <ClInclude Include="sistema_particulas\ParticleModule.h" />
+    <ClInclude Include="sistema_particulas\ParticlePlayback.h" />
+    <ClInclude Include="sistema_particulas\ParticleRendererGL.h" />
+    <ClInclude Include="sistema_particulas\ParticleSystem.h" />
+    <ClInclude Include="sistema_particulas\ParticleTestScene.h" />
     <ClInclude Include="UserInterface.h" />
     <ClInclude Include="varita.h" />
     <ClInclude Include="webPage.h" />

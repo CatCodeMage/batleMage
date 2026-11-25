@@ -18,6 +18,7 @@
 #include "UserInterface.h"
 #include "CameraPath.h"
 #include "Mp4Exporter.h"
+#include "sistema_particulas/ParticleModule.h"
 
 enum class InteractionMode { Editing, ControllingCamera };
 
@@ -75,6 +76,7 @@ private:
     void submitEntities(const std::vector<Entidad>& entities);
 
     bm::anim::SkinnedRenderer skinnedRenderer;
+    bm::particles::ParticleModule particleModule;
     std::unordered_map<int, ReplayAnimator> animators;
 };
 
