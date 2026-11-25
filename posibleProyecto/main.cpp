@@ -211,10 +211,13 @@ void simulateCombatToReplay() {
 
 int main(int argc, char* argv[])
 {
+    /*
     if (argc > 1 && std::string_view(argv[1]) == "--combate") {
         simulateCombatToReplay<CombatSimulation>();
     } else {
         simulateCombatToReplay<PruebaHechizos>();
     }
+    */
+   
     return createSimulation();
 }
