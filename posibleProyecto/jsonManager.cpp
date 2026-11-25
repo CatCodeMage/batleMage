@@ -131,19 +131,29 @@ FramesData generateCombat(const ModelLibrary& modelLib, const std::filesystem::p
 	for (const auto& frame : frames) {
 		std::vector<Entidad> entities;
 		entities.reserve(frame.size());
-		std::unordered_set<int> characterIds;
+		std::unordered_set<EntityId> entityIds;
 		for (const auto& record : frame) {
 			Entidad entity;
 			entity.transform.pos = replayVector(record.at(0));
 			entity.transform.rot = replayVector(record.at(1));
 			const json* definition = nullptr;
 
-			if (record.size() > 3 && record[3].is_object()) {
-				const auto& character = record[3];
-				entity.characterId = character.at("id").get<int>();
+			// El cuarto elemento puede contener solo el ID de un hechizo.
+			const json* extra = (record.size() > 3 && record[3].is_object()) ? &record[3] : nullptr;
+			if (extra) {
+				entity.id = extra->value("id", INVALID_ENTITY);
+				if (entity.id < INVALID_ENTITY ||
+					(entity.id != INVALID_ENTITY && !entityIds.insert(entity.id).second)) {
+					throw std::runtime_error("id de entidad invalido o repetido en un frame del replay");
+				}
+			}
+
+			if (extra && extra->contains("animation")) {
+				const auto& character = *extra;
+				entity.characterId = entity.id;
 				entity.animation = character.at("animation").get<std::string>();
 				entity.animationStartFrame = character.at("animationStartFrame").get<int>();
-				if (entity.characterId <= 0 || !characterIds.insert(entity.characterId).second ||
+				if (entity.characterId == INVALID_ENTITY ||
 					entity.animationStartFrame < 0 || size_t(entity.animationStartFrame) > result.combat.size()) {
 					throw std::runtime_error("id o inicio de animacion invalido en el replay");
 				}

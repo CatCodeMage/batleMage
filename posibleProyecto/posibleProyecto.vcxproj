@@ -197,6 +197,7 @@
     <ClInclude Include="CombatPanel.h" />
     <ClInclude Include="controladorMaquinaEstados.h" />
     <ClInclude Include="controladorPersonaje.h" />
+    <ClInclude Include="GeneradorIds.h" />
     <ClInclude Include="lanzadorHechizos.h" />
     <ClInclude Include="Material.h" />
     <ClInclude Include="MaterialLibrary.h" />

@@ -19,7 +19,8 @@ struct hechizosTemplate {
 class HechizosGestor {
 public:
     // Constructor: Pre-crea un número de hechizos en memoria (Pool)
-    HechizosGestor(size_t poolSize);
+    // 'ids' es del simulador: el gestor solo lo usa para dar id a lo que crea
+    HechizosGestor(size_t poolSize, GeneradorIds& ids);
 
     // para registrar los datos del un hechizo 
     void registrarHechizo(int id, const std::string& name, ElementType element, float cost,
@@ -73,4 +74,6 @@ private:
 
     // NUEVO: todas las cartas (proyectiles, modificadores, multicast). Se crean solo al cargar.
     std::unordered_map<int, std::unique_ptr<Carta>> cartas;
+
+    GeneradorIds& m_ids;   // NO es suyo: pertenece al simulador
 };

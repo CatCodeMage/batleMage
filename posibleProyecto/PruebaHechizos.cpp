@@ -47,7 +47,7 @@ static json replayEntity(const glm::vec3& pos, float yaw, const char* entityName
                          entityName });
 }
 
-PruebaHechizos::PruebaHechizos() : m_spells(POOL_HECHIZOS) {}
+PruebaHechizos::PruebaHechizos() : m_spells(POOL_HECHIZOS, m_ids) {}
 
 int PruebaHechizos::idPorNombre(const std::string& nombre) const {
     for (const auto& [id, plantilla] : m_spells.getCatalogoHechizos())
@@ -91,12 +91,11 @@ void PruebaHechizos::crearMagos(const std::filesystem::path& combatConfigFile) {
     if (!in) throw std::runtime_error("no se puede abrir " + combatConfigFile.string());
     const json config = json::parse(in);
 
-    int nextId = 1;
     for (const json& player : config.at("players")) {
         // Mismo tipo y altura que combat.json, pero cerca uno del otro (en el eje X) para que los hechizos lleguen
         const float altura = player.at("position").at(1).get<float>();
-        const float x = (nextId == 1 ? -0.5f : 0.5f) * DISTANCIA_MAGOS;
-        m_players.push_back(std::make_unique<Personaje>(nextId++, glm::vec3(x, altura, 0.0f), 1.0f, &m_spells));
+        const float x = (m_players.empty() ? -0.5f : 0.5f) * DISTANCIA_MAGOS;
+        m_players.push_back(std::make_unique<Personaje>(m_ids.nuevo(), glm::vec3(x, altura, 0.0f), 1.0f, &m_spells));
         const std::string tipo = player.value("type", "sphere");
         if (!m_players.back()->cargarDesdeJson(dataPath("db/players.json").string(), tipo))
             throw std::runtime_error("tipo de mago desconocido \"" + tipo + "\"");
