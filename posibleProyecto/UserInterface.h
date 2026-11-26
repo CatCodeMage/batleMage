@@ -1,6 +1,7 @@
 #pragma once
 #include "global.h"
 #include "SceneViewport.h"
+#include <vector>
 
 // Capa propia sobre Dear ImGui: el resto del programa no toca los backends
 class UserInterface {
@@ -14,6 +15,8 @@ public:
 	bool wasSceneClicked() const;
 	void drawCameraModeHint();
 	SceneViewport getCentralArea(int framebufferWidth, int framebufferHeight) const;   // el hueco que dejan los paneles
+	int findViewUnderMouse(const std::vector<SceneViewport>& views, int framebufferHeight) const;   // NO_VIEW si ninguna
+	bool wasSceneDoubleClicked() const;
 private:
 	unsigned int w_dockspaceId = 0;   // ImGuiID: asi esta cabecera no depende de ImGui
 };

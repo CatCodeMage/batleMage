@@ -18,6 +18,9 @@
 #include "UserInterface.h"
 #include "CameraPath.h"
 #include "SceneMosaic.h"
+#include "SceneCamera.h"
+#include <array>
+#include "SceneCameraPanel.h"
 
 enum class InteractionMode { Editing, ControllingCamera };
 
@@ -57,6 +60,10 @@ struct simulationData
     CameraPath cameraPath;
     CameraPathMode cameraPathMode = CameraPathMode::Recording;
     SceneMosaic sceneMosaic;
+    std::array<SceneCamera, SceneMosaic::MAX_VIEWS> sceneCameras;
+    std::vector<int> characterIds;   // los combatientes del replay, para elegir a quien sigue una camara
+    int selectedViewIndex = 0;
+    int freeCameraView = 0;          // la vista que mueve viewCamera (la ultima libre controlada)
 private:
     struct ReplayAnimator {
         ModelId model;
@@ -67,11 +74,19 @@ private:
     };
 
     void prepareLightingPrograms();
-    void drawSceneViews(const SceneViewport& sceneArea);
-    void drawSceneInViewport(const SceneViewport& viewport, const glm::mat4& view);
+    void drawSceneViews(const std::vector<SceneViewport>& views);
+    void drawSceneInViewport(const SceneViewport& viewport, const glm::mat4& view, float fieldOfViewDegrees);
 
     const bm::anim::Animator& poseFor(const Entidad& entity, const SkinnedModel& model);
     void submitEntities(const std::vector<Entidad>& entities);
+
+    void createDefaultSceneCameras();
+
+    std::vector<SceneViewport> currentViews(const SystemInfo& sysInfo) const;
+    void updateViewSelection(GLFWwindow* window, const std::vector<SceneViewport>& views, int framebufferHeight);
+    void startControllingCamera(GLFWwindow* window, int viewIndex);
+    void enterFullScreen(GLFWwindow* window);
+    SceneCamera cameraForView(int viewIndex) const;
 
     bm::anim::SkinnedRenderer skinnedRenderer;
     std::unordered_map<int, ReplayAnimator> animators;

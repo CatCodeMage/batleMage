@@ -9,6 +9,8 @@ struct CameraPose {   // lo minimo para reconstruir la vista; el campo de vision
 	float pitch;
 };
 
+glm::vec3 frontFromYawPitch(float yawDegrees, float pitchDegrees);   // la misma convencion que Camera
+
 class Camera
 {
 public:

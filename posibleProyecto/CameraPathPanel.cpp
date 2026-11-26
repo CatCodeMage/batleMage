@@ -1,8 +1,6 @@
-#include "CombatPanel.h"
 #include "CameraPathPanel.h"
 #include "simulationData.h"
 #include <imgui.h>
-#include <algorithm>
 
 namespace {
 	void drawModeSelector(CameraPathMode& mode) {
@@ -11,7 +9,7 @@ namespace {
 		if (ImGui::RadioButton("Resultado", mode == CameraPathMode::Playback)) mode = CameraPathMode::Playback;
 	}
 
-	void drawShotList(CameraPath& path, Camera& camera, FramesData& framesInfo) {
+	void drawShotList(CameraPath& path, SceneCamera& selectedCamera, FramesData& framesInfo) {
 		constexpr int NO_SHOT = -1;
 		int shotToRemove = NO_SHOT;
 		const std::vector<CameraShot>& shots = path.getShots();
@@ -19,11 +17,11 @@ namespace {
 		for (int shotIndex = 0; shotIndex < (int)shots.size(); ++shotIndex) {
 			const CameraShot& shot = shots[shotIndex];
 			ImGui::PushID(shotIndex);   // todas las filas tienen "Ir" y "Borrar": sin ID distinto, ImGui las confunde
-			ImGui::Text("Frame %d", shot.startFrame);
+			ImGui::Text("Frame %d  %s", shot.startFrame, sceneCameraTypeName(shot.camera.type));
 			ImGui::SameLine();
 			if (ImGui::SmallButton("Ir")) {
 				framesInfo.frame = shot.startFrame;
-				camera.setPose(shot.pose);   // en Edicion deja la camara lista para retocar esta toma
+				selectedCamera = shot.camera;   // la vista seleccionada pasa a tener este plano, para retocarlo
 			}
 			const bool isDefaultShot = shotIndex == 0;
 			if (!isDefaultShot) {
@@ -32,6 +30,7 @@ namespace {
 			}
 			ImGui::PopID();
 		}
+
 		if (shotToRemove != NO_SHOT) path.removeShot(shotToRemove);   // fuera del bucle: borrar dentro invalidaria la lista que se recorre
 	}
 
@@ -50,13 +49,13 @@ namespace {
 	}
 }
 
-void drawCameraPathPanel(CameraPathMode& mode, CameraPath& path, Camera& camera, FramesData& framesInfo, SceneMosaic& mosaic) {
+void drawCameraPathPanel(CameraPathMode& mode, CameraPath& path, SceneCamera& selectedCamera, FramesData& framesInfo, SceneMosaic& mosaic) {
 	ImGui::Begin("Camara");
 	drawMosaicControls(mosaic);
 	ImGui::Separator();
 	drawModeSelector(mode);
 	ImGui::Separator();
-	if (mode == CameraPathMode::Recording) ImGui::TextUnformatted("Espacio: guardar la camara en este frame");
-	drawShotList(path, camera, framesInfo);
+	if (mode == CameraPathMode::Recording) ImGui::TextUnformatted("Espacio: guardar la vista seleccionada en este frame");
+	drawShotList(path, selectedCamera, framesInfo);
 	ImGui::End();
 }

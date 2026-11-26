@@ -1,20 +1,20 @@
 #pragma once
 #include <vector>
-#include "camera.h"
+#include "SceneCamera.h"
 
 enum class CameraPathMode { Recording, Playback };   // Edicion / Resultado en la interfaz
 
 struct CameraShot {
 	int startFrame;
-	CameraPose pose;
+	SceneCamera camera;   // copia: si luego se retoca la vista, el plano guardado no cambia
 };
 
 class CameraPath {
 public:
-	void saveShot(int frame, const CameraPose& pose);   // si el frame ya tiene toma, la sustituye
+	void saveShot(int frame, const SceneCamera& camera);   // si el frame ya tiene plano, lo sustituye
 	void removeShot(int shotIndex);
-	CameraPose poseAtFrame(int frame) const;
+	SceneCamera cameraAtFrame(int frame) const;
 	const std::vector<CameraShot>& getShots() const { return w_shots; }
 private:
-	std::vector<CameraShot> w_shots;   // ordenadas por startFrame; la primera siempre empieza en 0
+	std::vector<CameraShot> w_shots;   // ordenados por startFrame; el primero siempre empieza en 0
 };

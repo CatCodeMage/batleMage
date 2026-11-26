@@ -40,6 +40,16 @@ float Camera::axisFromKeys(const Input& input, int positiveKey, int negativeKey)
 	return (float)input.keyDown(positiveKey) - (float)input.keyDown(negativeKey);   // -1, 0 o 1
 }
 
+glm::vec3 frontFromYawPitch(float yawDegrees, float pitchDegrees) {
+	const float yaw = glm::radians(yawDegrees);
+	const float pitch = glm::radians(pitchDegrees);
+	return glm::normalize(glm::vec3(cos(yaw) * cos(pitch), sin(pitch), sin(yaw) * cos(pitch)));
+}
+
+void Camera::updateFront() {
+	w_front = frontFromYawPitch(w_yaw, w_pitch);
+}
+
 void Camera::moveWithKeys(const Input& input, float dt) {
 	const glm::vec3 worldUp(0.f, 1.f, 0.f);
 	const glm::vec3 right = glm::normalize(glm::cross(w_front, worldUp));
@@ -49,13 +59,6 @@ void Camera::moveWithKeys(const Input& input, float dt) {
 	const float upInput = axisFromKeys(input, GLFW_KEY_E, GLFW_KEY_Q);
 
 	w_pos += (w_front * forwardInput + right * rightInput + worldUp * upInput) * speed * dt;
-}
-
-void Camera::updateFront() {
-	w_front = glm::normalize(glm::vec3(
-		cos(glm::radians(w_yaw)) * cos(glm::radians(w_pitch)),
-		sin(glm::radians(w_pitch)),
-		sin(glm::radians(w_yaw)) * cos(glm::radians(w_pitch))));
 }
 
 void Camera::updateView() {

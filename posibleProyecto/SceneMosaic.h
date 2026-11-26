@@ -12,7 +12,7 @@ public:
 	void addViews();      // 1 -> 2 -> 4 -> 6 -> 8
 	void removeViews();   // 8 -> 6 -> 4 -> 2 -> 1
 	std::vector<SceneViewport> splitArea(const SceneViewport& area) const;   // de izquierda a derecha y de arriba abajo
-
+	static constexpr int MAX_VIEWS = 8;
 private:
 	struct Layout {
 		int viewCount;

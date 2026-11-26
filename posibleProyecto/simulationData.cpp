@@ -2,15 +2,35 @@
 #include <imgui.h>
 #include "CombatPanel.h"
 #include "CameraPathPanel.h"
+#include <algorithm>
+
+namespace {
+	constexpr float VIEW_NEAR_PLANE = 0.1f;
+	constexpr float VIEW_FAR_PLANE = 300.0f;   // con 100 se cortaria el mapa visto desde lejos, deberia leerse del mapa, luego lo ajustamos
+}
+
+void simulationData::createDefaultSceneCameras() {
+	characterIds = characterIdsIn(framesInfo.combat.front());
+	const int firstCharacter = characterIds.size() > 0 ? characterIds[0] : NO_CHARACTER;
+	const int secondCharacter = characterIds.size() > 1 ? characterIds[1] : firstCharacter;
+
+	sceneCameras = {
+		makeSceneCamera(SceneCameraType::Free,         firstCharacter),
+		makeSceneCamera(SceneCameraType::Duel,         firstCharacter),
+		makeSceneCamera(SceneCameraType::FollowBehind, firstCharacter),
+		makeSceneCamera(SceneCameraType::FollowBehind, secondCharacter),
+		makeSceneCamera(SceneCameraType::FollowFront,  firstCharacter),
+		makeSceneCamera(SceneCameraType::FirstPerson,  secondCharacter),
+		makeSceneCamera(SceneCameraType::WholeMap,     firstCharacter),
+		makeSceneCamera(SceneCameraType::Overhead,     firstCharacter),
+	};
+}
 
 void simulationData::changeLights(std::vector<SceneLight>& newLights) {
 	lights = newLights;
 }
 
 void simulationData::init(GLFWwindow* window) {
-	constexpr int FIRST_FRAME = 0;
-	cameraPath.saveShot(FIRST_FRAME, viewCamera.getPose());   // toma por defecto: la camara inicial
-
 	textures.init();
 	skinnedRenderer.initialize();
 	loadAssetManifest(dataPath("db/assets.json"), libMesh, libModel, textures, skinnedRenderer.maxBones());
@@ -27,7 +47,11 @@ void simulationData::init(GLFWwindow* window) {
 	keysInput.init(window);
 
 	framesInfo = generateCombat(libModel, dataPath("db/combate_generado.json"));
+	createDefaultSceneCameras();
 	visualInterface.init(window);
+
+	constexpr int FIRST_FRAME = 0;
+	cameraPath.saveShot(FIRST_FRAME, makeSceneCamera(SceneCameraType::WholeMap, NO_CHARACTER));   // plano por defecto: el mapa entero
 }
 
 simulationData::~simulationData() {
@@ -97,10 +121,8 @@ void simulationData::submitEntities(const std::vector<Entidad>& entities) {
 void simulationData::updateCamera(const SystemInfo& sysInfo) {
 	const bool isRecording = cameraPathMode == CameraPathMode::Recording;
 	const bool isControllingCamera = interactionMode == InteractionMode::ControllingCamera;
-	const bool isFreeToMove = isRecording && isControllingCamera;
-
-	if (!isRecording) viewCamera.setPose(cameraPath.poseAtFrame(framesInfo.frame));
-	viewCamera.update(keysInput, sysInfo, isFreeToMove);
+	viewCamera.update(keysInput, sysInfo, isRecording && isControllingCamera);
+	sceneCameras[freeCameraView].freePose = viewCamera.getPose();
 	if (isRecording) saveShotIfRequested();
 }
 
@@ -109,9 +131,10 @@ void simulationData::saveShotIfRequested() {
 	const bool isTypingInPanel = visualInterface.isUsingKeyboard();   // p. ej. escribiendo el frame exacto
 	if (!hasPressedSave || isTypingInPanel) return;
 
-	cameraPath.saveShot(framesInfo.frame, viewCamera.getPose());
-	std::cout << "Toma guardada en el frame " << framesInfo.frame
-		<< " (" << cameraPath.getShots().size() << " tomas)\n";
+	const SceneCamera& selectedCamera = sceneCameras[selectedViewIndex];
+	cameraPath.saveShot(framesInfo.frame, selectedCamera);
+	std::cout << "Plano guardado en el frame " << framesInfo.frame << ": " << sceneCameraTypeName(selectedCamera.type)
+		<< " (" << cameraPath.getShots().size() << " planos)\n";
 }
 
 void simulationData::procesMainBodyLoopRealTime(GLFWwindow* window, SystemInfo& sysInfo) {
@@ -123,6 +146,7 @@ void simulationData::procesMainBodyLoopRealTime(GLFWwindow* window, SystemInfo& 
 
 	// System
 	visualInterface.setMouseEnabled(arePanelsVisible);
+	updateViewSelection(window, currentViews(sysInfo), sysInfo.getHeight());   // clic selecciona; doble clic en una libre la controla
 	updateInteractionMode(window);
 
 	// Camara
@@ -139,19 +163,21 @@ void simulationData::procesMainBodyLoopRealTime(GLFWwindow* window, SystemInfo& 
 	prepareLightingPrograms();
 
 	// Pintar simulacion
-	const SceneViewport wholeWindow{ 0, 0, sysInfo.getWidht(), sysInfo.getHeight() };
-	const SceneViewport sceneArea = arePanelsVisible
-		? visualInterface.getCentralArea(sysInfo.getWidht(), sysInfo.getHeight())
-		: wholeWindow;
-	drawSceneViews(sceneArea);
+	const std::vector<SceneViewport> views = currentViews(sysInfo);   // otra vez: el doble clic puede haber cambiado el modo
+	drawSceneViews(views); 
 
+	// Pintar la UI
 	renderer.clearFrame();
 	skinnedRenderer.clear();
 
 	// Pintar la UI
 	if (arePanelsVisible) {
 		drawCombatPanel(framesInfo);
-		drawCameraPathPanel(cameraPathMode, cameraPath, viewCamera, framesInfo, sceneMosaic);
+		drawCameraPathPanel(cameraPathMode, cameraPath, sceneCameras[selectedViewIndex], framesInfo, sceneMosaic);
+		if (cameraPathMode == CameraPathMode::Recording) {
+			drawViewHeaders(sceneCameras, views, selectedViewIndex, sysInfo.getHeight());
+			drawSelectedCameraPanel(sceneCameras[selectedViewIndex], selectedViewIndex, characterIds);
+		}
 	}
 	else visualInterface.drawCameraModeHint();
 
@@ -160,36 +186,12 @@ void simulationData::procesMainBodyLoopRealTime(GLFWwindow* window, SystemInfo& 
 }
 
 void simulationData::updateInteractionMode(GLFWwindow* window) {
-	const bool isEditing = interactionMode == InteractionMode::Editing;
-	const bool hasClickedScene = isEditing && visualInterface.wasSceneClicked();
-	const bool hasPressedEscape = !isEditing && keysInput.wasKeyPressed(GLFW_KEY_ESCAPE);
-	const bool hasLostFocus = !isEditing && !glfwGetWindowAttrib(window, GLFW_FOCUSED);   // Alt+Tab: no volver con el cursor bloqueado
-
-	if (hasClickedScene) {
-		interactionMode = InteractionMode::ControllingCamera;
-		keysInput.captureCursor(window);
-	}
-	else if (hasPressedEscape || hasLostFocus) {
+	const bool isControllingCamera = interactionMode == InteractionMode::ControllingCamera;
+	const bool hasPressedEscape = keysInput.wasKeyPressed(GLFW_KEY_ESCAPE);
+	const bool hasLostFocus = !glfwGetWindowAttrib(window, GLFW_FOCUSED);   // Alt+Tab: no volver con el cursor bloqueado
+	if (isControllingCamera && (hasPressedEscape || hasLostFocus)) {
 		interactionMode = InteractionMode::Editing;
 		keysInput.releaseCursor(window);
-	}
-}
-
-namespace {
-	constexpr float VIEW_FIELD_OF_VIEW_DEGREES = 45.0f;
-	constexpr float VIEW_NEAR_PLANE = 0.1f;
-	constexpr float VIEW_FAR_PLANE = 300.0f;   // con 100 se cortaria el mapa visto desde lejos
-
-
-	glm::mat4 testViewFor(int viewIndex, const Camera& freeCamera) {
-		if (viewIndex == 0) return freeCamera.get_view();
-
-		constexpr float ORBIT_RADIUS = 45.0f;
-		constexpr float ORBIT_HEIGHT = 25.0f;
-		constexpr float DEGREES_BETWEEN_VIEWS = 45.0f;   // 8 vistas dan la vuelta entera a la arena
-		const float angle = glm::radians(DEGREES_BETWEEN_VIEWS * viewIndex);
-		const glm::vec3 eye(ORBIT_RADIUS * std::cos(angle), ORBIT_HEIGHT, ORBIT_RADIUS * std::sin(angle));
-		return glm::lookAt(eye, glm::vec3(0.f), glm::vec3(0.f, 1.f, 0.f));
 	}
 }
 
@@ -202,10 +204,10 @@ void simulationData::prepareLightingPrograms() {
 	shadows.bindForLighting(program);
 }
 
-void simulationData::drawSceneInViewport(const SceneViewport& viewport, const glm::mat4& view) {
+void simulationData::drawSceneInViewport(const SceneViewport& viewport, const glm::mat4& view, float fieldOfViewDegrees) {
 	if (viewport.isVisible()) {
 		glViewport(viewport.x, viewport.y, viewport.width, viewport.height);
-		const glm::mat4 projection = glm::perspective(glm::radians(VIEW_FIELD_OF_VIEW_DEGREES),
+		const glm::mat4 projection = glm::perspective(glm::radians(fieldOfViewDegrees),
 			viewport.aspectRatio(), VIEW_NEAR_PLANE, VIEW_FAR_PLANE);
 		const glm::mat4 viewProjection = projection * view;
 
@@ -214,8 +216,56 @@ void simulationData::drawSceneInViewport(const SceneViewport& viewport, const gl
 	}
 }
 
-void simulationData::drawSceneViews(const SceneViewport& sceneArea) {
-	const std::vector<SceneViewport> views = sceneMosaic.splitArea(sceneArea);
-	for (int viewIndex = 0; viewIndex < (int)views.size(); ++viewIndex)
-		drawSceneInViewport(views[viewIndex], testViewFor(viewIndex, viewCamera));
+void simulationData::drawSceneViews(const std::vector<SceneViewport>& views) {
+	const std::vector<Entidad>& frameEntities = framesInfo.combat[framesInfo.frame];
+	for (int viewIndex = 0; viewIndex < (int)views.size(); ++viewIndex) {
+		const SceneCamera camera = cameraForView(viewIndex); 
+		drawSceneInViewport(views[viewIndex], viewMatrixFor(camera, frameEntities), camera.fieldOfViewDegrees);
+	}
+}
+
+std::vector<SceneViewport> simulationData::currentViews(const SystemInfo& sysInfo) const {
+	const bool isFullScreen = interactionMode == InteractionMode::ControllingCamera;
+	if (isFullScreen) return { SceneViewport{ 0, 0, sysInfo.getWidht(), sysInfo.getHeight() } };
+
+	const SceneViewport sceneArea = visualInterface.getCentralArea(sysInfo.getWidht(), sysInfo.getHeight());
+	const bool isPlayingBack = cameraPathMode == CameraPathMode::Playback;
+	if (isPlayingBack) return { sceneArea };   // Resultado: una sola camara, la del plano de este frame
+	return sceneMosaic.splitArea(sceneArea);
+}
+
+void simulationData::updateViewSelection(GLFWwindow* window, const std::vector<SceneViewport>& views, int framebufferHeight) {
+	selectedViewIndex = (std::min)(selectedViewIndex, sceneMosaic.getViewCount() - 1);   // si se quitan vistas, la seleccionada puede desaparecer
+	const bool isEditing = interactionMode == InteractionMode::Editing;
+	if (!isEditing || !visualInterface.wasSceneClicked()) return;
+	const bool isPlayingBack = cameraPathMode == CameraPathMode::Playback;
+	if (isPlayingBack) {   // en Resultado no hay vistas que elegir: el doble clic solo pone la imagen a pantalla entera
+		if (visualInterface.wasSceneDoubleClicked()) enterFullScreen(window);
+		return;
+	}
+	const int clickedView = visualInterface.findViewUnderMouse(views, framebufferHeight);
+	if (clickedView == NO_VIEW) return;
+
+	selectedViewIndex = clickedView;
+	const bool isFreeCamera = sceneCameras[clickedView].type == SceneCameraType::Free;
+	if (isFreeCamera && visualInterface.wasSceneDoubleClicked()) startControllingCamera(window, clickedView);
+}
+
+void simulationData::enterFullScreen(GLFWwindow* window) {
+	interactionMode = InteractionMode::ControllingCamera;
+	keysInput.captureCursor(window);
+}
+
+void simulationData::startControllingCamera(GLFWwindow* window, int viewIndex) {
+	freeCameraView = viewIndex;
+	viewCamera.setPose(sceneCameras[viewIndex].freePose);   // empieza donde estaba esa vista
+	enterFullScreen(window);
+} 
+
+SceneCamera simulationData::cameraForView(int viewIndex) const {
+	const bool isPlayingBack = cameraPathMode == CameraPathMode::Playback;
+	if (isPlayingBack) return cameraPath.cameraAtFrame(framesInfo.frame);   // Resultado: manda la lista de planos
+
+	const bool isControllingCamera = interactionMode == InteractionMode::ControllingCamera;
+	return sceneCameras[isControllingCamera ? freeCameraView : viewIndex];   // a pantalla entera, solo la que se mueve
 }

@@ -140,3 +140,17 @@ void UserInterface::drawCameraModeHint() {
 	ImGui::TextUnformatted("Modo camara - ESC para volver a editar");
 	ImGui::End();
 }
+
+int UserInterface::findViewUnderMouse(const std::vector<SceneViewport>& views, int framebufferHeight) const {
+	const ImGuiIO& io = ImGui::GetIO();
+	const float mouseX = io.MousePos.x * io.DisplayFramebufferScale.x;
+	const float mouseY = framebufferHeight - io.MousePos.y * io.DisplayFramebufferScale.y;   // ImGui cuenta desde arriba; OpenGL, desde abajo
+	for (int viewIndex = 0; viewIndex < (int)views.size(); ++viewIndex)
+		if (views[viewIndex].contains(mouseX, mouseY)) return viewIndex;
+	return NO_VIEW;
+}
+
+bool UserInterface::wasSceneDoubleClicked() const {
+	const bool isMouseOverInterface = ImGui::GetIO().WantCaptureMouse;
+	return !isMouseOverInterface && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left);
+}

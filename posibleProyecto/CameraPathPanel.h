@@ -3,4 +3,4 @@
 #include "SceneMosaic.h"
 struct FramesData;
 
-void drawCameraPathPanel(CameraPathMode& mode, CameraPath& path, Camera& camera, FramesData& framesInfo, SceneMosaic& mosaic);
+void drawCameraPathPanel(CameraPathMode& mode, CameraPath& path, SceneCamera& selectedCamera, FramesData& framesInfo, SceneMosaic& mosaic);
