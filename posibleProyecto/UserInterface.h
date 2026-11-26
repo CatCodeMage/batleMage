@@ -1,5 +1,6 @@
 #pragma once
 #include "global.h"
+#include "SceneViewport.h"
 
 // Capa propia sobre Dear ImGui: el resto del programa no toca los backends
 class UserInterface {
@@ -12,4 +13,7 @@ public:
 	bool isUsingKeyboard() const;
 	bool wasSceneClicked() const;
 	void drawCameraModeHint();
+	SceneViewport getCentralArea(int framebufferWidth, int framebufferHeight) const;   // el hueco que dejan los paneles
+private:
+	unsigned int w_dockspaceId = 0;   // ImGuiID: asi esta cabecera no depende de ImGui
 };

@@ -4,6 +4,7 @@
 
 void drawCombatPanel(FramesData& framesInfo) {
 	const int lastFrame = static_cast<int>(framesInfo.combat.size()) - 1;
+	ImGui::Text("%.0f FPS", ImGui::GetIO().Framerate);
 
 	ImGui::Begin("Combate");
 	ImGui::Checkbox("Pausa", &framesInfo.isPaused);

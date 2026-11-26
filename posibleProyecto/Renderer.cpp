@@ -46,23 +46,20 @@ void Renderer::applyLights(GLuint program) const {
             (GLsizei)(w_lights.size() * 2), (const GLfloat*)w_lights.data());
 } 
 
-void Renderer::getActualViewProj(const glm::mat4& viewProj) {
+void Renderer::drawLighting(const MeshLibrary& lib, const glm::mat4& viewProj) const {
+    glUseProgram(w_program);   // tras cada vista queda activo el programa de los personajes
     glUniformMatrix4fv(w_locViewProj, 1, GL_FALSE, glm::value_ptr(viewProj));
-}
-
-void Renderer::flush(const MeshLibrary& lib, const glm::mat4& viewProj) {
-    getActualViewProj(viewProj);
-
     applyLights(w_program);
-    
+
     glActiveTexture(GL_TEXTURE0 + ALBEDO_TEXTURE_UNIT);
     for (MeshId i = 0; i < w_batches.size(); ++i) {
-        if (!w_batches[i].empty()) {
-            glBindTexture(GL_TEXTURE_2D, w_batchTextures[i]);
-            lib.get(i).drawInstances(w_batches[i]);
-            w_batches[i].clear();
-        }
+        if (w_batches[i].empty()) continue;
+        glBindTexture(GL_TEXTURE_2D, w_batchTextures[i]);
+        lib.get(i).drawInstances(w_batches[i]);
     }
+}
 
+void Renderer::clearFrame() {
+    for (std::vector<InstanceData>& batch : w_batches) batch.clear();
     w_lights.clear();
 }

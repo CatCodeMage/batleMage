@@ -202,6 +202,7 @@
     <ClCompile Include="personaje.cpp" />
     <ClCompile Include="PruebaHechizos.cpp" />
     <ClCompile Include="Renderer.cpp" />
+    <ClCompile Include="SceneMosaic.cpp" />
     <ClCompile Include="shaders.cpp" />
     <ClCompile Include="simulationData.cpp" />
     <ClCompile Include="systemInfo.cpp" />
@@ -237,6 +238,8 @@
     <ClInclude Include="PruebaHechizos.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="resource.h" />
+    <ClInclude Include="SceneMosaic.h" />
+    <ClInclude Include="SceneViewport.h" />
     <ClInclude Include="shaders.h" />
     <ClInclude Include="simulationData.h" />
     <ClInclude Include="systemInfo.h" />

@@ -1,4 +1,5 @@
 #include "CombatPanel.h"
+#include "CameraPathPanel.h"
 #include "simulationData.h"
 #include <imgui.h>
 #include <algorithm>
@@ -33,10 +34,26 @@ namespace {
 		}
 		if (shotToRemove != NO_SHOT) path.removeShot(shotToRemove);   // fuera del bucle: borrar dentro invalidaria la lista que se recorre
 	}
+
+	void drawMosaicControls(SceneMosaic& mosaic) {
+		ImGui::BeginDisabled(!mosaic.canRemoveViews());
+		if (ImGui::Button("-")) mosaic.removeViews();
+		ImGui::EndDisabled();
+
+		ImGui::SameLine();
+		ImGui::Text("%d vistas", mosaic.getViewCount());
+
+		ImGui::SameLine();
+		ImGui::BeginDisabled(!mosaic.canAddViews());
+		if (ImGui::Button("+")) mosaic.addViews();
+		ImGui::EndDisabled();
+	}
 }
 
-void drawCameraPathPanel(CameraPathMode& mode, CameraPath& path, Camera& camera, FramesData& framesInfo) {
+void drawCameraPathPanel(CameraPathMode& mode, CameraPath& path, Camera& camera, FramesData& framesInfo, SceneMosaic& mosaic) {
 	ImGui::Begin("Camara");
+	drawMosaicControls(mosaic);
+	ImGui::Separator();
 	drawModeSelector(mode);
 	ImGui::Separator();
 	if (mode == CameraPathMode::Recording) ImGui::TextUnformatted("Espacio: guardar la camara en este frame");

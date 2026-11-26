@@ -2,6 +2,7 @@
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
+#include <imgui_internal.h>
 #include "Paths.h"
 
 constexpr const char* GLSL_VERSION = "#version 330 core";
@@ -73,6 +74,18 @@ void UserInterface::init(GLFWwindow* window) {
 	ImGui_ImplOpenGL3_Init(GLSL_VERSION);
 }
 
+SceneViewport UserInterface::getCentralArea(int framebufferWidth, int framebufferHeight) const {
+	const ImGuiDockNode* centralNode = ImGui::DockBuilderGetCentralNode(w_dockspaceId);
+	if (!centralNode) return { 0, 0, framebufferWidth, framebufferHeight };
+
+	const ImVec2 scale = ImGui::GetIO().DisplayFramebufferScale;
+	const int left = (int)(centralNode->Pos.x * scale.x);
+	const int top = (int)(centralNode->Pos.y * scale.y);
+	const int width = (int)(centralNode->Size.x * scale.x);
+	const int height = (int)(centralNode->Size.y * scale.y);
+	return { left, framebufferHeight - top - height, width, height };   // ImGui cuenta desde arriba; OpenGL, desde abajo
+}
+
 void UserInterface::beginFrame(bool arePanelsVisible) {
 	ImGui_ImplOpenGL3_NewFrame();
 	ImGui_ImplGlfw_NewFrame();
@@ -80,7 +93,7 @@ void UserInterface::beginFrame(bool arePanelsVisible) {
 
 	ImGuiDockNodeFlags dockspaceFlags = ImGuiDockNodeFlags_PassthruCentralNode;   // el centro queda transparente: se ve la escena
 	if (!arePanelsVisible) dockspaceFlags |= ImGuiDockNodeFlags_KeepAliveOnly;     // no se dibuja, pero los paneles no se desacoplan
-	ImGui::DockSpaceOverViewport(0, ImGui::GetMainViewport(), dockspaceFlags);
+	w_dockspaceId = ImGui::DockSpaceOverViewport(0, ImGui::GetMainViewport(), dockspaceFlags);
 }
 
 void UserInterface::endFrame() {

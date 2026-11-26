@@ -102,8 +102,6 @@ void simulationData::updateCamera(const SystemInfo& sysInfo) {
 	if (!isRecording) viewCamera.setPose(cameraPath.poseAtFrame(framesInfo.frame));
 	viewCamera.update(keysInput, sysInfo, isFreeToMove);
 	if (isRecording) saveShotIfRequested();
-
-	viewProjection = viewCamera.get_proj() * viewCamera.get_view();
 }
 
 void simulationData::saveShotIfRequested() {
@@ -136,24 +134,24 @@ void simulationData::procesMainBodyLoopRealTime(GLFWwindow* window, SystemInfo& 
 
 	renderer.submitLights(lights, sysInfo.getTimeStored());
 
-	//renderizar sombras
+	// Las sombras no dependen de la camara: una vez por frame, aunque haya varias vistas
 	shadows.render(lights, [&]() { renderer.drawShadowGeometry(libMesh); }, &skinnedRenderer);
-	if (!skinnedRenderer.empty()) {
-		const GLuint skinnedProgram = skinnedRenderer.lightingProgram();
-		shadows.bindForLighting(skinnedProgram);
-		renderer.applyLights(skinnedProgram);
-	}
+	prepareLightingPrograms();
 
 	// Pintar simulacion
-	shadows.bindForLighting(program);
-	renderer.flush(libMesh, viewProjection);
-	skinnedRenderer.drawLighting(viewProjection);
+	const SceneViewport wholeWindow{ 0, 0, sysInfo.getWidht(), sysInfo.getHeight() };
+	const SceneViewport sceneArea = arePanelsVisible
+		? visualInterface.getCentralArea(sysInfo.getWidht(), sysInfo.getHeight())
+		: wholeWindow;
+	drawSceneViews(sceneArea);
+
+	renderer.clearFrame();
 	skinnedRenderer.clear();
 
 	// Pintar la UI
 	if (arePanelsVisible) {
 		drawCombatPanel(framesInfo);
-		drawCameraPathPanel(cameraPathMode, cameraPath, viewCamera, framesInfo);
+		drawCameraPathPanel(cameraPathMode, cameraPath, viewCamera, framesInfo, sceneMosaic);
 	}
 	else visualInterface.drawCameraModeHint();
 
@@ -175,4 +173,49 @@ void simulationData::updateInteractionMode(GLFWwindow* window) {
 		interactionMode = InteractionMode::Editing;
 		keysInput.releaseCursor(window);
 	}
+}
+
+namespace {
+	constexpr float VIEW_FIELD_OF_VIEW_DEGREES = 45.0f;
+	constexpr float VIEW_NEAR_PLANE = 0.1f;
+	constexpr float VIEW_FAR_PLANE = 300.0f;   // con 100 se cortaria el mapa visto desde lejos
+
+
+	glm::mat4 testViewFor(int viewIndex, const Camera& freeCamera) {
+		if (viewIndex == 0) return freeCamera.get_view();
+
+		constexpr float ORBIT_RADIUS = 45.0f;
+		constexpr float ORBIT_HEIGHT = 25.0f;
+		constexpr float DEGREES_BETWEEN_VIEWS = 45.0f;   // 8 vistas dan la vuelta entera a la arena
+		const float angle = glm::radians(DEGREES_BETWEEN_VIEWS * viewIndex);
+		const glm::vec3 eye(ORBIT_RADIUS * std::cos(angle), ORBIT_HEIGHT, ORBIT_RADIUS * std::sin(angle));
+		return glm::lookAt(eye, glm::vec3(0.f), glm::vec3(0.f, 1.f, 0.f));
+	}
+}
+
+void simulationData::prepareLightingPrograms() {
+	if (!skinnedRenderer.empty()) {
+		const GLuint skinnedProgram = skinnedRenderer.lightingProgram();
+		shadows.bindForLighting(skinnedProgram);
+		renderer.applyLights(skinnedProgram);
+	}
+	shadows.bindForLighting(program);
+}
+
+void simulationData::drawSceneInViewport(const SceneViewport& viewport, const glm::mat4& view) {
+	if (viewport.isVisible()) {
+		glViewport(viewport.x, viewport.y, viewport.width, viewport.height);
+		const glm::mat4 projection = glm::perspective(glm::radians(VIEW_FIELD_OF_VIEW_DEGREES),
+			viewport.aspectRatio(), VIEW_NEAR_PLANE, VIEW_FAR_PLANE);
+		const glm::mat4 viewProjection = projection * view;
+
+		renderer.drawLighting(libMesh, viewProjection);
+		skinnedRenderer.drawLighting(viewProjection);
+	}
+}
+
+void simulationData::drawSceneViews(const SceneViewport& sceneArea) {
+	const std::vector<SceneViewport> views = sceneMosaic.splitArea(sceneArea);
+	for (int viewIndex = 0; viewIndex < (int)views.size(); ++viewIndex)
+		drawSceneInViewport(views[viewIndex], testViewFor(viewIndex, viewCamera));
 }

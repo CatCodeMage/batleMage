@@ -17,6 +17,7 @@
 #include "jsonManager.h"
 #include "UserInterface.h"
 #include "CameraPath.h"
+#include "SceneMosaic.h"
 
 enum class InteractionMode { Editing, ControllingCamera };
 
@@ -55,8 +56,7 @@ struct simulationData
     InteractionMode interactionMode = InteractionMode::Editing;
     CameraPath cameraPath;
     CameraPathMode cameraPathMode = CameraPathMode::Recording;
-    glm::mat4 viewProjection;
-
+    SceneMosaic sceneMosaic;
 private:
     struct ReplayAnimator {
         ModelId model;
@@ -65,6 +65,10 @@ private:
         bool looping = true;
         double seconds = 0.0;
     };
+
+    void prepareLightingPrograms();
+    void drawSceneViews(const SceneViewport& sceneArea);
+    void drawSceneInViewport(const SceneViewport& viewport, const glm::mat4& view);
 
     const bm::anim::Animator& poseFor(const Entidad& entity, const SkinnedModel& model);
     void submitEntities(const std::vector<Entidad>& entities);

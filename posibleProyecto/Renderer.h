@@ -23,14 +23,14 @@ public:
     Renderer();
     void init(GLuint program);
     void submit(MeshId id, GLuint albedoTexture, const glm::mat4& model, const glm::vec4& color, int kind = 0);
-    void flush(const MeshLibrary& lib, const glm::mat4& viewProj);
+    void drawLighting(const MeshLibrary& lib, const glm::mat4& viewProj) const;   // se puede llamar una vez por vista
+    void clearFrame();
     void drawShadowGeometry(const MeshLibrary& lib) const;
     void submitLights(std::vector<SceneLight>& lights, const float time);
     void submitLight(const Light& light);
     // El programa ya debe estar activo.
     void applyLights(GLuint program) const;
 private:
-    void getActualViewProj(const glm::mat4& viewProj);
     std::vector<Light> w_lights;
     std::vector<std::vector<InstanceData>> w_batches;      
     std::vector<GLuint> w_batchTextures;   
