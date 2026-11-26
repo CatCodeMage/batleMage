@@ -56,5 +56,6 @@
     "poison_cloud":    { "scale": [0.5, 0.5, 0.5], "asset": "fireball" },
     "healing":         { "scale": [0.5, 0.5, 0.5], "asset": "fireball" },
     "wind_blade":      { "scale": [0.5, 0.5, 0.5], "asset": "fireball" },
-    "water_jet":       { "scale": [0.5, 0.5, 0.5], "asset": "fireball" }
+    "water_jet":       { "scale": [0.5, 0.5, 0.5], "asset": "fireball" },
+    "dagger_barrage":  { "scale": [0.6, 0.6, 0.6], "asset": "fireball" }
 }

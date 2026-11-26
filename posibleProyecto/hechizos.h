@@ -126,3 +126,13 @@ private:
     void moverLineal(float dt);
     void moverParabolico(float dt);
 };
+
+// Calcula la direccion de lanzamiento balistica (angulo menor) para alcanzar un objetivo estacionario.
+// Devuelve false si el objetivo es inalcanzable (discriminante negativo, velocidad/distancia nula o lifetime insuficiente).
+bool calcularDireccionBalistica(
+    const glm::vec3& origin,
+    const glm::vec3& target,
+    float speed,
+    float effectiveGravity,
+    float maxLifetime,
+    glm::vec3& outDirection);

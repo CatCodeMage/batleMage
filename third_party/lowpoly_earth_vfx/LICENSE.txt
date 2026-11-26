@@ -1,0 +1,19 @@
+Lowpoly Nature & Earth VFX - License
+==========================================
+
+Copyright (c) 2026 Laonion. All rights reserved except as granted below.
+
+You MAY:
+- Use these effects, textures, meshes, shaders and scripts in any number of games and
+  interactive projects, commercial or non-commercial, released on any platform.
+- Modify them in any way for use in your projects.
+- Show them in trailers, screenshots, streams and other promotion of your projects.
+
+You may NOT:
+- Resell, sublicense or redistribute the assets as they are or modified, on their own or
+  as part of another asset pack, template, course material or AI training set.
+- Claim the assets as your own original work.
+
+Credit is appreciated but not required.
+
+The software is provided "as is", without warranty of any kind.

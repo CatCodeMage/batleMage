@@ -373,16 +373,21 @@ void CombatSimulation::applySpellHits()
 
             m_spells.procesarChoqueSuperficie(spell.get(), info.normal, info.penetration);
 
-            if (spellName == "ice_lance" || spellName == "fire_ball")
+            if (spellName == "ice_lance" || spellName == "fire_ball" || spellName == "lightning_bolt" || spellName == "earth_spike" || spellName == "wind_blade" || spellName == "water_jet" || spellName == "dagger_barrage")
             {
-                const float fullDuration = (spellName == "fire_ball") ? 3.18f : 1.9f;
+                const float fullDuration = (spellName == "fire_ball") ? 3.18f
+                    : ((spellName == "lightning_bolt") ? 2.50f
+                    : ((spellName == "earth_spike") ? 1.60f
+                    : ((spellName == "wind_blade") ? 1.20f
+                    : ((spellName == "water_jet") ? 1.15f
+                    : ((spellName == "dagger_barrage") ? 1.10f : 1.90f)))));
                 if (!spell->IsActive())
                 {
                     recordImpactVFX(spellName, hitPos, info.normal, fullDuration);
                 }
                 else if (wasApproaching)
                 {
-                    recordImpactVFX(spellName + "_bounce", hitPos, info.normal, 0.45f);
+                    recordImpactVFX(spellName + "_bounce", hitPos, info.normal, 0.40f);
                 }
             }
         }
@@ -442,7 +447,7 @@ bool CombatSimulation::tryHitAnyPlayer(
             m_hitFrames[playerIndex] =
                 HIT_EFFECT_FRAMES;
 
-            if (spell.getName() == "ice_lance" || spell.getName() == "fire_ball")
+            if (spell.getName() == "ice_lance" || spell.getName() == "fire_ball" || spell.getName() == "lightning_bolt" || spell.getName() == "earth_spike" || spell.getName() == "wind_blade" || spell.getName() == "water_jet" || spell.getName() == "dagger_barrage")
             {
                 const glm::vec3 delta = spell.getPosition() - player.getPosicion();
                 const glm::vec3 horiz(delta.x, 0.0f, delta.z);
@@ -451,7 +456,12 @@ bool CombatSimulation::tryHitAnyPlayer(
                     ? glm::normalize(horiz)
                     : (glm::length(dir) > 0.0001f ? -dir : glm::vec3(0.0f, 1.0f, 0.0f));
                 const glm::vec3 hitPos = player.getPosicion() + glm::vec3(0.0f, delta.y, 0.0f) + hitNormal * player.getRadio();
-                const float fullDuration = (spell.getName() == "fire_ball") ? 3.18f : 1.9f;
+                const float fullDuration = (spell.getName() == "fire_ball") ? 3.18f
+                    : ((spell.getName() == "lightning_bolt") ? 2.50f
+                    : ((spell.getName() == "earth_spike") ? 1.60f
+                    : ((spell.getName() == "wind_blade") ? 1.20f
+                    : ((spell.getName() == "water_jet") ? 1.15f
+                    : ((spell.getName() == "dagger_barrage") ? 1.10f : 1.90f)))));
                 recordImpactVFX(spell.getName(), hitPos, hitNormal, fullDuration);
             }
 

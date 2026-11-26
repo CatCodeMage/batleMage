@@ -20,6 +20,24 @@ struct BoxCollider
     glm::vec3 halfSize;
 };
 
+struct BoxZoneCollider
+{
+    glm::vec3 origin;
+    glm::vec3 direction;
+    float width;
+    float height;
+    float length;
+};
+
+struct ConeCollider
+{
+    glm::vec3 origin;
+    glm::vec3 direction;
+    float range;
+    float angle;
+    float height;
+};
+
 // Informacion adicional de una colision
 struct CollisionInfo
 {
@@ -57,4 +75,12 @@ public:
     CollisionInfo getGroundCollisionInfo(
         const SphereCollider& sphere,
         float groundHeight);
+
+    bool checkCollision(
+        const BoxZoneCollider& box,
+        const CylinderCollider& cylinder);
+
+    bool checkCollision(
+        const ConeCollider& cone,
+        const CylinderCollider& cylinder);
 };

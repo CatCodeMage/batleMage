@@ -10,7 +10,7 @@ using json = nlohmann::json;
 // =====================================================================
 // CONFIGURACIÓN DE LA PRUEBA (cámbiala a tu gusto)
 // =====================================================================
-constexpr float DURACION_PRUEBA_S = 20.0f;   // segundos simulados
+constexpr float DURACION_PRUEBA_S = 25.0f;   // segundos simulados
 constexpr bool  MAGOS_INMORTALES = true;    // los golpes se ven y se cuentan, pero no matan
 constexpr float ALTURA_SUELO = 0.0f;    // map.json: el suelo está en y = 0
 constexpr float DISTANCIA_MAGOS = 10.0f;   // los hechizos alcanzan 12-30 (velocidad x 3 s): en combat.json están a ~56
@@ -151,40 +151,31 @@ void PruebaHechizos::crearVaritas() {
 
     const int iceLance = idPorNombre("ice_lance");
     const int fireBall = idPorNombre("fire_ball");
+    const int lightningBolt = idPorNombre("lightning_bolt");
+    const int earthSpike = idPorNombre("earth_spike");
+    const int windBlade = idPorNombre("wind_blade");
+    const int iceShard = idPorNombre("ice_shard");
+    const int waterJet = idPorNombre("water_jet");
+    const int daggerBarrage = idPorNombre("dagger_barrage");
 
-    // Mago 1 (rojo, izquierda):
-    // 1) Ice Lance lineal recto -> impacta contra Mago 2
-    // 2) Ice Lance parabolico -> curva hacia el suelo e impacta con normal (0,1,0)
-    // 3) Dos Ice Lance simultaneos -> estelas e impactos independientes
-    // 4) Ice Lance parabolico con rebote -> rebota en el suelo sin destruirse y explota al agotar rebotes
-    // 5) Fire Ball + Ice Lance -> verifica que fire_ball sigue funcionando junto con ice_lance
+    // Mago 1 (rojo, izquierda): showcase determinista de los 8 proyectiles cada 2.5 s
     VaritaPrueba& v1 = m_varitas[0];
     v1.ranuras = {
         fireBall,
-        CARTA_REBOTE, fireBall,
         iceLance,
-        CARTA_ICE_LANCE_PARABOLICA,
-        CARTA_DOBLE, iceLance, iceLance,
-        CARTA_REBOTE, CARTA_ICE_LANCE_PARABOLICA,
-        CARTA_DOBLE, CARTA_MAS_DANO, fireBall, iceLance
+        lightningBolt,
+        earthSpike,
+        windBlade,
+        iceShard,
+        waterJet,
+        daggerBarrage
     };
-    v1.castDelay = 0.65f;
-    v1.recarga = 1.2f;
+    v1.castDelay = 2.5f;
+    v1.recarga = 2.5f;
 
-    // Mago 2 (azul, derecha): apunta hacia el suelo entre ambos magos
-    // 1) Ice Lance directo al suelo sin rebote -> impacto completo con normal (0,1,0)
-    // 2) Ice Lance con rebote -> rebota en el suelo y sigue volando en arco
-    // 3) Fire Ball con rebote -> rebota en el suelo y alcanza al Mago 1
+    // Mago 2 (azul, derecha): quieto como blanco para apreciar claramente cada hechizo
     VaritaPrueba& v2 = m_varitas[1];
-    v2.ranuras = {
-        iceLance,
-        CARTA_REBOTE, fireBall,
-        CARTA_REBOTE, iceLance,
-        CARTA_DOBLE, CARTA_REBOTE, iceLance, iceLance
-    };
-    v2.castDelay = 0.75f;
-    v2.recarga = 1.4f;
-    v2.inclinacionY = -0.36f;   // hacia el suelo para ver impactos en suelo y rebotes
+    v2.ranuras.clear();
 }
 
 // =====================================================================
@@ -225,6 +216,8 @@ void PruebaHechizos::dispararVaritas() {
         const glm::vec3 direccion = glm::normalize(glm::vec3(haciaRival.x, v.inclinacionY, haciaRival.z));
         const glm::vec3 origen = mago.getPosicion() + haciaRival * (mago.getRadio() + SPELL_HIT_RADIUS + 0.5f);
 
+        if (v.ranuras.empty()) continue;
+        const int idxAntes = v.indice;
         const ResultadoDisparo r = lanzador.disparar(v.ranuras, v.indice, v.mana, origen, direccion, mago.getId());
 
         v.mana -= r.manaGastado;
@@ -235,6 +228,12 @@ void PruebaHechizos::dispararVaritas() {
         if (r.disparado) {
             ++m_disparos;
             m_proyectiles += r.proyectilesLanzados;
+            if (idxAntes >= 0 && idxAntes < static_cast<int>(v.ranuras.size())) {
+                const auto it = m_spells.getCatalogoHechizos().find(v.ranuras[idxAntes]);
+                if (it != m_spells.getCatalogoHechizos().end()) {
+                    std::cout << "[SHOWCASE] " << it->second.definition.name << "\n";
+                }
+            }
             std::cout << "[PRUEBA] t=" << static_cast<float>(m_tick) / TICKS_PER_SECOND << "s jugador "
                 << mago.getId() << ": " << r.proyectilesLanzados << " proyectiles, mana " << v.mana
                 << (r.hayQueRecargar ? " (recarga)" : "") << "\n";
@@ -255,12 +254,17 @@ void PruebaHechizos::aplicarSuelo() {
 
             m_spells.procesarChoqueSuperficie(spell.get(), contacto.normal, contacto.penetration);
 
-            if (spellName == "ice_lance" || spellName == "fire_ball") {
-                const float fullDuration = (spellName == "fire_ball") ? 3.18f : 1.9f;
+            if (spellName == "ice_lance" || spellName == "fire_ball" || spellName == "lightning_bolt" || spellName == "earth_spike" || spellName == "wind_blade" || spellName == "water_jet" || spellName == "dagger_barrage") {
+                const float fullDuration = (spellName == "fire_ball") ? 3.18f
+                    : ((spellName == "lightning_bolt") ? 2.50f
+                    : ((spellName == "earth_spike") ? 1.60f
+                    : ((spellName == "wind_blade") ? 1.20f
+                    : ((spellName == "water_jet") ? 1.15f
+                    : ((spellName == "dagger_barrage") ? 1.10f : 1.90f)))));
                 if (!spell->IsActive()) {
                     recordImpactVFX(spellName, hitPos, contacto.normal, fullDuration);
                 } else if (wasApproaching) {
-                    recordImpactVFX(spellName + "_bounce", hitPos, contacto.normal, 0.45f);
+                    recordImpactVFX(spellName + "_bounce", hitPos, contacto.normal, 0.40f);
                 }
             }
         }
@@ -304,7 +308,7 @@ void PruebaHechizos::aplicarImpactos() {
             if (!MAGOS_INMORTALES)
                 m_combat.procesarImpacto(esfera, colliderOf(mago), spell->getDefinition(), mago);
 
-            if (spell->getName() == "ice_lance" || spell->getName() == "fire_ball") {
+            if (spell->getName() == "ice_lance" || spell->getName() == "fire_ball" || spell->getName() == "lightning_bolt" || spell->getName() == "earth_spike" || spell->getName() == "wind_blade" || spell->getName() == "water_jet" || spell->getName() == "dagger_barrage") {
                 const glm::vec3 delta = spell->getPosition() - mago.getPosicion();
                 const glm::vec3 horiz(delta.x, 0.0f, delta.z);
                 const glm::vec3 dir = spell->getDirection();
@@ -312,7 +316,12 @@ void PruebaHechizos::aplicarImpactos() {
                     ? glm::normalize(horiz)
                     : (glm::length(dir) > 0.0001f ? -dir : glm::vec3(0.0f, 1.0f, 0.0f));
                 const glm::vec3 hitPos = mago.getPosicion() + glm::vec3(0.0f, delta.y, 0.0f) + hitNormal * mago.getRadio();
-                const float fullDuration = (spell->getName() == "fire_ball") ? 3.18f : 1.9f;
+                const float fullDuration = (spell->getName() == "fire_ball") ? 3.18f
+                    : ((spell->getName() == "lightning_bolt") ? 2.50f
+                    : ((spell->getName() == "earth_spike") ? 1.60f
+                    : ((spell->getName() == "wind_blade") ? 1.20f
+                    : ((spell->getName() == "water_jet") ? 1.15f
+                    : ((spell->getName() == "dagger_barrage") ? 1.10f : 1.90f)))));
                 recordImpactVFX(spell->getName(), hitPos, hitNormal, fullDuration);
             }
 

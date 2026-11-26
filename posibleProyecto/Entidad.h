@@ -22,6 +22,11 @@ struct Entidad {
     double animationAge = -1.0;
     bool   isIceLance = false;
     bool   isFireBall = false;
+    bool   isLightningBolt = false;
+    bool   isEarthSpike = false;
+    bool   isWindBlade = false;
+    bool   isWaterBolt = false;
+    bool   isDaggerBarrage = false;
     int    poolIndex = -1;
 };
 

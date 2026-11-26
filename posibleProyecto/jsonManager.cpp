@@ -12,7 +12,10 @@ const std::string ENTITIES_PATH = "../db/entities.json";
 ElementType parseElement(std::string element) {
     if (element == "fire")      return ElementType::Fire;
     if (element == "ice")       return ElementType::ICE;
-    if (element == "physical") return ElementType::Physical;
+    if (element == "lightning") return ElementType::Lightning;
+    if (element == "wind")      return ElementType::Wind;
+    if (element == "water")     return ElementType::Water;
+    if (element == "physical")  return ElementType::Physical;
     return ElementType::Fire;
 }
 
@@ -40,17 +43,21 @@ void readSpells(HechizosGestor& spellManager) {
                 spell["scale"][2].get<float>()
             );
 
+            const float gravityMultiplier = spell.value<float>("gravityMultiplier", 0.0f);
+
             // NUEVO: leer el tipo de movimiento del JSON.
-            // Si no se especifica, el movimiento sera lineal.
-            std::string movementName = spell.value(
-                "movement_pattern",
-                std::string("linear")
-            );
+            // Si no se especifica, sera parabolico cuando gravityMultiplier > 0 y lineal en caso contrario.
+            MovementPattern pattern = (gravityMultiplier > 0.0f)
+                ? MovementPattern::Parabolic
+                : MovementPattern::Linear;
 
-            MovementPattern pattern = MovementPattern::Linear;
-
-            if (movementName == "parabolic") {
-                pattern = MovementPattern::Parabolic;
+            if (spell.contains("movement_pattern")) {
+                std::string movementName = spell.value("movement_pattern", std::string("linear"));
+                if (movementName == "parabolic") {
+                    pattern = MovementPattern::Parabolic;
+                } else if (movementName == "linear") {
+                    pattern = MovementPattern::Linear;
+                }
             }
 
             spellManager.registrarHechizo(
@@ -64,7 +71,8 @@ void readSpells(HechizosGestor& spellManager) {
                 spell["radious"].get<float>(),
                 scaleVec,
                 SPELL_LIFETIME_SECONDS,
-                pattern
+                pattern,
+                gravityMultiplier
             );
 
             id++;
@@ -177,6 +185,11 @@ std::vector<std::vector<Entidad>> generateCombat(const ModelLibrary& modelLib,
             entity.animation = info->second.animation;
             entity.isIceLance = (name == "ice_lance");
             entity.isFireBall = (name == "fire_ball");
+            entity.isLightningBolt = (name == "lightning_bolt");
+            entity.isEarthSpike = (name == "earth_spike");
+            entity.isWindBlade = (name == "wind_blade");
+            entity.isWaterBolt = (name == "water_jet");
+            entity.isDaggerBarrage = (name == "dagger_barrage");
             if (sample.size() >= 4)
                 entity.animationAge = sample.at(3).get<double>();
             if (sample.size() >= 5 && sample.at(4).is_number_integer())

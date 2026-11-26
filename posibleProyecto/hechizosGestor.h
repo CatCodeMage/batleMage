@@ -27,7 +27,8 @@ public:
         float cost, float damage, float cooldown,
         float speed, float radius, glm::vec3 scale,
         float maxLifeTime,
-        MovementPattern pattern = MovementPattern::Linear
+        MovementPattern pattern = MovementPattern::Linear,
+        float gravityMultiplier = 0.0f
     );
 
     // NUEVO: registrar cartas que no vienen de spells.json

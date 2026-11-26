@@ -177,6 +177,173 @@ void main() {
     const vec3 ICE_GLOW  = vec3(0.55, 0.85, 1.00);
     const vec3 ICE_MIST  = vec3(0.74, 0.83, 0.92);
 
+    // kinds 15..17: agua (water_jet / Undalux Water Bolt). Procedural, siguiendo el aspecto de
+    // undalux_bolt.gdshader y undalux_splash.gdshader de gennai (MIT): agua aireada con burbujas,
+    // fresnel rim, glint, gotas y bruma translúcida.
+    if (vKind > 14.5) {
+        if (vColor.a < 0.004) discard;
+        const vec3 WATER_BODY = vec3(0.22, 0.52, 0.62);
+        const vec3 WATER_FOAM = vec3(0.85, 0.95, 0.97);
+        if (vKind < 15.5) {
+            // 15: masa de agua aireada (orbe/bolt)
+            vec3 nrm = normalize(vNormal);
+            vec3 viewDir = normalize(uCamPos - vWorldPos);
+            float ndv = clamp(abs(dot(nrm, viewDir)), 0.0, 1.0);
+            float fres = pow(1.0 - ndv, 2.0);
+            vec3 lp = normalize(vLocalPos);
+            float t = (vWorldPos.x + vWorldPos.z) * 0.35;
+            float b1 = gx_fbm2(vec2(atan(lp.z, lp.x) * 1.5 + t, lp.y * 5.0 - t * 1.4), 3);
+            float b2 = gx_fbm2(vec2(lp.x * 4.0 - t * 0.8, lp.z * 4.0 + lp.y * 4.0), 2);
+            float bubbles = smoothstep(0.48, 0.80, b1 * 0.65 + b2 * 0.45);
+            float glint = pow(max(dot(reflect(-viewDir, nrm), normalize(vec3(0.4, 0.8, 0.3))), 0.0), 18.0);
+            vec3 col = mix(WATER_BODY * vColor.rgb, WATER_FOAM, clamp(fres * 0.75 + bubbles * 0.55 + glint * 0.85, 0.0, 1.0));
+            float alpha = clamp((0.38 + fres * 0.52 + bubbles * 0.30 + glint * 0.25) * vColor.a, 0.0, 0.94);
+            FragColor = vec4(col, alpha);
+            return;
+        }
+        if (vKind < 16.5) {
+            // 16: gota de agua / salpicadura
+            vec2 c = (vUV - 0.5) * 2.0;
+            float r = length(c);
+            if (r > 1.0) discard;
+            float core = 1.0 - smoothstep(0.15, 0.95, r);
+            float rim = smoothstep(0.35, 0.75, r) * (1.0 - smoothstep(0.75, 1.0, r));
+            vec3 col = mix(WATER_BODY * vColor.rgb, WATER_FOAM, clamp(core * 0.45 + rim * 0.75, 0.0, 1.0));
+            FragColor = vec4(col, clamp((core * 0.85 + rim * 0.35) * vColor.a, 0.0, 0.95));
+            return;
+        }
+        // 17: bruma / velo de agua
+        vec2 c = (vUV - 0.5) * 2.0;
+        float r = length(c);
+        if (r > 1.0) discard;
+        float n = gx_fbm2(vUV * 3.5 + vec2(vWorldPos.x * 0.25, -vWorldPos.z * 0.25), 3);
+        float mask = (1.0 - smoothstep(0.15, 1.0, r)) * smoothstep(0.25, 0.75, n);
+        vec3 col = mix(WATER_BODY, WATER_FOAM, 0.65);
+        FragColor = vec4(col, clamp(mask * vColor.a, 0.0, 0.85));
+        return;
+    }
+
+    // kinds 12..14: viento (wind_blade). Procedural, escrito para BattleMage; la idea visual (esfera de aire con
+    // corrientes en espiral, rafaga con anillo y envolvente) sigue "Spell Orbs - wind" de Himmelblau Studios.
+    if (vKind > 11.5) {
+        if (vColor.a < 0.004) discard;
+        const vec3 AIR_DEEP  = vec3(0.60, 0.77, 0.90);
+        const vec3 AIR_LIGHT = vec3(0.97, 1.00, 1.00);
+        if (vKind < 12.5) {
+            // 12: orbe/envolvente de aire. r = -, g = tiempo, b = 0 orbe | 1 solo envolvente, a = opacidad
+            vec3 nrm = normalize(vNormal);
+            vec3 viewDir = normalize(uCamPos - vWorldPos);
+            float ndv = clamp(abs(dot(nrm, viewDir)), 0.0, 1.0);
+            float fres = pow(1.0 - ndv, 1.7);
+            float tt = vColor.g;
+            vec3 lp = normalize(vLocalPos);
+            // corrientes que rodean el eje de vuelo (+Y local), retorcidas segun la latitud (sin costura)
+            float la = atan(lp.z, lp.x);
+            float a1 = la + tt * 1.35 + lp.y * 2.4;
+            float a2 = la - tt * 2.05 - lp.y * 3.6;
+            float s1 = gx_fbm2(vec2(cos(a1), sin(a1)) * 1.6 + vec2(0.0, lp.y * 9.0), 3);
+            float s2 = gx_fbm2(vec2(cos(a2), sin(a2)) * 2.3 + vec2(3.7, lp.y * 15.0 + 1.3), 3);
+            float streak = smoothstep(0.44, 0.78, s1 * 0.62 + s2 * 0.5);
+            float body = pow(ndv, 2.0) * 0.20;
+            float a = mix(fres * 0.80 + streak * 0.55 + body, fres * 0.95 + streak * 0.12, vColor.b);
+            vec3 col = mix(AIR_DEEP, AIR_LIGHT, clamp(streak * 0.7 + fres * 0.6, 0.0, 1.0));
+            FragColor = vec4(col, clamp(a * vColor.a, 0.0, 0.92));
+            return;
+        }
+        if (vKind < 13.5) {
+            // 13: linea curva de viento, a lo largo de UV.y. r = semilla, g = curvatura 0..1, b = brillo, a = opacidad
+            float seed = vColor.r;
+            float t = vUV.y;
+            float across = vUV.x - 0.5;
+            float taper = pow(max(sin(3.14159265 * t), 0.0), 0.85);
+            float wob = (gx_fbm2(vec2(t * 3.0 + seed * 7.0, seed * 3.1), 2) - 0.5) * 0.18;
+            float xc = ((vColor.g - 0.5) * 0.85 + wob) * sin(3.14159265 * t);
+            float w = 0.03 + 0.07 * taper;
+            float d = abs(across - xc * 0.5);
+            float core = 1.0 - smoothstep(w * 0.25, w * 0.85, d);
+            float glow = exp(-d / (w * 2.4)) * 0.32;
+            float gap = smoothstep(0.22, 0.58, gx_fbm2(vec2(t * 5.0 - seed * 9.0, seed * 4.0), 2) + 0.22);
+            float m = (core + glow) * taper * gap;
+            float a = clamp(m * vColor.a, 0.0, 1.0);
+            if (a < 0.004) discard;
+            FragColor = vec4(mix(AIR_DEEP, AIR_LIGHT, clamp(vColor.b * 0.6 + core * 0.4, 0.0, 1.0)), a);
+            return;
+        }
+        // 14: onda de choque / remolino plano sobre la superficie. r = progreso (radio), g = semilla, b = 0 anillo | 1 remolino
+        vec2 p = vUV * 2.0 - 1.0;
+        float r = length(p);
+        if (r >= 1.0) discard;
+        float ang = atan(p.y, p.x);
+        float seed = vColor.g;
+        float n = gx_fbm2(vec2(cos(ang), sin(ang)) * 2.0 + vec2(seed * 7.0, vColor.r * 3.0), 3);
+        float m;
+        if (vColor.b < 0.5) {
+            float rad = clamp(vColor.r, 0.10, 0.95);
+            float th = 0.11;
+            m = (1.0 - smoothstep(th * 0.3, th, abs(r - rad))) * (0.45 + 0.75 * n)
+                + exp(-abs(r - rad) / (th * 1.7)) * 0.20;
+        } else {
+            float a2 = ang + r * 5.0 - vColor.r * 6.0;
+            float arms = pow(0.5 + 0.5 * cos(a2 * 3.0), 3.0);
+            m = arms * (1.0 - smoothstep(0.25, 0.95, r)) * smoothstep(0.0, 0.12, r) * (0.45 + 0.7 * n);
+        }
+        m *= 1.0 - smoothstep(0.90, 1.0, r);
+        float a = clamp(m * vColor.a, 0.0, 1.0);
+        if (a < 0.004) discard;
+        FragColor = vec4(mix(AIR_DEEP, AIR_LIGHT, clamp(m * 0.8, 0.0, 1.0)), a);
+        return;
+    }
+
+    // kind == 11: REEBOO Lightning Bolt Arc (sp_bolt.gdshader)
+    if (vKind > 10.5) {
+        if (vColor.a < 0.004) discard;
+        float s = vColor.r;
+        float jaggedness = vColor.g;
+        float branchAmount = vColor.b;
+        float y = vUV.y;
+        float x = vUV.x - 0.5;
+
+        // sp_arc_path(y, s)
+        float off = 0.0;
+        float amp = 1.0;
+        float freq = 1.2;
+        for (int i = 0; i < 5; i++) {
+            off += (gx_vnoise2(vec2(y * freq, s * 0.173 + float(i) * 0.31)) - 0.5) * amp;
+            freq *= 2.1;
+            amp *= 0.55;
+        }
+        off *= sin(3.14159265 * y) * jaggedness;
+
+        float d = abs(x - off);
+        float core = 1.0 - smoothstep(0.025, 0.060, d);
+        float glow = exp(-d / 0.095) * 0.55;
+
+        // Rama secundaria (fork)
+        float t = clamp((y - 0.25) / 0.40, 0.0, 1.0);
+        float sideSign = fract(s * 0.618) > 0.5 ? 1.0 : -1.0;
+        float bOff = 0.0;
+        float bAmp = 1.0;
+        float bFreq = 1.2;
+        for (int i = 0; i < 5; i++) {
+            bOff += (gx_vnoise2(vec2(y * 1.6 * bFreq, (s + 17.0) * 0.173 + float(i) * 0.31)) - 0.5) * bAmp;
+            bFreq *= 2.1;
+            bAmp *= 0.55;
+        }
+        bOff = off + (bOff * sin(3.14159265 * y) * 0.5 + sideSign * 0.2) * t * jaggedness * 1.8;
+        float bd = abs(x - bOff);
+        float fork = ((1.0 - smoothstep(0.015, 0.036, bd)) + exp(-bd / 0.055) * 0.32)
+            * step(0.25, y) * (1.0 - smoothstep(0.50, 0.70, y)) * branchAmount;
+
+        float ends = smoothstep(0.0, 0.05, y) * smoothstep(0.0, 0.05, 1.0 - y);
+        float strobe = mix(0.45, 1.0, step(0.30, gx_hash12(vec2(s * 1.91, s * 0.73))));
+        float m = (core + glow + fork) * ends * strobe;
+        float a = clamp(m * vColor.a, 0.0, 1.0);
+        if (a < 0.004) discard;
+        vec3 col = mix(vec3(0.45, 0.62, 1.0), vec3(0.95, 0.98, 1.0), clamp(core + fork * 0.5, 0.0, 1.0)) * 3.8;
+        FragColor = vec4(col, a);
+        return;
+    }
+
     // kind == 10: REEBOO Fire Surface Decals (sp_decal.gdshaderinc: Scorch, Glow Pool, Ring Wave)
     if (vKind > 9.5) {
         if (vColor.a < 0.004) discard;

@@ -74,7 +74,110 @@ private:
         const glm::vec3& camUp,
         const glm::vec3& camForward) const;
 
+    void submitLightningCastAndFlight(
+        Renderer& renderer,
+        const std::vector<std::vector<Entidad>>& combatFrames,
+        int currentFrame,
+        const glm::vec3& camPos,
+        const glm::vec3& camRight,
+        const glm::vec3& camUp,
+        const glm::vec3& camForward,
+        double timeSeconds) const;
+
+    void submitLightningImpact(
+        Renderer& renderer,
+        const ImpactVFX& impact,
+        float age,
+        bool isBounceOnly,
+        const glm::vec3& camPos,
+        const glm::vec3& camRight,
+        const glm::vec3& camUp,
+        const glm::vec3& camForward,
+        double timeSeconds) const;
+
+    void submitEarthCastAndFlight(
+        Renderer& renderer,
+        const std::vector<std::vector<Entidad>>& combatFrames,
+        int currentFrame,
+        const glm::vec3& camPos,
+        const glm::vec3& camRight,
+        const glm::vec3& camUp,
+        const glm::vec3& camForward,
+        double timeSeconds) const;
+
+    void submitEarthImpact(
+        Renderer& renderer,
+        const ImpactVFX& impact,
+        float age,
+        bool isBounceOnly,
+        const glm::vec3& camPos,
+        const glm::vec3& camRight,
+        const glm::vec3& camUp,
+        const glm::vec3& camForward) const;
+
+    void submitWindCastAndFlight(
+        Renderer& renderer,
+        const std::vector<std::vector<Entidad>>& combatFrames,
+        int currentFrame,
+        const glm::vec3& camPos,
+        const glm::vec3& camRight,
+        const glm::vec3& camUp,
+        const glm::vec3& camForward,
+        double timeSeconds) const;
+
+    void submitWindImpact(
+        Renderer& renderer,
+        const ImpactVFX& impact,
+        float age,
+        bool isBounceOnly,
+        const glm::vec3& camPos,
+        const glm::vec3& camRight,
+        const glm::vec3& camUp,
+        const glm::vec3& camForward) const;
+
+    void submitWaterCastAndFlight(
+        Renderer& renderer,
+        const std::vector<std::vector<Entidad>>& combatFrames,
+        int currentFrame,
+        const glm::vec3& camPos,
+        const glm::vec3& camRight,
+        const glm::vec3& camUp,
+        const glm::vec3& camForward,
+        double timeSeconds) const;
+
+    void submitWaterImpact(
+        Renderer& renderer,
+        const ImpactVFX& impact,
+        float age,
+        bool isBounceOnly,
+        const glm::vec3& camPos,
+        const glm::vec3& camRight,
+        const glm::vec3& camUp,
+        const glm::vec3& camForward) const;
+
+    void submitDaggerCastAndFlight(
+        Renderer& renderer,
+        const std::vector<std::vector<Entidad>>& combatFrames,
+        int currentFrame,
+        const glm::vec3& camPos,
+        const glm::vec3& camRight,
+        const glm::vec3& camUp,
+        const glm::vec3& camForward,
+        double timeSeconds) const;
+
+    void submitDaggerImpact(
+        Renderer& renderer,
+        const ImpactVFX& impact,
+        float age,
+        bool isBounceOnly,
+        const glm::vec3& camPos,
+        const glm::vec3& camRight,
+        const glm::vec3& camUp,
+        const glm::vec3& camForward) const;
+
     MeshId m_lanceBodyMesh   = INVALID_MESH;
+    MeshId m_daggerMesh      = INVALID_MESH;
+    GLuint m_daggerTexture   = 0;
     MeshId m_crownSpikeMesh  = INVALID_MESH;
     MeshId m_shardBoxMesh    = INVALID_MESH;
     MeshId m_shardWedgeMesh  = INVALID_MESH;
@@ -86,5 +189,6 @@ private:
     MeshId m_fireOrbMesh     = INVALID_MESH;
     MeshId m_fireFlameMesh   = INVALID_MESH;
     MeshId m_fireFlashMesh   = INVALID_MESH;
+    MeshId m_earthRockMesh   = INVALID_MESH;
     GLuint m_whiteTexture    = 0;
 };

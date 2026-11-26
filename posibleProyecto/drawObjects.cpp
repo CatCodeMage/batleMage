@@ -15,7 +15,7 @@ static ModelId modelAt(const Entidad& entity, std::span<const ModelAnimation> an
 
 void submitEntidad(Renderer& renderer, const ModelLibrary& models, const Entidad& e,
     std::span<const ModelAnimation> animations, double timeSeconds) {
-    if (e.isIceLance || e.isFireBall) return;
+    if (e.isIceLance || e.isFireBall || e.isLightningBolt || e.isEarthSpike || e.isWindBlade || e.isWaterBolt || e.isDaggerBarrage) return;
     const double age = e.animationAge >= 0.0 ? e.animationAge : timeSeconds;
     Transform transform = e.transform;
     if (e.animation != NO_ANIMATION) {

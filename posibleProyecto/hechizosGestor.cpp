@@ -49,13 +49,13 @@ void HechizosGestor::registrarHechizo(
     int id, const std::string& name, ElementType element,
     float cost, float damage, float cooldown,
     float speed, float radius, glm::vec3 scale,
-    float maxLifeTime, MovementPattern pattern)
+    float maxLifeTime, MovementPattern pattern, float gravityMultiplier)
 {
     SpellDefinitionComponent def = {
         id, name, element,
         CastType::Projectile,
         pattern,
-        cost, damage, cooldown
+        cost, damage, cooldown, gravityMultiplier
     };
 
     hechizhosCatalog[id] = {
