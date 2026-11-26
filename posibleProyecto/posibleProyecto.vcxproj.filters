@@ -4,6 +4,9 @@
     <Filter Include="sistema_particulas">
       <UniqueIdentifier>{07735227-BC7A-47A5-8382-A61A9B2CDCDE}</UniqueIdentifier>
     </Filter>
+    <Filter Include="sistema_particulas\logica">
+      <UniqueIdentifier>{E7504BCF-4662-4C0A-BC97-9524BD43D51F}</UniqueIdentifier>
+    </Filter>
     <Filter Include="Archivos de encabezado">
       <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
       <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
@@ -190,6 +193,12 @@
     <ClCompile Include="sistema_particulas\ParticleTestScene.cpp">
       <Filter>sistema_particulas</Filter>
     </ClCompile>
+    <ClCompile Include="sistema_particulas\logica\GestorParticulasLogica.cpp">
+      <Filter>sistema_particulas\logica</Filter>
+    </ClCompile>
+    <ClCompile Include="sistema_particulas\logica\ParticleJson.cpp">
+      <Filter>sistema_particulas\logica</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h">
@@ -369,6 +378,15 @@
     </ClInclude>
     <ClInclude Include="sistema_particulas\ParticleTestScene.h">
       <Filter>sistema_particulas</Filter>
+    </ClInclude>
+    <ClInclude Include="sistema_particulas\logica\GestorParticulasLogica.h">
+      <Filter>sistema_particulas\logica</Filter>
+    </ClInclude>
+    <ClInclude Include="sistema_particulas\logica\ParticleJson.h">
+      <Filter>sistema_particulas\logica</Filter>
+    </ClInclude>
+    <ClInclude Include="sistema_particulas\logica\ValidacionParticulas.h">
+      <Filter>sistema_particulas\logica</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

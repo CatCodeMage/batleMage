@@ -1,4 +1,5 @@
 #include "CombatSimulation.h"
+#include "sistema_particulas/logica/ParticleJson.h"
 
 
 // Nombres de db/entities.json: generateCombat los usa para saber que modelo dibujar
@@ -269,7 +270,16 @@ void CombatSimulation::recordFrame(bool ending) {
         frame.push_back(std::move(entry));
     }
 
-    m_replayFrames.push_back(std::move(frame));
+    // El indice del replay tambien avanza durante recordEnding(), aunque m_tick no cambie.
+    m_particleFrames.emplace_back();
+    try {
+        m_replayFrames.push_back(std::move(frame));
+        m_particleFrames.back() = m_particulas.registrarFrame(frameIndex);
+    } catch (...) {
+        if (m_replayFrames.size() > frameIndex) m_replayFrames.erase(frameIndex);
+        m_particleFrames.pop_back();
+        throw;
+    }
 }
 
 void CombatSimulation::countDownHitEffects() {
@@ -292,7 +302,9 @@ void CombatSimulation::writeReplay(const std::filesystem::path& replayFile) cons
             { "ticksPerSecond", TICKS_PER_SECOND },
             { "rotationOrder", "XYZ" },
             { "rotationUnit", "radians" } } },
-        { "frames", m_replayFrames } };
+        { "frames", m_replayFrames },
+        { "particleStyles", bm::particles::particleJson::escribirEstilos(m_particulas.estilos()) },
+        { "particleFrames", bm::particles::particleJson::escribirFrames(m_particleFrames) } };
 
     std::ofstream out(replayFile);
     if (!out) throw std::runtime_error("no se puede escribir " + replayFile.string());

@@ -1,5 +1,6 @@
 #include "jsonManager.h"
 #include "CombatSimulation.h"
+#include "sistema_particulas/logica/ParticleJson.h"
 
 #include <unordered_set>
 
@@ -126,6 +127,15 @@ FramesData generateCombat(const ModelLibrary& modelLib, const std::filesystem::p
 		.value("ticksPerSecond", CombatSimulation::TICKS_PER_SECOND);
 	if (!frames.is_array() || frames.empty() || result.ticksPerSecond <= 0)
 		throw std::runtime_error("replay sin frames o con frecuencia invalida: " + replayFile.string());
+
+	const auto particleStyles = replay.find("particleStyles");
+	const auto particleFrames = replay.find("particleFrames");
+	if ((particleStyles == replay.end()) != (particleFrames == replay.end()))
+		throw std::runtime_error("El replay debe incluir particleStyles y particleFrames juntos: " + replayFile.string());
+	if (particleStyles != replay.end()) {
+		result.particleStyles = bm::particles::particleJson::leerEstilos(*particleStyles);
+		result.particleFrames = bm::particles::particleJson::leerFrames(*particleFrames, result.particleStyles, frames.size());
+	}
 
 	result.combat.reserve(frames.size());
 	for (const auto& frame : frames) {

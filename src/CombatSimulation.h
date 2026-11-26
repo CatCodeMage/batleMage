@@ -11,6 +11,7 @@
 #include <cmath>
 #include "Paths.h"
 #include "varita.h"
+#include "sistema_particulas/logica/GestorParticulasLogica.h"
 
 // Combate sin graficos: los personajes con su IA y los hechizos en vuelo.
 // No toca OpenGL, para poder ejecutarse sin ventana.
@@ -66,6 +67,8 @@ private:
     int m_tick = 0;
 
     nlohmann::json m_replayFrames = nlohmann::json::array();   // un frame por tick, en el formato de generateCombat
+    bm::particles::GestorParticulasLogica m_particulas;
+    std::vector<bm::particles::ParticleFrame> m_particleFrames;
 
     std::vector<Varita> createWands();
 

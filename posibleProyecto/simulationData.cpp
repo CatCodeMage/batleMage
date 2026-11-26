@@ -43,7 +43,11 @@ void simulationData::init(GLFWwindow* window) {
 
 	constexpr auto PARTICLE_TEST_SCENARIO = bm::particles::ParticleTestScene::Scenario::Smoke;
 	const auto frameCount = framesInfo.combat.size();
-	if (frameCount > 0 && std::in_range<int>(frameCount) && framesInfo.ticksPerSecond > 0) {
+	if (!framesInfo.particleFrames.empty()) {
+		particleModule.initialize(std::move(framesInfo.particleStyles));
+		particleModule.setFrames(std::move(framesInfo.particleFrames), framesInfo.ticksPerSecond);
+	} else if (frameCount > 0 && std::in_range<int>(frameCount) && framesInfo.ticksPerSecond > 0) {
+		// Escenario temporal de prueba para replays anteriores a las secciones de particulas.
 		particleModule.initialize(bm::particles::presets::makeCatalog());
 		particleModule.setFrames(bm::particles::ParticleTestScene::makeFrames(
 			PARTICLE_TEST_SCENARIO, static_cast<int>(frameCount), framesInfo.ticksPerSecond),

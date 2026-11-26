@@ -226,6 +226,8 @@
     <ClCompile Include="sistema_particulas\ParticleRendererGL.cpp" />
     <ClCompile Include="sistema_particulas\ParticleSystem.cpp" />
     <ClCompile Include="sistema_particulas\ParticleTestScene.cpp" />
+    <ClCompile Include="sistema_particulas\logica\GestorParticulasLogica.cpp" />
+    <ClCompile Include="sistema_particulas\logica\ParticleJson.cpp" />
     <ClCompile Include="UserInterface.cpp" />
     <ClCompile Include="webPage.cpp" />
     <ClCompile Include="varita.cpp" />
@@ -271,6 +273,9 @@
     <ClInclude Include="sistema_particulas\ParticleRendererGL.h" />
     <ClInclude Include="sistema_particulas\ParticleSystem.h" />
     <ClInclude Include="sistema_particulas\ParticleTestScene.h" />
+    <ClInclude Include="sistema_particulas\logica\GestorParticulasLogica.h" />
+    <ClInclude Include="sistema_particulas\logica\ParticleJson.h" />
+    <ClInclude Include="sistema_particulas\logica\ValidacionParticulas.h" />
     <ClInclude Include="UserInterface.h" />
     <ClInclude Include="varita.h" />
     <ClInclude Include="webPage.h" />
