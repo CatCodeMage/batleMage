@@ -39,14 +39,21 @@ void ControladorMaquinaEstados::setcatalogoHechizos(const std::vector<InfoHechiz
     m_catalogoHechizos = catalogo;
 }
 
-// Apunta adonde estara el rival cuando llegue el hechizo, suponiendo que sigue moviendose igual
 glm::vec3 ControladorMaquinaEstados::calcularDireccionAnticipada(const Personaje& personaje, float velocidadHechizo) const
 {
     const glm::vec3 posicionPropia = personaje.getPosicion();
     const glm::vec3 posicionObjetivo = m_objetivo->getPosicion();
-    const float segundosDeVuelo = glm::length(posicionObjetivo - posicionPropia) / velocidadHechizo;
+    const glm::vec3 diff = posicionObjetivo - posicionPropia;
+    if (glm::length(diff) <= 0.0001f) {
+        return glm::vec3(0.0f, 0.0f, 1.0f);
+    }
+    if (velocidadHechizo <= 0.001f) {
+        return glm::normalize(diff);
+    }
+    const float segundosDeVuelo = glm::length(diff) / velocidadHechizo;
     const glm::vec3 posicionPrevista = posicionObjetivo + m_velocidadObjetivo * segundosDeVuelo;
-    return glm::normalize(posicionPrevista - posicionPropia);
+    const glm::vec3 dir = posicionPrevista - posicionPropia;
+    return (glm::length(dir) > 0.0001f) ? glm::normalize(dir) : glm::normalize(diff);
 }
 
 void ControladorMaquinaEstados::actualizar(Personaje& personaje, float deltaTime)
@@ -56,7 +63,6 @@ void ControladorMaquinaEstados::actualizar(Personaje& personaje, float deltaTime
         return;
     }
     m_tiempoDesdeUltAtaque += deltaTime;
-    personaje.aumentarMana(m_regenMana*deltaTime);
     if(m_objetivo == nullptr || m_objetivo->yaTieneEstado(EstadoPersonaje::MUERTO))
     {
         m_estadoIA = EstadoIA::ESPERANDO;
@@ -87,45 +93,65 @@ void ControladorMaquinaEstados::actualizar(Personaje& personaje, float deltaTime
     ejecutarEstado(personaje, direccion, distancia, deltaTime);
 }
 
-void ControladorMaquinaEstados::evaluarTransiciones(const Personaje& personaje, float distanciaAlObjetivo) 
+void ControladorMaquinaEstados::evaluarTransiciones(Personaje& personaje, float distanciaAlObjetivo)
 {
     if (personaje.yaTieneEstado(EstadoPersonaje::CASTEANDO))
     {
         return;
     }
-    m_hechizosLanzables.clear();
-    std::vector<InfoHechizo> hechizosConMana;
-    float manaAct = personaje.getMana();
 
-    for(const InfoHechizo& hechizo : m_catalogoHechizos)
-    {
-        if(manaAct >= hechizo.costeMana)
-        {
-            hechizosConMana.push_back(hechizo);
-        }
-    }
+    const HechizosGestor* gestor = personaje.getGestorHechizos();
+    const auto& varitas = personaje.getVaritas();
 
-    if (hechizosConMana.empty() || distanciaAlObjetivo < m_distanciaSegura)
+    if (gestor == nullptr || varitas.empty() || distanciaAlObjetivo < m_distanciaSegura)
     {
         m_estadoIA = EstadoIA::HUYENDO;
         return;
     }
 
-    for(const InfoHechizo& hechizo : hechizosConMana)
+    int mejorVaritaLista = -1;
+    int mejorVaritaEnRango = -1;
+    bool algunaTieneMana = false;
+
+    for (int i = 0; i < static_cast<int>(varitas.size()); ++i)
     {
-        if(distanciaAlObjetivo <= hechizo.alcance)
+        // Con distancia 0 comprobamos si la varita tiene maná para lanzar algún hechizo
+        if (!varitas[i].puedeAtacarObjetivo(0.0f, *gestor))
         {
-            m_hechizosLanzables.push_back(hechizo);
+            continue;
+        }
+        algunaTieneMana = true;
+
+        if (varitas[i].puedeAtacarObjetivo(distanciaAlObjetivo, *gestor))
+        {
+            if (mejorVaritaEnRango < 0)
+            {
+                mejorVaritaEnRango = i;
+            }
+            if (varitas[i].estaLista() && mejorVaritaLista < 0)
+            {
+                mejorVaritaLista = i;
+            }
         }
     }
 
-    if(m_hechizosLanzables.empty())
+    if (mejorVaritaLista >= 0)
+    {
+        personaje.cambiarVarita(mejorVaritaLista);
+        m_estadoIA = EstadoIA::ATACANDO;
+    }
+    else if (mejorVaritaEnRango >= 0)
+    {
+        personaje.cambiarVarita(mejorVaritaEnRango);
+        m_estadoIA = EstadoIA::ATACANDO;
+    }
+    else if (algunaTieneMana)
     {
         m_estadoIA = EstadoIA::PERSIGUIENDO;
     }
     else
     {
-        m_estadoIA = EstadoIA::ATACANDO;
+        m_estadoIA = EstadoIA::HUYENDO;
     }
 }
 
@@ -172,30 +198,31 @@ void ControladorMaquinaEstados::ejecutarEstado(Personaje& personaje,const glm::v
         {
             if (personaje.yaTieneEstado(EstadoPersonaje::CASTEANDO))
             {
-                if (m_tiempoDesdeUltAtaque > 0.3f) 
-                {
-                    personaje.borrarEstado(EstadoPersonaje::CASTEANDO);
-                    personaje.anadirEstado(EstadoPersonaje::IDLE);
-                }
                 break;
             }
             personaje.borrarEstado(EstadoPersonaje::VOLANDO);
             apuntarHacia(personaje, direccionHaciaObjetivo);
-            constexpr float DISTANCIA_COMBATE_PREFERIDA = 12.0f;   
+            constexpr float DISTANCIA_COMBATE_PREFERIDA = 12.0f;
             if (distancia > DISTANCIA_COMBATE_PREFERIDA)
-                acercarseAlObjetivo(personaje, direccionHaciaObjetivo, deltaTime);  
+            {
+                acercarseAlObjetivo(personaje, direccionHaciaObjetivo, deltaTime);
+            }
             rodearObjetivo(personaje, direccionHaciaObjetivo, deltaTime);
-            if (m_tiempoDesdeUltAtaque >= m_cooldownAtaque)
+            Varita* varita = personaje.getVaritaActual();
+            const HechizosGestor* gestor = personaje.getGestorHechizos();
+            if (varita != nullptr && gestor != nullptr && varita->estaLista())
             {
                 personaje.borrarEstado(EstadoPersonaje::IDLE);
-                int indiceRandom = std::rand() % m_hechizosLanzables.size();
-                InfoHechizo hechizoElegido = m_hechizosLanzables[indiceRandom];
-                personaje.disminuirMana(hechizoElegido.costeMana);
-                
-                apuntarHacia(personaje, calcularDireccionAnticipada(personaje, hechizoElegido.velocidad));
-                personaje.lanzarHechizo(hechizoElegido.id);
-                m_cooldownAtaque = hechizoElegido.cooldown;
-                m_tiempoDesdeUltAtaque = 0.0f;
+                const float vel = varita->getVelocidadProximoHechizo(*gestor);
+                apuntarHacia(personaje, calcularDireccionAnticipada(personaje, vel));
+                if (personaje.dispararVaritaActual())
+                {
+                    m_tiempoDesdeUltAtaque = 0.0f;
+                }
+                else
+                {
+                    personaje.anadirEstado(EstadoPersonaje::IDLE);
+                }
             }
             break;
         }

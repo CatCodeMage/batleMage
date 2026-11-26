@@ -58,5 +58,13 @@ public:
     float getDispersion() const { return m_dispersion; }
     const std::vector<int>& getRanuras() const { return m_ranuras; }
     int getIndiceActual() const { return m_indiceActual; }
+    
+    void setRanuras(const std::vector<int>& ranuras);
+    void setManaActual(float mana);
+    void setIndiceActual(int indice);
+    void setTiempoEspera(float tiempo);
+
+    bool estaLista() const { return m_tiempoEspera <= 0.0f; }
+    float getTiempoEspera() const { return m_tiempoEspera; }
 };
 

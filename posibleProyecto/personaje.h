@@ -44,6 +44,7 @@ private:
     float m_tiempoQuemado;
     float m_tiempoCongelado;
     float m_danoQuemadura;
+    float m_tiempoCasteando;
     glm::vec3 m_posicion;
     glm::vec3 m_rotacion;
     glm::vec3 m_direccion;

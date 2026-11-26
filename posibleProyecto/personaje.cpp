@@ -16,6 +16,7 @@ Personaje::Personaje(int id, glm::vec3 posicionInicial, float radio, HechizosGes
     this->m_vida = this->m_vidaMax;
     this->m_manaMax = 50.0f;
     this->m_mana = this->m_manaMax; 
+    this->m_tiempoCasteando = 0.0f;
     this->m_tiempoQuemado = 0.0f;
     this->m_tiempoCongelado = 0.0f;
     this->m_danoQuemadura = 5.0f;
@@ -28,15 +29,21 @@ Personaje::Personaje(int id, glm::vec3 posicionInicial, float radio, HechizosGes
 
 void Personaje::anadirEstado(EstadoPersonaje nuevoEstado, float duracion)
 {
-    if(nuevoEstado == EstadoPersonaje::QUEMADO)
+    if (nuevoEstado == EstadoPersonaje::QUEMADO)
     {
         m_tiempoQuemado = duracion;
     }
-    else if(nuevoEstado == EstadoPersonaje::CONGELADO)
+    else if (nuevoEstado == EstadoPersonaje::CONGELADO)
     {
         m_tiempoCongelado = duracion;
     }
-    if(!yaTieneEstado(nuevoEstado))
+    else if (nuevoEstado == EstadoPersonaje::CASTEANDO)
+    {
+        m_tiempoCasteando = duracion;
+        borrarEstado(EstadoPersonaje::VOLANDO);
+    }
+
+    if (!yaTieneEstado(nuevoEstado))
     {
         m_estadosActuales.push_back(nuevoEstado);
     }
@@ -44,11 +51,12 @@ void Personaje::anadirEstado(EstadoPersonaje nuevoEstado, float duracion)
 
 void Personaje::borrarEstado(EstadoPersonaje estado)
 {
-    if(estado == EstadoPersonaje::QUEMADO) m_tiempoQuemado = 0.0f;
-    if(estado == EstadoPersonaje::CONGELADO) m_tiempoCongelado = 0.0f;
+    if (estado == EstadoPersonaje::QUEMADO)   m_tiempoQuemado = 0.0f;
+    if (estado == EstadoPersonaje::CONGELADO) m_tiempoCongelado = 0.0f;
+    if (estado == EstadoPersonaje::CASTEANDO) m_tiempoCasteando = 0.0f;
 
     auto it = std::find(m_estadosActuales.begin(), m_estadosActuales.end(), estado);
-    if(it != m_estadosActuales.end())
+    if (it != m_estadosActuales.end())
     {
         m_estadosActuales.erase(it);
     }
@@ -61,25 +69,40 @@ bool Personaje::yaTieneEstado(EstadoPersonaje estado) const
 
 void Personaje::update(float deltaTime)
 {
-    if(yaTieneEstado(EstadoPersonaje::MUERTO)) return;
+    if (yaTieneEstado(EstadoPersonaje::MUERTO)) return;
 
-    if(yaTieneEstado(EstadoPersonaje::QUEMADO))
+    if (yaTieneEstado(EstadoPersonaje::QUEMADO))
     {
         recibirDano(m_danoQuemadura * deltaTime);
         m_tiempoQuemado -= deltaTime;
-        
-        if(yaTieneEstado(EstadoPersonaje::MUERTO)) return;
 
-        if(m_tiempoQuemado <= 0.0f)
+        if (yaTieneEstado(EstadoPersonaje::MUERTO)) return;
+
+        if (m_tiempoQuemado <= 0.0f)
         {
             borrarEstado(EstadoPersonaje::QUEMADO);
         }
     }
 
-    if(yaTieneEstado(EstadoPersonaje::CONGELADO))
+    if (yaTieneEstado(EstadoPersonaje::CASTEANDO))
+    {
+        m_tiempoCasteando -= deltaTime;
+        if (m_tiempoCasteando <= 0.0f)
+        {
+            borrarEstado(EstadoPersonaje::CASTEANDO);
+        }
+    }
+
+    // Las varitas siguen recargando maná y cooldown aunque esté congelado
+    for (Varita& varita : m_varitas)
+    {
+        varita.update(deltaTime);
+    }
+
+    if (yaTieneEstado(EstadoPersonaje::CONGELADO))
     {
         m_tiempoCongelado -= deltaTime;
-        if(m_tiempoCongelado <= 0.0f)
+        if (m_tiempoCongelado <= 0.0f)
         {
             borrarEstado(EstadoPersonaje::CONGELADO);
         }
@@ -88,14 +111,10 @@ void Personaje::update(float deltaTime)
             return;
         }
     }
-    
-    if(m_controlador != nullptr)
+
+    if (m_controlador != nullptr)
     {
         m_controlador->actualizar(*this, deltaTime);
-    }
-    for(Varita& varita : m_varitas)
-    {
-        varita.update(deltaTime);
     }
 }
 
@@ -189,7 +208,7 @@ void Personaje::lanzarHechizo(int idHechizo)
         }
         float distanciaSeparacion = m_radio + radioHechizo + m_margenCasteo;
         glm::vec3 posicionOrigenHechizo = m_posicion + direccionDisparo * distanciaSeparacion;
-        m_gestorHechizos->spawnSpell(idHechizo, posicionOrigenHechizo, direccionDisparo);
+        m_gestorHechizos->spawnSpell(idHechizo, posicionOrigenHechizo, direccionDisparo, m_id);
     }
 }
 
@@ -255,6 +274,8 @@ float Personaje::getMana() const
 float Personaje::getRadio() const { return m_radio; }
 
 glm::vec3 Personaje::getPosicion() const { return m_posicion; }
+glm::vec3 Personaje::getRotacion() const { return m_rotacion; }
+glm::vec3 Personaje::getDireccion() const { return m_direccion; }
 
 void Personaje::setRotacion(const glm::vec3& nuevaRotacion) 
 { 
@@ -269,8 +290,6 @@ void Personaje::setDireccion(const glm::vec3& nuevaDireccion)
 }
 
 void Personaje::setPosicion(const glm::vec3& nuevaPosicion) { m_posicion = nuevaPosicion; }
-void Personaje::setRotacion(const glm::vec3& nuevaRotacion) { m_rotacion = nuevaRotacion; }
-void Personaje::setDireccion(const glm::vec3& nuevaDireccion) { m_direccion = nuevaDireccion; }
 void Personaje::setRadio(float radio) { m_radio = radio; }
 
 std::vector<EstadoPersonaje> Personaje::getEstados() const
