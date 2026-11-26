@@ -28,3 +28,13 @@ bool needsCharacter(SceneCameraType type);   // los tipos que siguen a un person
 SceneCamera makeSceneCamera(SceneCameraType type, int targetCharacterId);   // con los valores de partida de su tipo
 glm::mat4 viewMatrixFor(const SceneCamera& camera, const std::vector<Entidad>& frameEntities);
 std::vector<int> characterIdsIn(const std::vector<Entidad>& frameEntities);
+
+struct CameraView {   // lo que necesita una vista para pintarse
+	glm::mat4 view;
+	float fieldOfViewDegrees;
+};
+
+CameraView cameraViewFor(const SceneCamera& camera, const std::vector<Entidad>& frameEntities);
+const Entidad* findCharacter(const std::vector<Entidad>& frameEntities, int characterId);   // nullptr si no esta en el frame
+glm::vec3 chestOf(const Entidad& character);
+glm::vec3 combatCenter(const std::vector<Entidad>& frameEntities);   // el centro de la arena si no hay combatientes

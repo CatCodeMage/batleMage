@@ -31,16 +31,6 @@ namespace {
 		ImGui::SliderFloat(label, &value, range.min, range.max, "%.1f");
 	}
 
-	std::string characterName(int characterId) { return "Mago " + std::to_string(characterId); }
-
-	void drawCharacterSelector(int& targetCharacterId, const std::vector<int>& characterIds) {
-		if (!ImGui::BeginCombo("Personaje", characterName(targetCharacterId).c_str())) return;
-		for (int characterId : characterIds)
-			if (ImGui::Selectable(characterName(characterId).c_str(), characterId == targetCharacterId))
-				targetCharacterId = characterId;
-		ImGui::EndCombo();
-	}
-
 	void drawTypeSelector(SceneCamera& camera) {
 		int typeIndex = (int)camera.type;
 		ImGui::SetNextItemWidth(TYPE_COMBO_WIDTH_PIXELS);
@@ -96,11 +86,21 @@ void drawViewHeaders(SceneCameras& cameras, const std::vector<SceneViewport>& vi
 	}
 }
 
+std::string characterName(int characterId) { return "Mago " + std::to_string(characterId); }
+
+void drawCharacterSelector(const char* label, int& targetCharacterId, const std::vector<int>& characterIds) {
+	if (!ImGui::BeginCombo(label, characterName(targetCharacterId).c_str())) return;
+	for (int characterId : characterIds)
+		if (ImGui::Selectable(characterName(characterId).c_str(), characterId == targetCharacterId))
+			targetCharacterId = characterId;
+	ImGui::EndCombo();
+}
+
 void drawSelectedCameraPanel(SceneCamera& camera, int viewIndex, const std::vector<int>& characterIds) {
 	ImGui::Begin("Vista");
 	ImGui::Text("Vista %d: %s", viewIndex + 1, sceneCameraTypeName(camera.type));
 	ImGui::Separator();
-	if (needsCharacter(camera.type)) drawCharacterSelector(camera.targetCharacterId, characterIds);
+	if (needsCharacter(camera.type)) drawCharacterSelector("Personaje", camera.targetCharacterId, characterIds);
 	drawTypeSettings(camera);
 	drawSlider("Campo de vision", camera.fieldOfViewDegrees, FIELD_OF_VIEW);
 	ImGui::End();

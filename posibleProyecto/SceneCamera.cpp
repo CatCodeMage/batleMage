@@ -10,11 +10,7 @@ namespace {
 	constexpr float FACE_CLEARANCE = 0.3f;        // en primera persona, el ojo va delante de la cara para no ver la cabeza por dentro
 	constexpr float MIN_DUEL_SEPARATION = 0.01f;  // por debajo, la linea entre los dos no da una direccion
 
-	const Entidad* findCharacter(const std::vector<Entidad>& entities, int characterId) {
-		for (const Entidad& entity : entities)
-			if (entity.characterId == characterId) return &entity;
-		return nullptr;
-	}
+
 
 	const Entidad* findOpponent(const std::vector<Entidad>& entities, int characterId) {
 		for (const Entidad& entity : entities)
@@ -28,19 +24,6 @@ namespace {
 	}
 
 	glm::vec3 rightOf(const Entidad& character) { return glm::normalize(glm::cross(forwardOf(character), WORLD_UP)); }
-	glm::vec3 chestOf(const Entidad& character) { return character.transform.pos + WORLD_UP * CHEST_HEIGHT; }
-
-	glm::vec3 combatCenter(const std::vector<Entidad>& entities) {
-		glm::vec3 positionSum(0.f);
-		int characterCount = 0;
-		for (const Entidad& entity : entities) {
-			if (entity.characterId != NO_CHARACTER)  {
-				positionSum += entity.transform.pos;
-				++characterCount;
-			}
-		}
-		return characterCount > 0 ? (positionSum / (float)characterCount) : ARENA_CENTER;
-	}
 
 	glm::mat4 viewOfFreePose(const CameraPose& pose) {
 		return glm::lookAt(pose.position, pose.position + frontFromYawPitch(pose.yaw, pose.pitch), WORLD_UP);
@@ -89,6 +72,30 @@ namespace {
 		const glm::vec3 center = combatCenter(entities);
 		return glm::lookAt(center + WORLD_UP * camera.height, center, SCREEN_UP_SEEN_FROM_ABOVE);
 	} 
+}
+
+CameraView cameraViewFor(const SceneCamera& camera, const std::vector<Entidad>& frameEntities) {
+	return { viewMatrixFor(camera, frameEntities), camera.fieldOfViewDegrees };
+}
+
+const Entidad* findCharacter(const std::vector<Entidad>& entities, int characterId) {
+	for (const Entidad& entity : entities)
+		if (entity.characterId == characterId) return &entity;
+	return nullptr;
+}
+
+glm::vec3 chestOf(const Entidad& character) { return character.transform.pos + WORLD_UP * CHEST_HEIGHT; }
+
+glm::vec3 combatCenter(const std::vector<Entidad>& entities) {
+	glm::vec3 positionSum(0.f);
+	int characterCount = 0;
+	for (const Entidad& entity : entities) {
+		if (entity.characterId != NO_CHARACTER) {
+			positionSum += entity.transform.pos;
+			++characterCount;
+		}
+	}
+	return characterCount > 0 ? (positionSum / (float)characterCount) : ARENA_CENTER;
 }
 
 SceneCamera makeSceneCamera(SceneCameraType type, int targetCharacterId) {

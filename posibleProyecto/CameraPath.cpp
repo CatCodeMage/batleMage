@@ -18,8 +18,26 @@ void CameraPath::saveShot(int frame, const SceneCamera& camera) {
 	else                w_shots.insert(insertPosition, { frame, camera });   // insertar aqui mantiene el orden
 }
 
-SceneCamera CameraPath::cameraAtFrame(int frame) const {
+int CameraPath::shotIndexAtFrame(int frame) const {
 	auto startsAfterFrame = [frame](const CameraShot& shot) { return shot.startFrame > frame; };
 	auto firstLaterShot = std::find_if(w_shots.begin(), w_shots.end(), startsAfterFrame);
-	return std::prev(firstLaterShot)->camera;   // el anterior empieza en frame o antes; existe porque hay plano en el 0
-} 
+	return (int)std::distance(w_shots.begin(), firstLaterShot) - 1;   // el anterior empieza en frame o antes; existe porque hay plano en el 0
+}
+
+CameraView CameraPath::viewAtFrame(int frame, const std::vector<Entidad>& frameEntities) const {
+	const int shotIndex = shotIndexAtFrame(frame);
+	const CameraShot& shot = w_shots[shotIndex];
+	const CameraView shotView = cameraViewFor(shot.camera, frameEntities);
+
+	const bool isLastShot = shotIndex + 1 == (int)w_shots.size();
+	if (isLastShot || shot.transition.type == TransitionType::Cut) return shotView;
+
+	const CameraShot& nextShot = w_shots[shotIndex + 1];
+	const int shotLength = nextShot.startFrame - shot.startFrame;
+	const int transitionFrames = (std::min)(shot.transition.durationFrames, shotLength);   // no puede empezar antes que su propio plano
+	const int framesUntilNextShot = nextShot.startFrame - frame;
+	if (framesUntilNextShot > transitionFrames) return shotView;
+
+	const float progress = 1.f - (float)framesUntilNextShot / (float)transitionFrames;
+	return blendCameraMove(shotView, cameraViewFor(nextShot.camera, frameEntities), progress, shot.transition, frameEntities);
+}

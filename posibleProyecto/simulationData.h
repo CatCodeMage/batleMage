@@ -75,7 +75,8 @@ private:
 
     void prepareLightingPrograms();
     void drawSceneViews(const std::vector<SceneViewport>& views);
-    void drawSceneInViewport(const SceneViewport& viewport, const glm::mat4& view, float fieldOfViewDegrees);
+    void drawSceneInViewport(const SceneViewport& viewport, const CameraView& cameraView);
+    CameraView cameraViewForView(int viewIndex, const std::vector<Entidad>& frameEntities) const;
 
     const bm::anim::Animator& poseFor(const Entidad& entity, const SkinnedModel& model);
     void submitEntities(const std::vector<Entidad>& entities);

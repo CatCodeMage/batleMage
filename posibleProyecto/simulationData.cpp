@@ -173,7 +173,7 @@ void simulationData::procesMainBodyLoopRealTime(GLFWwindow* window, SystemInfo& 
 	// Pintar la UI
 	if (arePanelsVisible) {
 		drawCombatPanel(framesInfo);
-		drawCameraPathPanel(cameraPathMode, cameraPath, sceneCameras[selectedViewIndex], framesInfo, sceneMosaic);
+		drawCameraPathPanel(cameraPathMode, cameraPath, sceneCameras[selectedViewIndex], framesInfo, sceneMosaic, characterIds);		
 		if (cameraPathMode == CameraPathMode::Recording) {
 			drawViewHeaders(sceneCameras, views, selectedViewIndex, sysInfo.getHeight());
 			drawSelectedCameraPanel(sceneCameras[selectedViewIndex], selectedViewIndex, characterIds);
@@ -204,26 +204,18 @@ void simulationData::prepareLightingPrograms() {
 	shadows.bindForLighting(program);
 }
 
-void simulationData::drawSceneInViewport(const SceneViewport& viewport, const glm::mat4& view, float fieldOfViewDegrees) {
-	if (viewport.isVisible()) {
-		glViewport(viewport.x, viewport.y, viewport.width, viewport.height);
-		const glm::mat4 projection = glm::perspective(glm::radians(fieldOfViewDegrees),
-			viewport.aspectRatio(), VIEW_NEAR_PLANE, VIEW_FAR_PLANE);
-		const glm::mat4 viewProjection = projection * view;
+void simulationData::drawSceneInViewport(const SceneViewport& viewport, const CameraView& cameraView) {
+	if (!viewport.isVisible()) return;   // ventana minimizada, o los paneles ocupan todo
 
-		renderer.drawLighting(libMesh, viewProjection);
-		skinnedRenderer.drawLighting(viewProjection);
-	}
+	glViewport(viewport.x, viewport.y, viewport.width, viewport.height);
+	const glm::mat4 projection = glm::perspective(glm::radians(cameraView.fieldOfViewDegrees),
+		viewport.aspectRatio(), VIEW_NEAR_PLANE, VIEW_FAR_PLANE);
+	const glm::mat4 viewProjection = projection * cameraView.view;
+
+	renderer.drawLighting(libMesh, viewProjection);
+	skinnedRenderer.drawLighting(viewProjection);
 }
-
-void simulationData::drawSceneViews(const std::vector<SceneViewport>& views) {
-	const std::vector<Entidad>& frameEntities = framesInfo.combat[framesInfo.frame];
-	for (int viewIndex = 0; viewIndex < (int)views.size(); ++viewIndex) {
-		const SceneCamera camera = cameraForView(viewIndex); 
-		drawSceneInViewport(views[viewIndex], viewMatrixFor(camera, frameEntities), camera.fieldOfViewDegrees);
-	}
-}
-
+ 
 std::vector<SceneViewport> simulationData::currentViews(const SystemInfo& sysInfo) const {
 	const bool isFullScreen = interactionMode == InteractionMode::ControllingCamera;
 	if (isFullScreen) return { SceneViewport{ 0, 0, sysInfo.getWidht(), sysInfo.getHeight() } };
@@ -262,10 +254,16 @@ void simulationData::startControllingCamera(GLFWwindow* window, int viewIndex) {
 	enterFullScreen(window);
 } 
 
-SceneCamera simulationData::cameraForView(int viewIndex) const {
+CameraView simulationData::cameraViewForView(int viewIndex, const std::vector<Entidad>& frameEntities) const {
 	const bool isPlayingBack = cameraPathMode == CameraPathMode::Playback;
-	if (isPlayingBack) return cameraPath.cameraAtFrame(framesInfo.frame);   // Resultado: manda la lista de planos
+	if (isPlayingBack) return cameraPath.viewAtFrame(framesInfo.frame, frameEntities);   // Resultado: planos y transiciones
 
 	const bool isControllingCamera = interactionMode == InteractionMode::ControllingCamera;
-	return sceneCameras[isControllingCamera ? freeCameraView : viewIndex];   // a pantalla entera, solo la que se mueve
+	return cameraViewFor(sceneCameras[isControllingCamera ? freeCameraView : viewIndex], frameEntities);   // a pantalla entera, solo la que se mueve
+}
+
+void simulationData::drawSceneViews(const std::vector<SceneViewport>& views) {
+	const std::vector<Entidad>& frameEntities = framesInfo.combat[framesInfo.frame];
+	for (int viewIndex = 0; viewIndex < (int)views.size(); ++viewIndex)
+		drawSceneInViewport(views[viewIndex], cameraViewForView(viewIndex, frameEntities));
 }

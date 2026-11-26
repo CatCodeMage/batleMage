@@ -162,6 +162,7 @@
     <ClCompile Include="camera.cpp" />
     <ClCompile Include="CameraPath.cpp" />
     <ClCompile Include="CameraPathPanel.cpp" />
+    <ClCompile Include="CameraTransition.cpp" />
     <ClCompile Include="CombatPanel.cpp" />
     <ClCompile Include="controladorMaquinaEstados.cpp" />
     <ClCompile Include="drawObjects.cpp" />
@@ -193,6 +194,7 @@
     <ClInclude Include="..\src\logica\mapa.h" />
     <ClInclude Include="CameraPath.h" />
     <ClInclude Include="CameraPathPanel.h" />
+    <ClInclude Include="CameraTransition.h" />
     <ClInclude Include="CombatPanel.h" />
     <ClInclude Include="controladorMaquinaEstados.h" />
     <ClInclude Include="controladorPersonaje.h" />
