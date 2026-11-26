@@ -3,6 +3,16 @@
 #include "ModelLibrary.h"
 #include "GeneradorIds.h"   // solo el tipo EntityId (sin dependencias)
 
+using AnimationId = uint32_t;
+constexpr AnimationId NO_ANIMATION = UINT32_MAX;
+
+struct ModelAnimation {
+    std::vector<ModelId> frames;
+    double fps = 1.0;
+    double spinRadiansPerSecond = 0.0;
+    bool loop = true;
+};
+
 struct Entidad {
     ModelId   model = INVALID_MODEL;
     Transform transform;
@@ -12,4 +22,22 @@ struct Entidad {
     int       characterId = 0;           // 0 si el replay no identifica a un combatiente
     std::string animation;
     int       animationStartFrame = 0;
+    // A negative age selects the replay clock for legacy samples.
+    double animationAge = -1.0;
+    bool   isIceLance = false;
+    bool   isFireBall = false;
+    bool   isLightningBolt = false;
+    bool   isEarthSpike = false;
+    bool   isWindBlade = false;
+    bool   isWaterBolt = false;
+    bool   isDaggerBarrage = false;
+    int    poolIndex = -1;
+};
+
+struct ImpactVFX {
+    std::string type;
+    glm::vec3   position = glm::vec3(0.0f);
+    glm::vec3   normal   = glm::vec3(0.0f, 1.0f, 0.0f);
+    int         startTick = 0;
+    float       duration  = 1.9f;
 };

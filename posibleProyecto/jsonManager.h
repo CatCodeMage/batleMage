@@ -20,13 +20,13 @@ struct ReplayAnimationState {
 
 struct FramesData {
 	std::vector<std::vector<Entidad>> combat;
+	std::vector<ImpactVFX> impacts;
 	int frame = 0;
 	int ticksPerSecond = 0;
 	bool isPaused = false;
 	bm::particles::ParticleStyleCatalog particleStyles;
 	std::vector<bm::particles::ParticleFrame> particleFrames;   // Vacio solo para replays sin estas secciones.
 };
-
 ElementType parseElement(std::string element);
 
 void readSpells(HechizosGestor& spellManager);

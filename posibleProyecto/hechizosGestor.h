@@ -23,8 +23,14 @@ public:
     HechizosGestor(size_t poolSize, GeneradorIds& ids);
 
     // para registrar los datos del un hechizo 
-    void registrarHechizo(int id, const std::string& name, ElementType element, float cost,
-        float damage, float cooldown, float speed, float radius, glm::vec3 scale, float maxLifeTime);
+    void registrarHechizo(
+        int id, const std::string& name, ElementType element,
+        float cost, float damage, float cooldown,
+        float speed, float radius, glm::vec3 scale,
+        float maxLifeTime,
+        MovementPattern pattern = MovementPattern::Linear,
+        float gravityMultiplier = 0.0f
+    );
 
     // NUEVO: registrar cartas que no vienen de spells.json
     void registrarModificador(int id, const std::string& nombre, float mana, float castDelay,
@@ -64,6 +70,7 @@ private:
     // NUEVO
     Hechizo* sacarDelPool();
     void devolverAlPool(Hechizo* spell);
+    bool perteneceAlPool(const Hechizo* spell) const;
 
     std::vector<std::unique_ptr<Hechizo>> spellPool;
 
@@ -74,6 +81,5 @@ private:
 
     // NUEVO: todas las cartas (proyectiles, modificadores, multicast). Se crean solo al cargar.
     std::unordered_map<int, std::unique_ptr<Carta>> cartas;
-
     GeneradorIds& m_ids;   // NO es suyo: pertenece al simulador
 };

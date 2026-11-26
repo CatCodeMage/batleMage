@@ -1,0 +1,5 @@
+HimmelblauFX SpellOrbs (wind / wind-hit presets)
+Copyright (c) 2026 Himmelblau Studios
+
+Permission is hereby granted to use, modify, and integrate these VFX assets and shader concepts in commercial and non-commercial games.
+Redistribution as standalone source assets is not permitted.

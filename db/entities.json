@@ -27,7 +27,21 @@
         "scale": [0.5, 0.5, 0.5],
         "asset": "fireball"
     },
-    "fire_ball":       { "scale": [0.5, 0.5, 0.5], "asset": "fireball" },
+    "fire_ball": {
+        "scale": [1.05, 1.05, 1.05],
+        "asset": "fireball_00",
+        "animation": {
+            "fps": 16,
+            "spinDegreesPerSecond": 288,
+            "loop": true,
+            "assets": [
+                "fireball_00", "fireball_01", "fireball_02", "fireball_03", "fireball_04",
+                "fireball_05", "fireball_06", "fireball_07", "fireball_08", "fireball_09",
+                "fireball_10", "fireball_11", "fireball_12", "fireball_13", "fireball_14",
+                "fireball_15", "fireball_16", "fireball_17", "fireball_18", "fireball_19"
+            ]
+        }
+    },
     "meteor":          { "scale": [0.5, 0.5, 0.5], "asset": "fireball" },
     "flame_wall":      { "scale": [0.5, 0.5, 0.5], "asset": "fireball" },
     "ice_lance":       { "scale": [0.5, 0.5, 0.5], "asset": "ice_cube" },
@@ -42,5 +56,6 @@
     "poison_cloud":    { "scale": [0.5, 0.5, 0.5], "asset": "fireball" },
     "healing":         { "scale": [0.5, 0.5, 0.5], "asset": "fireball" },
     "wind_blade":      { "scale": [0.5, 0.5, 0.5], "asset": "fireball" },
-    "water_jet":       { "scale": [0.5, 0.5, 0.5], "asset": "fireball" }
+    "water_jet":       { "scale": [0.5, 0.5, 0.5], "asset": "fireball" },
+    "dagger_barrage":  { "scale": [0.6, 0.6, 0.6], "asset": "fireball" }
 }

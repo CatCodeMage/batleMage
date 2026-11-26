@@ -60,3 +60,7 @@ build*
 /CMakeSettings.json
 .DS_Store
 *.swp
+
+# Modelos 3D
+!posibleProyecto/assets/**/*.obj
+!posibleProyecto/assets/**/*.mtl

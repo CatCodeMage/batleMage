@@ -53,6 +53,7 @@ private:
     void aplicarSuelo();
     void aplicarImpactos();
     void countDownEffects();
+    void recordImpactVFX(const std::string& type, const glm::vec3& position, const glm::vec3& normal, float duration = 1.9f);
     void recordFrame();
 
     int         idPorNombre(const std::string& nombre) const;
@@ -76,4 +77,5 @@ private:
     int m_tick = 0;
 
     nlohmann::json m_replayFrames = nlohmann::json::array();
+    nlohmann::json m_replayImpacts = nlohmann::json::array();
 };

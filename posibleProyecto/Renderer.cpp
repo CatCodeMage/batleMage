@@ -4,11 +4,13 @@ constexpr GLint ALBEDO_TEXTURE_UNIT = 0;
 
 Renderer::Renderer() {
     w_locViewProj = -1;
+    w_locCamPos = -1;
 }
 
 void Renderer::init(GLuint program) {
     w_program = program;
     w_locViewProj = glGetUniformLocation(program, "uViewProj");
+    w_locCamPos = glGetUniformLocation(program, "uCamPos");
     glUniform1i(glGetUniformLocation(program, "uAlbedo"), ALBEDO_TEXTURE_UNIT);
 }
 
@@ -23,19 +25,22 @@ void Renderer::submitLight(const Light& light) {
     w_lights.push_back(light);
 }
  
-void Renderer::submit(MeshId id, GLuint albedoTexture, const glm::mat4& model, const glm::vec4& color, int kind) {
+void Renderer::submit(MeshId id, GLuint albedoTexture, const glm::mat4& model, const glm::vec4& color,
+    int kind, const glm::vec3& emission) {
     assert(id != INVALID_MESH);
     if (id >= w_batches.size()) {
         w_batches.resize(id + 1);
-        w_batchTextures.resize(id + 1, 0);
+        w_batchMaterials.resize(id + 1);
     }
     w_batches[id].push_back({ model, color, (float)kind });
-    w_batchTextures[id] = albedoTexture;
+    w_batchMaterials[id] = { albedoTexture, emission };
 }
 
 void Renderer::drawShadowGeometry(const MeshLibrary& lib) const {
     for (MeshId i = 0; i < w_batches.size(); ++i) {
-        lib.get(i).drawInstances(w_batches[i]);
+        if (!w_batches[i].empty() && w_batches[i][0].kind < 2.5f) {
+            lib.get(i).drawInstances(w_batches[i]);
+        }
     }
 }
 
@@ -52,16 +57,45 @@ void Renderer::getActualViewProj(const glm::mat4& viewProj) {
 
 void Renderer::flush(const MeshLibrary& lib, const glm::mat4& viewProj) {
     getActualViewProj(viewProj);
+    if (w_locCamPos >= 0)
+        glUniform3fv(w_locCamPos, 1, glm::value_ptr(w_camPos));
 
     applyLights(w_program);
-    
     glActiveTexture(GL_TEXTURE0 + ALBEDO_TEXTURE_UNIT);
+    // 1. Geometria opaca (escenario, personajes, proyectiles solidos, cristales y shards)
     for (MeshId i = 0; i < w_batches.size(); ++i) {
-        if (!w_batches[i].empty()) {
-            glBindTexture(GL_TEXTURE_2D, w_batchTextures[i]);
+        if (!w_batches[i].empty() && w_batches[i][0].kind < 2.5f) {
+            const BatchMaterial& material = w_batchMaterials[i];
+            glBindTexture(GL_TEXTURE_2D, material.albedoTexture);
+            glUniform3fv(w_locEmission, 1, glm::value_ptr(material.emission));
             lib.get(i).drawInstances(w_batches[i]);
             w_batches[i].clear();
         }
+    }
+
+    // 2. VFX transparentes (escarcha sobre superficie, niebla fria y sparkles)
+    bool hasTransparent = false;
+    for (MeshId i = 0; i < w_batches.size(); ++i) {
+        if (!w_batches[i].empty()) {
+            hasTransparent = true;
+            break;
+        }
+    }
+    if (hasTransparent) {
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        glDepthMask(GL_FALSE);
+        for (MeshId i = 0; i < w_batches.size(); ++i) {
+            if (!w_batches[i].empty()) {
+                const BatchMaterial& material = w_batchMaterials[i];
+                glBindTexture(GL_TEXTURE_2D, material.albedoTexture);
+                glUniform3fv(w_locEmission, 1, glm::value_ptr(material.emission));
+                lib.get(i).drawInstances(w_batches[i]);
+                w_batches[i].clear();
+            }
+        }
+        glDepthMask(GL_TRUE);
+        glDisable(GL_BLEND);
     }
 
     w_lights.clear();

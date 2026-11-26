@@ -105,14 +105,14 @@ int guranteWindowCreated(GLFWwindow* window) {
     return 0;
 }
 
+
 GLFWwindow* createWindow() {
     GLFWwindow* window = nullptr;
 
     if (!glfwInit()) {
-        std::cerr << "No se pudo inicializar GLFW\n"; 
+        std::cerr << "No se pudo inicializar GLFW\n";
     }
-    else
-    {
+    else {
         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
@@ -132,6 +132,8 @@ GLFWwindow* createWindow() {
 
     return window;
 }
+
+
 
 // TEMPORAL (L1): se borra cuando el cargador este comprobado
 void testObjLoader() {
@@ -198,8 +200,8 @@ int createSimulation() {
 // Simula el combate entero sin graficos y lo deja grabado para que los graficos lo reproduzcan
 template <typename Simulation>
 void simulateCombatToReplay() {
-    CombatSimulation simulation;
-    simulation.setup(dataPath("db/combat_1.json"));
+    Simulation simulation;
+    simulation.setup(dataPath("db/combat.json"));
     while (!simulation.isFinished()) {
         simulation.step();
     }
@@ -211,13 +213,9 @@ void simulateCombatToReplay() {
 
 int main(int argc, char* argv[])
 {
-    /*
-    if (argc > 1 && std::string_view(argv[1]) == "--combate") {
-        simulateCombatToReplay<CombatSimulation>();
-    } else {
+    if (argc > 1 && std::string_view(argv[1]) == "--prueba-hechizos")
         simulateCombatToReplay<PruebaHechizos>();
-    }
-    */
-   
+    else
+        simulateCombatToReplay<CombatSimulation>();
     return createSimulation();
 }

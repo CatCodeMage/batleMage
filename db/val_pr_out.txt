@@ -1,0 +1,80 @@
+[PRUEBA] combate de prueba de hechizos: 20 s, magos inmortales
+[PRUEBA] t=0s jugador 1: 1 proyectiles, mana 190
+[PRUEBA] t=0s jugador 2: 1 proyectiles, mana 190
+[PRUEBA] t=0.666667s jugador 1: 1 proyectiles, mana 190
+[PRUEBA] t=0.783333s jugador 2: 1 proyectiles, mana 190
+[PRUEBA] t=1.33333s jugador 1: 1 proyectiles, mana 190
+[PRUEBA] t=1.56667s jugador 2: 1 proyectiles, mana 190
+[PRUEBA] t=2s jugador 1: 1 proyectiles, mana 190
+[PRUEBA] jugador 1 recibe lightning_bolt (dano 20)
+[PRUEBA] jugador 2 recibe fire_ball (dano 23.5)
+[PRUEBA] t=2.35s jugador 2: 1 proyectiles, mana 190
+[PRUEBA] jugador 2 recibe ice_lance (dano 18)
+[PRUEBA] jugador 1 recibe fire_ball (dano 23.5)
+[PRUEBA] t=2.66667s jugador 1: 2 proyectiles, mana 180
+[PRUEBA] t=3.13333s jugador 2: 2 proyectiles, mana 180 (recarga)
+[PRUEBA] t=3.33333s jugador 1: 1 proyectiles, mana 190
+[PRUEBA] jugador 1 recibe ice_lance (dano 18)
+[PRUEBA] jugador 2 recibe ice_lance (dano 18)
+[PRUEBA] jugador 2 recibe ice_lance (dano 18)
+[PRUEBA] t=4s jugador 1: 2 proyectiles, mana 175
+[PRUEBA] jugador 1 recibe ice_lance (dano 18)
+[PRUEBA] jugador 1 recibe ice_lance (dano 18)
+[PRUEBA] jugador 2 recibe ice_lance (dano 18)
+[PRUEBA] t=4.56667s jugador 2: 1 proyectiles, mana 190
+[PRUEBA] t=4.75s jugador 1: 1 proyectiles, mana 190
+[PRUEBA] jugador 2 recibe ice_lance (dano 28)
+[PRUEBA] t=5.35s jugador 2: 1 proyectiles, mana 190
+[PRUEBA] jugador 2 recibe lightning_bolt (dano 20)
+[PRUEBA] t=5.41667s jugador 1: 1 proyectiles, mana 190
+[PRUEBA] t=6.08333s jugador 1: 1 proyectiles, mana 190
+[PRUEBA] t=6.13333s jugador 2: 1 proyectiles, mana 190
+[PRUEBA] t=6.75s jugador 1: 1 proyectiles, mana 190 (recarga)
+[PRUEBA] jugador 2 recibe wind_blade (dano 11)
+[PRUEBA] jugador 1 recibe lightning_bolt (dano 20)
+[PRUEBA] t=6.91667s jugador 2: 1 proyectiles, mana 190
+[PRUEBA] jugador 2 recibe earth_spike (dano 19)
+[PRUEBA] jugador 1 recibe fire_ball (dano 23.5)
+[PRUEBA] jugador 2 recibe ice_shard (dano 9.5)
+[PRUEBA] t=7.7s jugador 2: 2 proyectiles, mana 180 (recarga)
+[PRUEBA] t=7.98333s jugador 1: 1 proyectiles, mana 190
+[PRUEBA] jugador 1 recibe ice_lance (dano 18)
+[PRUEBA] t=8.65s jugador 1: 1 proyectiles, mana 190
+[PRUEBA] jugador 1 recibe ice_lance (dano 18)
+[PRUEBA] jugador 1 recibe ice_lance (dano 18)
+[PRUEBA] t=9.13333s jugador 2: 1 proyectiles, mana 190
+[PRUEBA] t=9.31667s jugador 1: 1 proyectiles, mana 190
+[PRUEBA] t=9.91667s jugador 2: 1 proyectiles, mana 190
+[PRUEBA] t=9.98333s jugador 1: 1 proyectiles, mana 190
+[PRUEBA] jugador 2 recibe fire_ball (dano 23.5)
+[PRUEBA] jugador 2 recibe ice_lance (dano 18)
+[PRUEBA] t=10.65s jugador 1: 2 proyectiles, mana 180
+[PRUEBA] t=10.7s jugador 2: 1 proyectiles, mana 190
+[PRUEBA] t=11.3167s jugador 1: 1 proyectiles, mana 190
+[PRUEBA] jugador 1 recibe lightning_bolt (dano 20)
+[PRUEBA] t=11.4833s jugador 2: 1 proyectiles, mana 190
+[PRUEBA] jugador 1 recibe fire_ball (dano 23.5)
+[PRUEBA] jugador 2 recibe ice_lance (dano 18)
+[PRUEBA] jugador 2 recibe ice_lance (dano 18)
+[PRUEBA] t=11.9833s jugador 1: 2 proyectiles, mana 175
+[PRUEBA] t=12.2667s jugador 2: 2 proyectiles, mana 180 (recarga)
+[PRUEBA] jugador 2 recibe ice_lance (dano 18)
+[PRUEBA] jugador 1 recibe ice_lance (dano 18)
+[PRUEBA] t=12.7333s jugador 1: 1 proyectiles, mana 190
+[PRUEBA] jugador 2 recibe ice_lance (dano 28)
+[PRUEBA] jugador 2 recibe lightning_bolt (dano 20)
+[PRUEBA] t=13.4s jugador 1: 1 proyectiles, mana 190
+[PRUEBA] jugador 1 recibe ice_lance (dano 18)
+[PRUEBA] jugador 1 recibe ice_lance (dano 18)
+[PRUEBA] t=13.7s jugador 2: 1 proyectiles, mana 190
+[PRUEBA] t=14.0667s jugador 1: 1 proyectiles, mana 190
+[PRUEBA] t=14.4833s jugador 2: 1 proyectiles, mana 190
+[PRUEBA] t=14.7333s jugador 1: 1 proyectiles, mana 190 (recarga)
+[PRUEBA] jugador 2 recibe wind_blade (dano 11)
+[PRUEBA] jugador 2 recibe earth_spike (dano 19)
+[PRUEBA] t=15.2667s jugador 2: 1 proyectiles, mana 190
+[PRUEBA] jugador 2 recibe ice_shard (dano 9.5)
+[PRUEBA] jugador 1 recibe lightning_bolt (dano 20)
+[PRUEBA] t=15.9667s jugador 1: 1 proyectiles, mana 190
+[PRUEBA] t=16.05s jugador 2: 1 proyectiles, mana 190
+[PRUEBA] jugador 1 reci

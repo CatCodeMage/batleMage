@@ -1,22 +1,38 @@
+
 #pragma once
+
 #include <iostream>
 #include <string>
 #include <vector>
 #include <cmath>
 #include <memory>
-#include <cstdint>   // NUEVO: uint32_t
-#include <array>     // NUEVO: std::array
-#include <utility>   // NUEVO: std::move
-#include "global.h" 
+#include <cstdint>
+#include <array>
+#include <utility>
+#include "global.h"
 #include "CombatTypes.h"
 
-enum class CastType { Projectile, AreaOfEffect, Cone, Raycast, Self };
-enum class MovementPattern { Linear, Homing, Parabolic, Orbiting, Static };
+// Tipos de lanzamiento
+enum class CastType {
+    Projectile,
+    AreaOfEffect,
+    Cone,
+    Raycast,
+    Self
+};
 
-constexpr float SPELL_GRAVITY = 1.5f;   // unidades/s^2 (la de Alex; la tuya era 5.0)
+// Tipos de movimiento
+enum class MovementPattern {
+    Linear,
+    Homing,
+    Parabolic,
+    Orbiting,
+    Static
+};
 
-// 2. El componente aloja el enum junto al resto de datos estáticos
-// he sacado del anterior struct los que cambia
+constexpr float SPELL_GRAVITY = 1.5f;   // unidades/s^2
+
+// Propiedades estaticas del hechizo
 struct SpellDefinitionComponent {
     int id;
     std::string name;
@@ -26,9 +42,10 @@ struct SpellDefinitionComponent {
     float cost;
     float damage;
     float cooldown;
+    float gravityMultiplier = 0.0f;
 };
 
-// Componentes de estado dinámico
+// Estado dinamico del proyectil
 struct ProjectileComponent {
     glm::vec3 translacio;
     glm::vec3 rotacio;

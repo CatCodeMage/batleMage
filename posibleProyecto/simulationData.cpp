@@ -2,6 +2,7 @@
 #include <imgui.h>
 #include "CombatPanel.h"
 #include "CameraPathPanel.h"
+#include "CombatSimulation.h"
 
 #include <utility>
 
@@ -25,6 +26,7 @@ void simulationData::init(GLFWwindow* window) {
 	textures.init();
 	skinnedRenderer.initialize();
 	loadAssetManifest(dataPath("db/assets.json"), libMesh, libModel, textures, skinnedRenderer.maxBones());
+	iceLanceVfx.init(libMesh, textures);
 
 	map.load(dataPath("db/map.json"), libModel);
 
@@ -153,6 +155,8 @@ void simulationData::procesMainBodyLoopRealTime(GLFWwindow* window, SystemInfo& 
 	submitEntities(framesInfo.combat[framesInfo.frame]);
 
 	renderer.submitLights(lights, sysInfo.getTimeStored());
+	const double replaySeconds = static_cast<double>(framesInfo.frame) / CombatSimulation::TICKS_PER_SECOND;
+	iceLanceVfx.submitFrame(renderer, framesInfo.combat, framesInfo.impacts, framesInfo.frame, viewCamera, replaySeconds);
 
 	//renderizar sombras
 	shadows.render(lights, [&]() { renderer.drawShadowGeometry(libMesh); }, &skinnedRenderer);
@@ -182,7 +186,6 @@ void simulationData::procesMainBodyLoopRealTime(GLFWwindow* window, SystemInfo& 
 	// Mostrar el resultado
 	updateFrame(window);
 }
-
 void simulationData::updateInteractionMode(GLFWwindow* window) {
 	const bool isEditing = interactionMode == InteractionMode::Editing;
 	const bool hasClickedScene = isEditing && visualInterface.wasSceneClicked();

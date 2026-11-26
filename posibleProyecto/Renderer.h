@@ -22,18 +22,28 @@ class Renderer {
 public:
     Renderer();
     void init(GLuint program);
-    void submit(MeshId id, GLuint albedoTexture, const glm::mat4& model, const glm::vec4& color, int kind = 0);
+    void submit(MeshId id, GLuint albedoTexture, const glm::mat4& model, const glm::vec4& color,
+        int kind = 0, const glm::vec3& emission = glm::vec3(0.0f));
     void flush(const MeshLibrary& lib, const glm::mat4& viewProj);
     void drawShadowGeometry(const MeshLibrary& lib) const;
     void submitLights(std::vector<SceneLight>& lights, const float time);
     void submitLight(const Light& light);
     // El programa ya debe estar activo.
     void applyLights(GLuint program) const;
+    void setCameraPos(const glm::vec3& camPos) { w_camPos = camPos; }
 private:
     void getActualViewProj(const glm::mat4& viewProj);
     std::vector<Light> w_lights;
     std::vector<std::vector<InstanceData>> w_batches;      
+    struct BatchMaterial {
+        GLuint albedoTexture = 0;
+        glm::vec3 emission = glm::vec3(0.0f);
+    };
+    std::vector<BatchMaterial> w_batchMaterials;
     std::vector<GLuint> w_batchTextures;   
     GLuint w_program = 0;
+    glm::vec3 w_camPos = glm::vec3(0.0f, 2.0f, 6.0f);
     GLint w_locViewProj;
+    GLint w_locCamPos = -1;
+    GLint w_locEmission = -1;
 };

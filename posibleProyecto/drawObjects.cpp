@@ -1,6 +1,9 @@
 #include "drawObjects.h"
+#include <algorithm>
+#include <cmath>
 
 void submitEntidad(Renderer& renderer, const Model& model, const Entidad& e) {
+    if (e.isIceLance || e.isFireBall || e.isLightningBolt || e.isEarthSpike || e.isWindBlade || e.isWaterBolt || e.isDaggerBarrage) return;
     const glm::mat4 modelMatrix = e.transform.toMatrix();   // una vez por entidad, no por parte
     for (const ModelPart& part : model.parts)
         renderer.submit(part.mesh, part.albedoTexture, modelMatrix, part.color * e.color, e.kind);
