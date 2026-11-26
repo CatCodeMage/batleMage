@@ -2,8 +2,6 @@
 #include <imgui.h>
 #include "CombatPanel.h"
 #include "CameraPathPanel.h"
-#include "sistema_particulas/ParticleEffect.h"
-#include "sistema_particulas/ParticleTestScene.h"
 
 #include <utility>
 
@@ -41,18 +39,10 @@ void simulationData::init(GLFWwindow* window) {
 
 	framesInfo = generateCombat(libModel, dataPath("db/combate_generado.json"));
 
-	constexpr auto PARTICLE_TEST_SCENARIO = bm::particles::ParticleTestScene::Scenario::Smoke;
-	const auto frameCount = framesInfo.combat.size();
 	if (!framesInfo.particleFrames.empty()) {
 		particleModule.initialize(std::move(framesInfo.particleStyles));
-		particleModule.setFrames(std::move(framesInfo.particleFrames), framesInfo.ticksPerSecond);
-	} else if (frameCount > 0 && std::in_range<int>(frameCount) && framesInfo.ticksPerSecond > 0) {
-		// Escenario temporal de prueba para replays anteriores a las secciones de particulas.
-		particleModule.initialize(bm::particles::presets::makeCatalog());
-		particleModule.setFrames(bm::particles::ParticleTestScene::makeFrames(
-			PARTICLE_TEST_SCENARIO, static_cast<int>(frameCount), framesInfo.ticksPerSecond),
-			framesInfo.ticksPerSecond);
 	}
+	particleModule.setFrames(std::move(framesInfo.particleFrames), framesInfo.ticksPerSecond);
 
 	visualInterface.init(window);
 }
