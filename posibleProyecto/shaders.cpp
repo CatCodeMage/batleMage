@@ -33,6 +33,11 @@ in vec4 vColor;
 in vec2 vUV;
 flat in float vKind;
 uniform sampler2D uAlbedo;
+uniform vec4  uAlbedoColor;
+uniform vec3  uEmissive;
+uniform float uRoughness;
+uniform float uMetallic;
+uniform float uOpacity;
 uniform int  uNumLights;
 uniform vec4 uLights[2 * MAX_LIGHTS];   // [2*i] = pos.xyz + alcance ; [2*i+1] = color.rgb + intensidad
 
@@ -83,12 +88,13 @@ float shadowVisibility(int lightIndex, vec3 lightPos, vec3 normal) {
 }
 
 void main() {
+    vec4 texColor = texture(uAlbedo, vUV);
     vec3 base;
     if (vKind > 0.5) {
         float c = mod(floor(vWorldPos.x) + floor(vWorldPos.z), 2.0);
-        base = vec3(mix(0.25, 0.6, c));
+        base = vec3(mix(0.25, 0.6, c)) * uAlbedoColor.rgb * vColor.rgb;
      } else {
-        base = texture(uAlbedo, vUV).rgb * vColor.rgb;
+        base = texColor.rgb * uAlbedoColor.rgb * vColor.rgb;
     }
     vec3 n   = normalize(vNormal);
     // Luces ambiente
@@ -111,7 +117,11 @@ void main() {
 
         lit += ci.rgb * ci.a * diff * atten * visibility;
     }
-    FragColor = vec4(base * lit, 1.0);
+
+    vec3 finalColor = base * lit + uEmissive;
+    float finalAlpha = texColor.a * uOpacity * uAlbedoColor.a * vColor.a;
+
+    FragColor = vec4(finalColor, finalAlpha);
 })";
 
 

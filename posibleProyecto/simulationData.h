@@ -18,6 +18,7 @@
 #include "UserInterface.h"
 #include "CameraPath.h"
 #include "Mp4Exporter.h"
+#include "MaterialLibrary.h"
 
 enum class InteractionMode { Editing, ControllingCamera };
 
@@ -47,6 +48,7 @@ struct simulationData
     // Data
     MeshLibrary libMesh;
     ModelLibrary libModel;
+    MaterialLibrary libMaterial;
     TextureLibrary textures;
     MapData map;
     std::vector<SceneLight> lights;

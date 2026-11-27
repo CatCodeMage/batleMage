@@ -22,7 +22,7 @@ void simulationData::init(GLFWwindow* window) {
 
 	textures.init();
 	skinnedRenderer.initialize();
-	loadAssetManifest(dataPath("db/assets.json"), libMesh, libModel, textures, skinnedRenderer.maxBones());
+	loadAssetManifest(dataPath("db/assets.json"), libMesh, libModel, libMaterial, textures, skinnedRenderer.maxBones());
 
 	map.load(dataPath("db/map.json"), libModel);
 
@@ -155,8 +155,8 @@ void simulationData::procesMainBodyLoopRealTime(GLFWwindow* window, SystemInfo& 
 
 	// Pintar simulacion
 	shadows.bindForLighting(program);
-	renderer.flush(libMesh, viewProjection);
-	skinnedRenderer.drawLighting(viewProjection);
+	renderer.flush(libMesh, viewProjection, libMaterial);
+	skinnedRenderer.drawLighting(viewProjection, libMaterial);
 	skinnedRenderer.clear();
 
 	// Pintar la UI

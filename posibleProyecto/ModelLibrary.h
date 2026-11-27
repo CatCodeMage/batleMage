@@ -3,19 +3,20 @@
 #include "MeshLibrary.h"
 #include "skeleton_animation/Animator.h"
 #include "skeleton_animation/SkinnedMesh.h"
+#include "MaterialLibrary.h"
+
 
 using ModelId = uint32_t;
 constexpr ModelId INVALID_MODEL = UINT32_MAX;
 
 struct ModelPart {
-    MeshId    mesh          = INVALID_MESH;
-    glm::vec4 color         = glm::vec4(1.0f);
-    GLuint    albedoTexture = 0;
+    MeshId mesh = INVALID_MESH;
+    MaterialId matId;
 };
 
 struct SkinnedPart {
     bm::anim::SkinnedMesh mesh;
-    GLuint albedoTexture;
+    MaterialId matId = INVALID_MATERIAL_ID;
 };
 
 struct SkinnedModel {

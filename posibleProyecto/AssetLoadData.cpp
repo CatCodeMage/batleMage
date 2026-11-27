@@ -212,19 +212,32 @@ static GLuint loadAlbedoTexture(const ObjMaterial& material, TextureLibrary& tex
     return hasAlbedoTexture ? textures.load(material.albedoTexture) : textures.white();
 }
 
-static Model registerPieces(const std::string& assetName, const std::vector<ObjPiece>& pieces, MeshLibrary& meshes, TextureLibrary& textures) {
+static Model registerPieces(const std::string& assetName, const std::vector<ObjPiece>& pieces, MeshLibrary& meshes, TextureLibrary& textures, MaterialLibrary& matLib) {
     Model model;
     for (size_t pieceIndex = 0; pieceIndex < pieces.size(); ++pieceIndex) {
         const ObjPiece& piece = pieces[pieceIndex];
         const std::string meshName = assetName + "#" + std::to_string(pieceIndex);
         const MeshId mesh = meshes.add(meshName, piece.verts, piece.idx);
-        model.parts.push_back({ mesh, piece.material.color, loadAlbedoTexture(piece.material, textures) });
+        Material mat;
+        mat.name = piece.material.name;
+        mat.albedoColor = piece.material.color;
+        mat.albedoTexture = loadAlbedoTexture(piece.material, textures);
+        // valores por defecto
+        mat.roughness = 0.8f;
+        mat.metallic = 0.0f;
+        mat.emissive = glm::vec3(0.0f);
+        mat.opacity = 1.0f;
+
+        const std::string materialKey = assetName + "/" + piece.material.name;
+        const MaterialId matId = matLib.add(mat, materialKey);
+
+        model.parts.push_back({ mesh, matId });
     }
     return model;
 }
 
 static Model loadSkinnedModel(const std::filesystem::path& file, const json& config,
-    TextureLibrary& textures, size_t maxBones) {
+    TextureLibrary& textures, MaterialLibrary& matLib, size_t maxBones, std::string assetName) {
     using namespace bm::anim;
     const auto imported = std::make_shared<const ImportedModel>(AssimpModelLoader::load(file));
     for (const ImportedMesh& mesh : imported->meshes) {
@@ -247,13 +260,29 @@ static Model loadSkinnedModel(const std::filesystem::path& file, const json& con
     }
 
     skinned.parts.reserve(imported->meshes.size());
-    for (const ImportedMesh& mesh : imported->meshes)
-        skinned.parts.push_back({ SkinnedMesh(mesh), textures.load(mesh.material.albedo, file) });
+    for (const ImportedMesh& mesh : imported->meshes) {
+        Material mat;
+
+        mat.name = mesh.material.name;
+        mat.albedoColor = mesh.material.baseColor;
+        mat.albedoTexture = textures.load(mesh.material.albedo, file);
+        mat.roughness = 0.8f;
+        mat.metallic = 0.0f;
+        mat.emissive = glm::vec3(0.0f);
+        mat.opacity = 1.0f;
+
+        const std::string key =
+            assetName + "/" + mesh.material.name;
+
+        const MaterialId matId = matLib.add(mat, key);
+
+        skinned.parts.push_back({ SkinnedMesh(mesh), matId});
+    }
     return model;
 }
 
 int loadAssetManifest(const std::filesystem::path& manifest, MeshLibrary& meshes, ModelLibrary& models,
-    TextureLibrary& textures, size_t maxBones) {
+    MaterialLibrary& matLib, TextureLibrary& textures, size_t maxBones) {
 
     std::ifstream in(manifest);
     if (!in) throw std::runtime_error("no se puede abrir " + std::filesystem::absolute(manifest).string());
@@ -275,9 +304,9 @@ int loadAssetManifest(const std::filesystem::path& manifest, MeshLibrary& meshes
                 throw std::runtime_error("el tipo skinned requiere un archivo GLB, glTF o FBX");
 
             if (skinnedFormat) {
-                models.add(name, loadSkinnedModel(file, config, textures, maxBones));
+                models.add(name, loadSkinnedModel(file, config, textures, matLib, maxBones, name));
             } else {
-                models.add(name, registerPieces(name, loadObj(file), meshes, textures));
+                models.add(name, registerPieces(name, loadObj(file), meshes, textures, matLib));
             }
             ++cargados;
         }

@@ -4,12 +4,19 @@ constexpr GLint ALBEDO_TEXTURE_UNIT = 0;
 
 Renderer::Renderer() {
     w_locViewProj = -1;
+    m_locAlbedoColor = m_locEmissive = m_locRoughness = m_locMetallic = m_locOpacity = -1;
 }
 
 void Renderer::init(GLuint program) {
     w_program = program;
     w_locViewProj = glGetUniformLocation(program, "uViewProj");
     glUniform1i(glGetUniformLocation(program, "uAlbedo"), ALBEDO_TEXTURE_UNIT);
+
+    m_locAlbedoColor = glGetUniformLocation(w_program, "uAlbedoColor");
+    m_locEmissive = glGetUniformLocation(w_program, "uEmissive");
+    m_locRoughness = glGetUniformLocation(w_program, "uRoughness");
+    m_locMetallic = glGetUniformLocation(w_program, "uMetallic");
+    m_locOpacity = glGetUniformLocation(w_program, "uOpacity");
 }
 
 void Renderer::submitLights(std::vector<SceneLight>& lights, const float time) {
@@ -23,19 +30,29 @@ void Renderer::submitLight(const Light& light) {
     w_lights.push_back(light);
 }
  
-void Renderer::submit(MeshId id, GLuint albedoTexture, const glm::mat4& model, const glm::vec4& color, int kind) {
+void Renderer::submit(MeshId id, MaterialId matId, const glm::mat4& model, const glm::vec4& color, int kind) {
     assert(id != INVALID_MESH);
+    assert(matId != INVALID_MATERIAL_ID);
     if (id >= w_batches.size()) {
         w_batches.resize(id + 1);
-        w_batchTextures.resize(id + 1, 0);
     }
-    w_batches[id].push_back({ model, color, (float)kind });
-    w_batchTextures[id] = albedoTexture;
+    auto& batches = w_batches[id];
+
+    auto it = std::find_if(batches.begin(), batches.end(), [matId](const RenderBatch& batch) { return batch.material == matId; });
+
+    if (it == batches.end()) {
+        batches.push_back({ matId, {} });
+        it = std::prev(batches.end());
+    }
+
+    it->instances.push_back({ model, color, (float)kind });
 }
 
 void Renderer::drawShadowGeometry(const MeshLibrary& lib) const {
     for (MeshId i = 0; i < w_batches.size(); ++i) {
-        lib.get(i).drawInstances(w_batches[i]);
+        for (const RenderBatch& batch : w_batches[i]) {
+            lib.get(i).drawInstances(batch.instances);
+        }
     }
 }
 
@@ -50,17 +67,40 @@ void Renderer::getActualViewProj(const glm::mat4& viewProj) {
     glUniformMatrix4fv(w_locViewProj, 1, GL_FALSE, glm::value_ptr(viewProj));
 }
 
-void Renderer::flush(const MeshLibrary& lib, const glm::mat4& viewProj) {
+void Renderer::flush(const MeshLibrary& lib, const glm::mat4& viewProj, const MaterialLibrary& matLib) {
+    glUseProgram(w_program);
+
     getActualViewProj(viewProj);
 
     applyLights(w_program);
     
     glActiveTexture(GL_TEXTURE0 + ALBEDO_TEXTURE_UNIT);
     for (MeshId i = 0; i < w_batches.size(); ++i) {
-        if (!w_batches[i].empty()) {
-            glBindTexture(GL_TEXTURE_2D, w_batchTextures[i]);
-            lib.get(i).drawInstances(w_batches[i]);
+        for (const RenderBatch& batch : w_batches[i]) {
+            if (batch.instances.empty()) {
+                continue;
+            }
+
+            const Material& mat = matLib.get(batch.material);
+
+            if (mat.opacity < 1.0f) {
+                glEnable(GL_BLEND);
+                glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+            }
+
+            glUniform4fv(m_locAlbedoColor, 1, &mat.albedoColor[0]);
+            glUniform3fv(m_locEmissive, 1, &mat.emissive[0]);
+            glUniform1f(m_locRoughness, mat.roughness);
+            glUniform1f(m_locMetallic, mat.metallic);
+            glUniform1f(m_locOpacity, mat.opacity);
+
+            glBindTexture(GL_TEXTURE_2D, mat.albedoTexture);
+            lib.get(i).drawInstances(batch.instances);
             w_batches[i].clear();
+
+            if (mat.opacity < 1.0f) {
+                glDisable(GL_BLEND);
+            }
         }
     }
 
