@@ -183,6 +183,7 @@ static ObjMaterial describeMaterial(int materialId, const std::vector<tinyobj::m
     ObjMaterial material;
     material.name = source.name;
     material.color = glm::vec4(source.diffuse[0], source.diffuse[1], source.diffuse[2], 1.0f);
+    material.emission = glm::vec3(source.emission[0], source.emission[1], source.emission[2]);
 
     const bool hasAlbedoTexture = !source.diffuse_texname.empty();
     if (hasAlbedoTexture) material.albedoTexture = objFolder / source.diffuse_texname;

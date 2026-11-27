@@ -35,11 +35,13 @@ public:
     void submitLight(const Light& light);
     // El programa ya debe estar activo.
     void applyLights(GLuint program) const;
+    void setCameraPos(const glm::vec3& camPos) { w_camPos = camPos; }
 private:
     void getActualViewProj(const glm::mat4& viewProj);
     std::vector<Light> w_lights;
     std::vector<std::vector<RenderBatch>> w_batches;
     GLuint w_program = 0;
+    glm::vec3 w_camPos = glm::vec3(0.0f, 2.0f, 6.0f);
     GLint w_locViewProj;
     GLint m_locAlbedoColor;
     GLint m_locEmissive;

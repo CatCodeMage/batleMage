@@ -1,6 +1,9 @@
+
 #include "jsonManager.h"
 #include "CombatSimulation.h"
+#include "sistema_particulas/logica/ParticleJson.h"
 
+#include <cmath>
 #include <unordered_set>
 
 using json = nlohmann::json;
@@ -24,83 +27,105 @@ json ReplayAnimationState::record(int id, const char* entity, const char* nextAc
 }
 
 ElementType parseElement(std::string element) {
-	if (element == "fire")      return ElementType::Fire;
-	if (element == "ice")       return ElementType::ICE;
-	if (element == "physical") return ElementType::Physical;
-	return ElementType::Fire;
+    if (element == "fire")      return ElementType::Fire;
+    if (element == "ice")       return ElementType::ICE;
+    if (element == "lightning") return ElementType::Lightning;
+    if (element == "wind")      return ElementType::Wind;
+    if (element == "water")     return ElementType::Water;
+    if (element == "physical")  return ElementType::Physical;
+    return ElementType::Fire;
 }
 
 void readSpells(HechizosGestor& spellManager) {
-	constexpr float DEFAULT_SPELL_COST = 10.0f;
-	// La IA calcula el alcance de cada hechizo como velocidad x vida: con 100 s atacaban desde cualquier distancia
-	constexpr float SPELL_LIFETIME_SECONDS = 3.0f;
+    constexpr float DEFAULT_SPELL_COST = 10.0f;
 
-	std::ifstream spells(SPELLS_PATH);
+    // La IA calcula el alcance como velocidad x tiempo de vida.
+    constexpr float SPELL_LIFETIME_SECONDS = 3.0f;
 
-	if (spells.is_open())
-	{
-		json j;
-		spells >> j;
+    std::ifstream spells(SPELLS_PATH);
 
-		int id = 0;
+    if (spells.is_open())
+    {
+        json j;
+        spells >> j;
 
-		for (auto& [name, spell] : j.items()) {
-			ElementType elem = parseElement(spell["element"]);
+        int id = 0;
 
-			glm::vec3 scaleVec(
-				spell["scale"][0].get<float>(),
-				spell["scale"][1].get<float>(),
-				spell["scale"][2].get<float>()
-			);
+        for (auto& [name, spell] : j.items()) {
+            ElementType elem = parseElement(spell["element"]);
 
-			spellManager.registrarHechizo(
-				id,
-				name,
-				elem,
-				spell.value<float>("cost", DEFAULT_SPELL_COST),
-				spell["damage"].get<float>(),
-				spell["cooldown"].get<float>(),
-				spell["speed"].get<float>(),
-				spell["radious"].get<float>(),
-				scaleVec,
-				SPELL_LIFETIME_SECONDS
-			);
+            glm::vec3 scaleVec(
+                spell["scale"][0].get<float>(),
+                spell["scale"][1].get<float>(),
+                spell["scale"][2].get<float>()
+            );
 
-			id++;
-		}
-	}
-	else
-	{
-		std::cout << "No file found" << std::endl;;
-	}
+            const float gravityMultiplier = spell.value<float>("gravityMultiplier", 0.0f);
+
+            // NUEVO: leer el tipo de movimiento del JSON.
+            // Si no se especifica, sera parabolico cuando gravityMultiplier > 0 y lineal en caso contrario.
+            MovementPattern pattern = (gravityMultiplier > 0.0f)
+                ? MovementPattern::Parabolic
+                : MovementPattern::Linear;
+
+            if (spell.contains("movement_pattern")) {
+                std::string movementName = spell.value("movement_pattern", std::string("linear"));
+                if (movementName == "parabolic") {
+                    pattern = MovementPattern::Parabolic;
+                } else if (movementName == "linear") {
+                    pattern = MovementPattern::Linear;
+                }
+            }
+
+            spellManager.registrarHechizo(
+                id,
+                name,
+                elem,
+                spell.value<float>("cost", DEFAULT_SPELL_COST),
+                spell["damage"].get<float>(),
+                spell["cooldown"].get<float>(),
+                spell["speed"].get<float>(),
+                spell["radious"].get<float>(),
+                scaleVec,
+                SPELL_LIFETIME_SECONDS,
+                pattern,
+                gravityMultiplier
+            );
+
+            id++;
+        }
+    }
+    else
+    {
+        std::cout << "No file found" << std::endl;
+    }
 }
 
 std::vector<std::string> getPlayers() {
-	try {
-		std::vector<std::string> playerOptions;
+    try {
+        std::vector<std::string> playerOptions;
 
-		std::ifstream players(PLAYERS_PATH);
+        std::ifstream players(PLAYERS_PATH);
 
-		if (!players.is_open())
-		{
-			return {};
-		}
+        if (!players.is_open())
+        {
+            return {};
+        }
 
-		json j;
+        json j;
+        players >> j;
 
-		players >> j;
+        for (auto& [key, value] : j.items()) {
+            playerOptions.push_back(key);
+        }
 
-		for (auto& [key, value] : j.items()) {
-			playerOptions.push_back(key);
-		}
+        return playerOptions;
+    }
+    catch (const std::exception& e) {
+        std::cout << e.what() << std::endl;
 
-		return playerOptions;
-	}
-	catch (const std::exception& e) {
-		std::cout << e.what() << std::endl;
-
-		return {};
-	}
+        return {};
+    }
 }
 
 static glm::vec3 replayVector(const json& values) {
@@ -127,23 +152,42 @@ FramesData generateCombat(const ModelLibrary& modelLib, const std::filesystem::p
 	if (!frames.is_array() || frames.empty() || result.ticksPerSecond <= 0)
 		throw std::runtime_error("replay sin frames o con frecuencia invalida: " + replayFile.string());
 
+	const auto particleStyles = replay.find("particleStyles");
+	const auto particleFrames = replay.find("particleFrames");
+	if ((particleStyles == replay.end()) != (particleFrames == replay.end()))
+		throw std::runtime_error("El replay debe incluir particleStyles y particleFrames juntos: " + replayFile.string());
+	if (particleStyles != replay.end()) {
+		result.particleStyles = bm::particles::particleJson::leerEstilos(*particleStyles);
+		result.particleFrames = bm::particles::particleJson::leerFrames(*particleFrames, result.particleStyles, frames.size());
+	}
+
 	result.combat.reserve(frames.size());
 	for (const auto& frame : frames) {
 		std::vector<Entidad> entities;
 		entities.reserve(frame.size());
-		std::unordered_set<int> characterIds;
+		std::unordered_set<EntityId> entityIds;
 		for (const auto& record : frame) {
 			Entidad entity;
 			entity.transform.pos = replayVector(record.at(0));
 			entity.transform.rot = replayVector(record.at(1));
 			const json* definition = nullptr;
 
-			if (record.size() > 3 && record[3].is_object()) {
-				const auto& character = record[3];
-				entity.characterId = character.at("id").get<int>();
+			// El cuarto elemento puede contener solo el ID de un hechizo.
+			const json* extra = (record.size() > 3 && record[3].is_object()) ? &record[3] : nullptr;
+			if (extra) {
+				entity.id = extra->value("id", INVALID_ENTITY);
+				if (entity.id < INVALID_ENTITY ||
+					(entity.id != INVALID_ENTITY && !entityIds.insert(entity.id).second)) {
+					throw std::runtime_error("id de entidad invalido o repetido en un frame del replay");
+				}
+			}
+
+			if (extra && extra->contains("animation")) {
+				const auto& character = *extra;
+				entity.characterId = entity.id;
 				entity.animation = character.at("animation").get<std::string>();
 				entity.animationStartFrame = character.at("animationStartFrame").get<int>();
-				if (entity.characterId <= 0 || !characterIds.insert(entity.characterId).second ||
+				if (entity.characterId == INVALID_ENTITY ||
 					entity.animationStartFrame < 0 || size_t(entity.animationStartFrame) > result.combat.size()) {
 					throw std::runtime_error("id o inicio de animacion invalido en el replay");
 				}

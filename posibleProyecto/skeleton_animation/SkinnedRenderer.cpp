@@ -21,6 +21,7 @@ uniform mat4 uBoneMatrices[MAX_BONES];
 uniform int uBoneCount;
 
 out vec3 vWorldPos;
+out vec3 vLocalPos;
 #ifndef DEPTH_PASS
 uniform vec4 uBaseColor;
 uniform float uKind;
@@ -50,6 +51,7 @@ void main() {
     mat4 worldTransform = uModel * skin;
     vec4 world = worldTransform * vec4(aPosition, 1.0);
     vWorldPos = world.xyz;
+    vLocalPos = aPosition;
     gl_Position = uViewProj * world;
 
 #ifndef DEPTH_PASS

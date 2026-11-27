@@ -1,6 +1,12 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
+    <Filter Include="sistema_particulas">
+      <UniqueIdentifier>{07735227-BC7A-47A5-8382-A61A9B2CDCDE}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="sistema_particulas\logica">
+      <UniqueIdentifier>{E7504BCF-4662-4C0A-BC97-9524BD43D51F}</UniqueIdentifier>
+    </Filter>
     <Filter Include="Archivos de encabezado">
       <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
       <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
@@ -153,7 +159,7 @@
     <ClCompile Include="CameraPath.cpp">
       <Filter>Archivos de recursos\Archivos de origen</Filter>
     </ClCompile>
-    <ClCompile Include="CameraPathPanel.cpp">
+    <ClCompile Include="CameraPathPanel.cpp" />
     <ClCompile Include="Mp4Exporter.cpp">
       <Filter>Archivos de recursos\Archivos de origen</Filter>
     </ClCompile>
@@ -168,6 +174,30 @@
     </ClCompile>
     <ClCompile Include="MaterialLibrary.cpp">
       <Filter>Archivos de recursos\Archivos de origen</Filter>
+    </ClCompile>
+    <ClCompile Include="sistema_particulas\ParticleEffect.cpp">
+      <Filter>sistema_particulas</Filter>
+    </ClCompile>
+    <ClCompile Include="sistema_particulas\ParticleModule.cpp">
+      <Filter>sistema_particulas</Filter>
+    </ClCompile>
+    <ClCompile Include="sistema_particulas\ParticlePlayback.cpp">
+      <Filter>sistema_particulas</Filter>
+    </ClCompile>
+    <ClCompile Include="sistema_particulas\ParticleRendererGL.cpp">
+      <Filter>sistema_particulas</Filter>
+    </ClCompile>
+    <ClCompile Include="sistema_particulas\ParticleSystem.cpp">
+      <Filter>sistema_particulas</Filter>
+    </ClCompile>
+    <ClCompile Include="sistema_particulas\ParticleTestScene.cpp">
+      <Filter>sistema_particulas</Filter>
+    </ClCompile>
+    <ClCompile Include="sistema_particulas\logica\GestorParticulasLogica.cpp">
+      <Filter>sistema_particulas\logica</Filter>
+    </ClCompile>
+    <ClCompile Include="sistema_particulas\logica\ParticleJson.cpp">
+      <Filter>sistema_particulas\logica</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -306,7 +336,7 @@
     <ClInclude Include="CameraPath.h">
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
-    <ClInclude Include="CameraPathPanel.h">
+    <ClInclude Include="CameraPathPanel.h" />
     <ClInclude Include="Mp4Exporter.h">
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
@@ -324,6 +354,39 @@
     </ClInclude>
     <ClInclude Include="MaterialLibrary.h">
       <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
+    <ClInclude Include="sistema_particulas\Particle.h">
+      <Filter>sistema_particulas</Filter>
+    </ClInclude>
+    <ClInclude Include="sistema_particulas\ParticleEffect.h">
+      <Filter>sistema_particulas</Filter>
+    </ClInclude>
+    <ClInclude Include="sistema_particulas\ParticleFrame.h">
+      <Filter>sistema_particulas</Filter>
+    </ClInclude>
+    <ClInclude Include="sistema_particulas\ParticleModule.h">
+      <Filter>sistema_particulas</Filter>
+    </ClInclude>
+    <ClInclude Include="sistema_particulas\ParticlePlayback.h">
+      <Filter>sistema_particulas</Filter>
+    </ClInclude>
+    <ClInclude Include="sistema_particulas\ParticleRendererGL.h">
+      <Filter>sistema_particulas</Filter>
+    </ClInclude>
+    <ClInclude Include="sistema_particulas\ParticleSystem.h">
+      <Filter>sistema_particulas</Filter>
+    </ClInclude>
+    <ClInclude Include="sistema_particulas\ParticleTestScene.h">
+      <Filter>sistema_particulas</Filter>
+    </ClInclude>
+    <ClInclude Include="sistema_particulas\logica\GestorParticulasLogica.h">
+      <Filter>sistema_particulas\logica</Filter>
+    </ClInclude>
+    <ClInclude Include="sistema_particulas\logica\ParticleJson.h">
+      <Filter>sistema_particulas\logica</Filter>
+    </ClInclude>
+    <ClInclude Include="sistema_particulas\logica\ValidacionParticulas.h">
+      <Filter>sistema_particulas\logica</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

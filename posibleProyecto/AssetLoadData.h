@@ -10,6 +10,7 @@ struct ObjMaterial {
     std::string           name;                   
     glm::vec4             color = glm::vec4(1.0f); 
     std::filesystem::path albedoTexture;            
+    glm::vec3             emission = glm::vec3(0.0f);
 };
 
 struct ObjPiece {

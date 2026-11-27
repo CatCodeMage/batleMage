@@ -2,6 +2,9 @@
 #include <imgui.h>
 #include "CombatPanel.h"
 #include "CameraPathPanel.h"
+#include "CombatSimulation.h"
+
+#include <utility>
 
 void simulationData::changeLights(std::vector<SceneLight>& newLights) {
 	lights = newLights;
@@ -23,6 +26,7 @@ void simulationData::init(GLFWwindow* window) {
 	textures.init();
 	skinnedRenderer.initialize();
 	loadAssetManifest(dataPath("db/assets.json"), libMesh, libModel, libMaterial, textures, skinnedRenderer.maxBones());
+	iceLanceVfx.init(libMesh, textures);
 
 	map.load(dataPath("db/map.json"), libModel);
 
@@ -36,12 +40,19 @@ void simulationData::init(GLFWwindow* window) {
 	keysInput.init(window);
 
 	framesInfo = generateCombat(libModel, dataPath("db/combate_generado.json"));
+
+	if (!framesInfo.particleFrames.empty()) {
+		particleModule.initialize(std::move(framesInfo.particleStyles));
+	}
+	particleModule.setFrames(std::move(framesInfo.particleFrames), framesInfo.ticksPerSecond);
+
 	visualInterface.init(window);
 }
 
 simulationData::~simulationData() {
 	visualInterface.destroy();
 	glUseProgram(0);
+	particleModule.shutdown();
 	skinnedRenderer.destroy();
 	animators.clear();
 	shadows.destroy();
@@ -144,6 +155,8 @@ void simulationData::procesMainBodyLoopRealTime(GLFWwindow* window, SystemInfo& 
 	submitEntities(framesInfo.combat[framesInfo.frame]);
 
 	renderer.submitLights(lights, sysInfo.getTimeStored());
+	const double replaySeconds = static_cast<double>(framesInfo.frame) / CombatSimulation::TICKS_PER_SECOND;
+	iceLanceVfx.submitFrame(renderer, framesInfo.combat, framesInfo.impacts, framesInfo.frame, viewCamera, replaySeconds);
 
 	//renderizar sombras
 	shadows.render(lights, [&]() { renderer.drawShadowGeometry(libMesh); }, &skinnedRenderer);
@@ -159,6 +172,10 @@ void simulationData::procesMainBodyLoopRealTime(GLFWwindow* window, SystemInfo& 
 	skinnedRenderer.drawLighting(viewProjection, libMaterial);
 	skinnedRenderer.clear();
 
+	// El tick del combate fija el estado de las particulas, incluso en pausa.
+	particleModule.seek(framesInfo.frame);
+	particleModule.render(viewCamera.get_view(), viewCamera.get_proj());
+
 	// Pintar la UI
 	if (arePanelsVisible) {
 		drawCombatPanel(framesInfo);
@@ -169,7 +186,6 @@ void simulationData::procesMainBodyLoopRealTime(GLFWwindow* window, SystemInfo& 
 	// Mostrar el resultado
 	updateFrame(window);
 }
-
 void simulationData::updateInteractionMode(GLFWwindow* window) {
 	const bool isEditing = interactionMode == InteractionMode::Editing;
 	const bool hasClickedScene = isEditing && visualInterface.wasSceneClicked();
