@@ -31,7 +31,7 @@ void Renderer::submitLight(const Light& light) {
     w_lights.push_back(light);
 }
  
-void Renderer::submit(MeshId id, MaterialId matId, const glm::mat4& model, const glm::vec4& color, int kind, const glm::vec3& emission) {
+void Renderer::submit(MeshId id, MaterialId matId, const glm::mat4& model, const glm::vec4& color, int kind) {
     assert(id != INVALID_MESH);
     assert(matId != INVALID_MATERIAL_ID);
     if (id >= w_batches.size()) {
@@ -68,68 +68,72 @@ void Renderer::getActualViewProj(const glm::mat4& viewProj) {
     glUniformMatrix4fv(w_locViewProj, 1, GL_FALSE, glm::value_ptr(viewProj));
 }
 
-void Renderer::flush(const MeshLibrary& lib, const glm::mat4& viewProj, const MaterialLibrary& matLib) {
+void Renderer::flush(
+    const MeshLibrary& lib,
+    const glm::mat4& viewProj,
+    const MaterialLibrary& matLib)
+{
     glUseProgram(w_program);
 
     getActualViewProj(viewProj);
-    if (w_locCamPos >= 0)
+
+    if (w_locCamPos >= 0) {
         glUniform3fv(w_locCamPos, 1, glm::value_ptr(w_camPos));
+    }
 
     applyLights(w_program);
+
     glActiveTexture(GL_TEXTURE0 + ALBEDO_TEXTURE_UNIT);
-    // 1. Geometria opaca (escenario, personajes, proyectiles solidos, cristales y shards)
+
+    auto drawBatch = [&](MeshId meshId, const RenderBatch& batch) {
+        if (batch.instances.empty()) {
+            return;
+        }
+
+        const Material& mat = matLib.get(batch.material);
+
+        glUniform4fv(m_locAlbedoColor, 1, &mat.albedoColor[0]);
+        glUniform3fv(m_locEmissive, 1, &mat.emissive[0]);
+        glUniform1f(m_locRoughness, mat.roughness);
+        glUniform1f(m_locMetallic, mat.metallic);
+        glUniform1f(m_locOpacity, mat.opacity);
+
+        glBindTexture(GL_TEXTURE_2D, mat.albedoTexture);
+        lib.get(meshId).drawInstances(batch.instances);
+        };
+
+    // 1. Geometría opaca.
+    glDisable(GL_BLEND);
+    glDepthMask(GL_TRUE);
+
     for (MeshId i = 0; i < w_batches.size(); ++i) {
         for (const RenderBatch& batch : w_batches[i]) {
-            if (batch.instances.empty()) {
-                continue;
-            }
-
-            const Material& mat = matLib.get(batch.material);
-
-            if (mat.opacity < 1.0f) {
-                glEnable(GL_BLEND);
-                glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-            }
-
-            glUniform4fv(m_locAlbedoColor, 1, &mat.albedoColor[0]);
-            glUniform3fv(m_locEmissive, 1, &mat.emissive[0]);
-            glUniform1f(m_locRoughness, mat.roughness);
-            glUniform1f(m_locMetallic, mat.metallic);
-            glUniform1f(m_locOpacity, mat.opacity);
-
-            glBindTexture(GL_TEXTURE_2D, mat.albedoTexture);
-            lib.get(i).drawInstances(batch.instances);
-            w_batches[i].clear();
-
-            if (mat.opacity < 1.0f) {
-                glDisable(GL_BLEND);
+            if (matLib.get(batch.material).opacity >= 1.0f) {
+                drawBatch(i, batch);
             }
         }
     }
 
-    // 2. VFX transparentes (escarcha sobre superficie, niebla fria y sparkles)
-    bool hasTransparent = false;
+    // 2. Geometría transparente.
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glDepthMask(GL_FALSE);
+
     for (MeshId i = 0; i < w_batches.size(); ++i) {
-        if (!w_batches[i].empty()) {
-            hasTransparent = true;
-            break;
-        }
-    }
-    if (hasTransparent) {
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        glDepthMask(GL_FALSE);
-        for (MeshId i = 0; i < w_batches.size(); ++i) {
-            if (!w_batches[i].empty()) {
-                const BatchMaterial& material = w_batchMaterials[i];
-                glBindTexture(GL_TEXTURE_2D, material.albedoTexture);
-                glUniform3fv(w_locEmission, 1, glm::value_ptr(material.emission));
-                lib.get(i).drawInstances(w_batches[i]);
-                w_batches[i].clear();
+        for (const RenderBatch& batch : w_batches[i]) {
+            if (matLib.get(batch.material).opacity < 1.0f) {
+                drawBatch(i, batch);
             }
         }
-        glDepthMask(GL_TRUE);
-        glDisable(GL_BLEND);
+    }
+
+    // Restaurar el estado de OpenGL.
+    glDepthMask(GL_TRUE);
+    glDisable(GL_BLEND);
+
+    // Vaciar todos los lotes una vez terminados los dos pases.
+    for (auto& batches : w_batches) {
+        batches.clear();
     }
 
     w_lights.clear();

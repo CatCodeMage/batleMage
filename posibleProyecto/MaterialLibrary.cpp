@@ -43,7 +43,7 @@ void MaterialLibrary::loadFromJson(const std::filesystem::path& path) {
 
 		mat.name = name;
 
-		if (matJson.contains("albedoTexture")) {
+		if (matJson.contains("albedoColor")) {
 			auto& c = matJson["albedoColor"];
 			mat.albedoColor = glm::vec4(c[0], c[1], c[2], c.size() > 3 ? c[3].get<float>() : 1.0f);
 		}

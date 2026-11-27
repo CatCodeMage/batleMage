@@ -9,10 +9,11 @@
 #include "Renderer.h"
 #include "Entidad.h"
 #include "camera.h"
+#include "MaterialLibrary.h"
 
 class IceLanceVFX {
 public:
-    void init(MeshLibrary& meshes, const TextureLibrary& textures);
+    void init(MeshLibrary& meshes, const TextureLibrary& textures, MaterialLibrary& matLib);
 
     void submitFrame(
         Renderer& renderer,
@@ -23,6 +24,10 @@ public:
         double timeSeconds) const;
 
 private:
+
+    MaterialId m_whiteMaterial = INVALID_MATERIAL_ID;
+    MaterialId m_daggerMaterial = INVALID_MATERIAL_ID;
+
     void submitFlightAndTrails(
         Renderer& renderer,
         const std::vector<std::vector<Entidad>>& combatFrames,

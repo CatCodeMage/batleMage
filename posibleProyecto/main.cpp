@@ -201,7 +201,7 @@ int createSimulation() {
 template <typename Simulation>
 void simulateCombatToReplay() {
     Simulation simulation;
-    simulation.setup(dataPath("db/combat.json"));
+    simulation.setup(dataPath("db/combat_1.json"));
     while (!simulation.isFinished()) {
         simulation.step();
     }

@@ -15,7 +15,6 @@ layout (location = 8) in float iKind;
 uniform mat4 uViewProj;
 out vec3 vWorldPos;
 out vec3 vLocalPos;
-out vec3 vLocalPos;
 out vec3 vNormal;
 out vec2 vUV;
 out vec4 vColor;
@@ -44,6 +43,7 @@ flat in float vKind;
 uniform sampler2D uAlbedo;
 uniform vec4  uAlbedoColor;
 uniform vec3  uEmissive;
+uniform vec3 uCamPos;
 uniform float uRoughness;
 uniform float uMetallic;
 uniform float uOpacity;
@@ -175,6 +175,11 @@ float shadowVisibility(int lightIndex, vec3 lightPos, vec3 normal) {
 
 	return 1.0;
 }
+
+const vec3 ICE_BODY  = vec3(0.55, 0.78, 0.95);
+const vec3 ICE_FROST = vec3(0.82, 0.94, 1.00);
+const vec3 ICE_GLOW  = vec3(0.35, 0.75, 1.00);
+const vec3 ICE_MIST  = vec3(0.55, 0.72, 0.85);
 
 void main() {
     vec4 texColor = texture(uAlbedo, vUV);
@@ -467,7 +472,7 @@ void main() {
         star += max(0.0, 1.0 - abs(d.y) * 7.0) * max(0.0, 1.0 - abs(d.x) * 1.3);
         float s = clamp(core + star * 0.65, 0.0, 1.0) * vColor.a;
         if (s < 0.004) discard;
-        vec3 col = mix(ICE_GLOW, ICE_FROST, 0.58) * 1.35 + uEmission;
+        vec3 col = mix(ICE_GLOW, ICE_FROST, 0.58) * 1.35 + uEmissive;
         FragColor = vec4(col, clamp(s, 0.0, 1.0));
         return;
     }
@@ -490,7 +495,7 @@ void main() {
         float wisp = mix(0.45, 1.05, gx_fbm2(vUV * 6.2 + seedf * 1.7, 3));
         float a = soft * wisp * vColor.a;
         if (a < 0.004) discard;
-        vec3 col = mix(ICE_MIST * 0.78, ICE_FROST, smoothstep(0.08, 0.9, soft) * 0.68) + uEmission * 0.15;
+        vec3 col = mix(ICE_MIST * 0.78, ICE_FROST, smoothstep(0.08, 0.9, soft) * 0.68) + uEmissive * 0.15;
         FragColor = vec4(col, clamp(a, 0.0, 1.0));
         return;
     }

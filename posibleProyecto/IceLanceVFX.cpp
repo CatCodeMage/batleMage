@@ -478,8 +478,20 @@ glm::mat4 makeAxisAlignedMatrix(const glm::vec3& pos, const glm::vec3& axis, flo
 
 } // namespace
 
-void IceLanceVFX::init(MeshLibrary& meshes, const TextureLibrary& textures) {
+void IceLanceVFX::init(MeshLibrary& meshes, const TextureLibrary& textures, MaterialLibrary& matLib) {
     m_whiteTexture    = textures.white();
+
+    Material whiteMat;
+    whiteMat.name = "vfx_white";
+    whiteMat.albedoTexture = m_whiteTexture;
+    whiteMat.albedoColor = glm::vec4(1.0f);
+    whiteMat.emissive = glm::vec3(0.0f);
+    whiteMat.roughness = 1.0f;
+    whiteMat.metallic = 0.0f;
+    whiteMat.opacity = 1.0f;
+
+    m_whiteMaterial = matLib.add(whiteMat, "vfx/white");
+
     // Orden de creacion: primero opacos (kind=2), luego transparentes en orden de prioridad
     m_lanceBodyMesh   = buildIceLanceBodyMesh(meshes);
     m_crownSpikeMesh  = buildCrownSpikeMesh(meshes);
@@ -497,8 +509,24 @@ void IceLanceVFX::init(MeshLibrary& meshes, const TextureLibrary& textures) {
     m_fireFlameMesh   = buildBillboardQuadMesh(meshes, "reeboo_fire_flame_quad");
     m_fireFlashMesh   = buildBillboardQuadMesh(meshes, "reeboo_fire_flash_quad");
     m_earthRockMesh   = buildEarthRockMesh(meshes);
-    m_daggerTexture   = const_cast<TextureLibrary&>(textures).load("assets/dagger/throwing-knife_body_basecolor.jpg");
-    if (m_daggerTexture == 0) m_daggerTexture = m_whiteTexture;
+    
+    m_daggerTexture = const_cast<TextureLibrary&>(textures).load("assets/dagger/throwing-knife_body_basecolor.jpg");
+
+    if (m_daggerTexture == 0) {
+        m_daggerTexture = m_whiteTexture;
+    }
+    
+    Material daggerMat;
+
+    daggerMat.name = "vfx_dagger";
+    daggerMat.albedoTexture = m_daggerTexture;
+    daggerMat.albedoColor = glm::vec4(1.0f);
+    daggerMat.emissive = glm::vec3(0.0f);
+    daggerMat.roughness = 0.8f;
+    daggerMat.metallic = 0.0f;
+    daggerMat.opacity = 1.0f;
+
+    m_daggerMaterial = matLib.add(daggerMat, "vfx/dagger");
 
     // Cargar throwing-knife.obj una sola vez con tinyobjloader
     {
@@ -615,11 +643,10 @@ void IceLanceVFX::submitFlightAndTrails(
         const float seedFrac = gx_hash11(static_cast<float>(e.poolIndex >= 0 ? e.poolIndex * 19 + 7 : 17));
         renderer.submit(
             m_lanceBodyMesh,
-            m_whiteTexture,
+            m_whiteMaterial,
             bodyTransform.toMatrix(),
             glm::vec4(0.75f, seedFrac, 1.0f, 1.0f),
-            KIND_ICE_CRYSTAL,
-            ICE_EMISSION * 1.55f
+            KIND_ICE_CRYSTAL
         );
 
         // Nucleo cristalino interior rotado 30 grados para mayor riqueza visual
@@ -628,11 +655,10 @@ void IceLanceVFX::submitFlightAndTrails(
         coreTransform.rot.z += GX_PI / 6.0f;
         renderer.submit(
             m_lanceBodyMesh,
-            m_whiteTexture,
+            m_whiteMaterial,
             coreTransform.toMatrix(),
             glm::vec4(0.95f, gx_fract(seedFrac + 0.37f), 1.0f, 1.0f),
-            KIND_ICE_CRYSTAL,
-            ICE_EMISSION * 2.1f
+            KIND_ICE_CRYSTAL
         );
 
         // Luz puntual fria que acompana al Ice Lance en vuelo
@@ -675,11 +701,10 @@ void IceLanceVFX::submitFlightAndTrails(
             const float mistAlpha = baseAlpha * 0.54f;
             renderer.submit(
                 m_mistQuadMesh,
-                m_whiteTexture,
+                m_whiteMaterial,
                 makeBillboardMatrix(puffPos, camRight, camUp, camForward, mistSize),
                 glm::vec4(1.0f, h1, 1.0f, mistAlpha),
-                KIND_COLD_MIST,
-                ICE_EMISSION * 0.35f
+                KIND_COLD_MIST
             );
 
             // Sparkles / destellos (part 1)
@@ -694,11 +719,10 @@ void IceLanceVFX::submitFlightAndTrails(
                 const float spSize = (std::max)(TRAIL_SIZE * 0.38f * (0.7f + 0.6f * h2), 0.0045f * dist);
                 renderer.submit(
                     m_sparkleQuadMesh,
-                    m_whiteTexture,
+                    m_whiteMaterial,
                     makeBillboardMatrix(spPos, camRight, camUp, camForward, spSize),
                     glm::vec4(1.0f, h2, 1.0f, sparkleAlpha),
-                    KIND_SPARKLE,
-                    ICE_EMISSION * 0.9f
+                    KIND_SPARKLE
                 );
             }
         }
@@ -794,11 +818,10 @@ void IceLanceVFX::submitSingleImpact(
         const float frostRand = gx_hash11(seedSalt + 17.0f);
         renderer.submit(
             m_frostQuadMesh,
-            m_whiteTexture,
+            m_whiteMaterial,
             frostModel,
             glm::vec4(fill, frostRand, 1.0f, frostOpacity * fade),
-            KIND_FROST_PATCH,
-            ICE_EMISSION * 0.3f
+            KIND_FROST_PATCH
         );
     }
 
@@ -847,11 +870,10 @@ void IceLanceVFX::submitSingleImpact(
 
         renderer.submit(
             m_crownSpikeMesh,
-            m_whiteTexture,
+            m_whiteMaterial,
             spikeModel,
             glm::vec4(0.80f, r1, 1.0f, 1.0f - leave * 0.85f),
-            KIND_ICE_CRYSTAL,
-            ICE_EMISSION * 1.25f
+            KIND_ICE_CRYSTAL
         );
     }
 
@@ -920,11 +942,10 @@ void IceLanceVFX::submitSingleImpact(
         const MeshId shardMesh = (i % 3 == 0) ? m_shardWedgeMesh : m_shardBoxMesh;
         renderer.submit(
             shardMesh,
-            m_whiteTexture,
+            m_whiteMaterial,
             shardModel,
             glm::vec4(0.85f, h1, 1.0f, shardFade),
-            KIND_ICE_CRYSTAL,
-            ICE_EMISSION * 1.15f
+            KIND_ICE_CRYSTAL
         );
     }
 
@@ -957,11 +978,10 @@ void IceLanceVFX::submitSingleImpact(
 
         renderer.submit(
             m_mistQuadMesh,
-            m_whiteTexture,
+            m_whiteMaterial,
             makeBillboardMatrix(pos, camRight, camUp, camForward, sz),
             glm::vec4(1.0f, h1, 1.0f, alpha),
-            KIND_COLD_MIST,
-            ICE_EMISSION * 0.35f
+            KIND_COLD_MIST
         );
     }
 
@@ -992,11 +1012,10 @@ void IceLanceVFX::submitSingleImpact(
 
         renderer.submit(
             m_sparkleQuadMesh,
-            m_whiteTexture,
+            m_whiteMaterial,
             makeBillboardMatrix(wp, camRight, camUp, camForward, sz),
             glm::vec4(1.0f, h, 1.0f, a),
-            KIND_SPARKLE,
-            ICE_EMISSION
+            KIND_SPARKLE
         );
     }
 
@@ -1049,7 +1068,7 @@ void IceLanceVFX::submitFireCastAndFlight(
                 const glm::vec3 col = glm::mix(glm::vec3(1.0f, 0.95f, 0.80f), glm::vec3(1.0f, 0.50f, 0.10f), u);
                 renderer.submit(
                     m_fireFlashMesh,
-                    m_whiteTexture,
+                    m_whiteMaterial,
                     makeBillboardMatrix(castPos, camRight, camUp, camForward, 1.95f * curve),
                     glm::vec4(col, alpha),
                     KIND_FIRE_FLASH
@@ -1069,7 +1088,7 @@ void IceLanceVFX::submitFireCastAndFlight(
                 ringModel[3] = glm::vec4(ringPos, 1.0f);
                 renderer.submit(
                     m_fireDecalMesh,
-                    m_whiteTexture,
+                    m_whiteMaterial,
                     ringModel,
                     glm::vec4(ringRad, gx_hash11(seedSalt + 5.0f), 0.85f, (1.0f - u) * 0.95f),
                     KIND_FIRE_DECAL
@@ -1094,7 +1113,7 @@ void IceLanceVFX::submitFireCastAndFlight(
                     const float angle = h2 * GX_TAU + (h1 - 0.5f) * 3.0f * castAge;
                     renderer.submit(
                         m_fireFlameMesh,
-                        m_whiteTexture,
+                        m_whiteMaterial,
                         makeRotatedBillboardMatrix(pos, camRight, camUp, camForward, sz, angle),
                         glm::vec4(evalFireFlameRamp(u, h1), alpha),
                         KIND_FIRE_FLAME
@@ -1121,7 +1140,7 @@ void IceLanceVFX::submitFireCastAndFlight(
                     const glm::vec3 col = glm::mix(glm::vec3(1.0f, 0.95f, 0.70f), glm::vec3(1.0f, 0.45f, 0.10f), u);
                     renderer.submit(
                         m_fireFlashMesh,
-                        m_whiteTexture,
+                        m_whiteMaterial,
                         makeAlignedBillboardMatrix(pos, vel, camPos, camRight, 0.09f * scale, 0.34f * scale),
                         glm::vec4(col, 1.0f - u),
                         KIND_FIRE_FLASH
@@ -1148,7 +1167,7 @@ void IceLanceVFX::submitFireCastAndFlight(
                     const glm::vec3 smokeCol = glm::mix(glm::vec3(0.32f, 0.23f, 0.18f), glm::vec3(0.17f, 0.15f, 0.16f), u);
                     renderer.submit(
                         m_fireSmokeMesh,
-                        m_whiteTexture,
+                        m_whiteMaterial,
                         makeRotatedBillboardMatrix(pos, camRight, camUp, camForward, sz, h2 * GX_TAU + pAge * 1.2f),
                         glm::vec4(smokeCol, alpha),
                         KIND_FIRE_SMOKE
@@ -1184,7 +1203,7 @@ void IceLanceVFX::submitFireCastAndFlight(
         // 2.1 Halo (QuadMesh 0.9 -> escalado a 1.85, color (1, 0.3, 0.05, 0.25))
         renderer.submit(
             m_fireFlameMesh,
-            m_whiteTexture,
+            m_whiteMaterial,
             makeBillboardMatrix(pos, camRight, camUp, camForward, 1.85f),
             glm::vec4(1.0f, 0.35f, 0.06f, 0.36f),
             KIND_FIRE_FLAME
@@ -1197,7 +1216,7 @@ void IceLanceVFX::submitFireCastAndFlight(
         orbTransform.scale = glm::vec3(0.46f);
         renderer.submit(
             m_fireOrbMesh,
-            m_whiteTexture,
+            m_whiteMaterial,
             orbTransform.toMatrix(),
             glm::vec4(1.0f, age * 2.2f, 0.4f, 0.96f),
             KIND_FIRE_ORB
@@ -1277,7 +1296,7 @@ void IceLanceVFX::submitFireCastAndFlight(
                 const glm::vec3 col = glm::mix(glm::vec3(1.0f, 0.88f, 0.55f), glm::vec3(1.0f, 0.38f, 0.05f), u);
                 renderer.submit(
                     m_fireFlashMesh,
-                    m_whiteTexture,
+                    m_whiteMaterial,
                     makeAlignedBillboardMatrix(histPos, histDir, camPos, camRight, w, 0.65f),
                     glm::vec4(col, (1.0f - u) * 0.92f),
                     KIND_FIRE_FLASH
@@ -1296,7 +1315,7 @@ void IceLanceVFX::submitFireCastAndFlight(
                     const float tu = lagAge / 0.28f;
                     renderer.submit(
                         m_fireFlameMesh,
-                        m_whiteTexture,
+                        m_whiteMaterial,
                         makeAlignedBillboardMatrix(histPos, histDir, camPos, camRight, 0.92f * widthCurve, 0.78f),
                         glm::vec4(evalFireFlameRamp(tu, h1), (1.0f - tu * 0.85f) * 0.82f),
                         KIND_FIRE_FLAME
@@ -1312,7 +1331,7 @@ void IceLanceVFX::submitFireCastAndFlight(
                 const float angle = h2 * GX_TAU + (h1 - 0.5f) * 4.0f * lagAge;
                 renderer.submit(
                     m_fireFlameMesh,
-                    m_whiteTexture,
+                    m_whiteMaterial,
                     makeRotatedBillboardMatrix(flamePos, camRight, camUp, camForward, flameSz, angle),
                     glm::vec4(evalFireFlameRamp(u, h2), flameAlpha),
                     KIND_FIRE_FLAME
@@ -1337,7 +1356,7 @@ void IceLanceVFX::submitFireCastAndFlight(
                         : glm::mix(glm::vec3(1.0f, 0.42f, 0.08f), glm::vec3(0.8f, 0.12f, 0.0f), (u - 0.6f) / 0.4f);
                     renderer.submit(
                         m_fireFlashMesh,
-                        m_whiteTexture,
+                        m_whiteMaterial,
                         makeBillboardMatrix(emberPos, camRight, camUp, camForward, emberSz),
                         glm::vec4(emberCol, 1.0f - gx_smoothstep(0.6f, 1.0f, u)),
                         KIND_FIRE_FLASH
@@ -1360,7 +1379,7 @@ void IceLanceVFX::submitFireCastAndFlight(
                         const glm::vec3 smokeCol = glm::mix(glm::vec3(0.24f, 0.19f, 0.16f), glm::vec3(0.26f, 0.24f, 0.22f), u);
                         renderer.submit(
                             m_fireSmokeMesh,
-                            m_whiteTexture,
+                            m_whiteMaterial,
                             makeRotatedBillboardMatrix(smokePos, camRight, camUp, camForward, smokeSz, h3 * GX_TAU + lagAge * 0.9f),
                             glm::vec4(smokeCol, smokeAlpha),
                             KIND_FIRE_SMOKE
@@ -1412,7 +1431,7 @@ void IceLanceVFX::submitFireImpact(
             scorchModel[3] = glm::vec4(scorchPos, 1.0f);
             renderer.submit(
                 m_fireDecalMesh,
-                m_whiteTexture,
+                m_whiteMaterial,
                 scorchModel,
                 glm::vec4(hotCore, randSeed, 0.10f, 0.88f * fade),
                 KIND_FIRE_DECAL
@@ -1433,7 +1452,7 @@ void IceLanceVFX::submitFireImpact(
             glowModel[3] = glm::vec4(glowPos, 1.0f);
             renderer.submit(
                 m_fireDecalMesh,
-                m_whiteTexture,
+                m_whiteMaterial,
                 glowModel,
                 glm::vec4(grow, randSeed, 0.45f, fade * 0.90f),
                 KIND_FIRE_DECAL
@@ -1457,7 +1476,7 @@ void IceLanceVFX::submitFireImpact(
         ringModel[3] = glm::vec4(ringPos, 1.0f);
         renderer.submit(
             m_fireDecalMesh,
-            m_whiteTexture,
+            m_whiteMaterial,
             ringModel,
             glm::vec4(ringRad, randSeed, 0.85f, fade),
             KIND_FIRE_DECAL
@@ -1474,7 +1493,7 @@ void IceLanceVFX::submitFireImpact(
         const glm::vec3 col = glm::mix(glm::vec3(1.0f, 0.88f, 0.58f), glm::vec3(1.0f, 0.40f, 0.05f), u);
         renderer.submit(
             m_fireFlashMesh,
-            m_whiteTexture,
+            m_whiteMaterial,
             makeBillboardMatrix(blastCenter, camRight, camUp, camForward, flashSize),
             glm::vec4(col, 1.0f - u),
             KIND_FIRE_FLASH
@@ -1497,7 +1516,7 @@ void IceLanceVFX::submitFireImpact(
             const float alpha = (1.0f - gx_smoothstep(0.45f, 1.0f, u)) * 0.92f;
             renderer.submit(
                 m_fireFlameMesh,
-                m_whiteTexture,
+                m_whiteMaterial,
                 makeRotatedBillboardMatrix(pos, camRight, camUp, camForward, sz, h2 * GX_TAU + age * 1.5f),
                 glm::vec4(evalFireFlameRamp(u * 0.9f, h1), alpha),
                 KIND_FIRE_FLAME
@@ -1529,7 +1548,7 @@ void IceLanceVFX::submitFireImpact(
             const float angle = h2 * GX_TAU + (h1 - 0.5f) * 3.0f * age;
             renderer.submit(
                 m_fireFlameMesh,
-                m_whiteTexture,
+                m_whiteMaterial,
                 makeRotatedBillboardMatrix(pos, camRight, camUp, camForward, sz, angle),
                 glm::vec4(evalFireFlameRamp(u, h2), alpha),
                 KIND_FIRE_FLAME
@@ -1563,7 +1582,7 @@ void IceLanceVFX::submitFireImpact(
             const glm::vec3 smokeCol = glm::mix(glm::vec3(0.38f, 0.29f, 0.23f), glm::vec3(0.18f, 0.16f, 0.17f), u);
             renderer.submit(
                 m_fireSmokeMesh,
-                m_whiteTexture,
+                m_whiteMaterial,
                 makeRotatedBillboardMatrix(pos, camRight, camUp, camForward, sz, h2 * GX_TAU + pAge * 0.5f),
                 glm::vec4(smokeCol, alpha),
                 KIND_FIRE_SMOKE
@@ -1598,7 +1617,7 @@ void IceLanceVFX::submitFireImpact(
                 : glm::mix(glm::vec3(1.0f, 0.50f, 0.12f), glm::vec3(0.90f, 0.20f, 0.0f), (u - 0.4f) / 0.6f);
             renderer.submit(
                 m_fireFlashMesh,
-                m_whiteTexture,
+                m_whiteMaterial,
                 makeAlignedBillboardMatrix(pos, vel, camPos, camRight, 0.09f * scale, 0.36f * scale),
                 glm::vec4(col, 1.0f - u),
                 KIND_FIRE_FLASH
@@ -1655,7 +1674,7 @@ void IceLanceVFX::submitLightningCastAndFlight(
                 const glm::vec3 col = glm::mix(glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(0.5f, 0.7f, 1.0f), u);
                 renderer.submit(
                     m_fireFlashMesh,
-                    m_whiteTexture,
+                    m_whiteMaterial,
                     makeBillboardMatrix(castPos, camRight, camUp, camForward, 1.85f * curve),
                     glm::vec4(col, 1.0f - u),
                     KIND_FIRE_FLASH
@@ -1674,7 +1693,7 @@ void IceLanceVFX::submitLightningCastAndFlight(
                 ringModel[3] = glm::vec4(castPos + castDir * 0.12f, 1.0f);
                 renderer.submit(
                     m_fireDecalMesh,
-                    m_whiteTexture,
+                    m_whiteMaterial,
                     ringModel,
                     glm::vec4(ringRad, gx_hash11(seedSalt + 3.0f), 0.85f, (1.0f - u) * 0.90f),
                     KIND_FIRE_DECAL
@@ -1691,7 +1710,7 @@ void IceLanceVFX::submitLightningCastAndFlight(
                 const glm::vec3 arcMid = castPos + arcDir * 0.45f;
                 renderer.submit(
                     m_fireFlashMesh,
-                    m_whiteTexture,
+                    m_whiteMaterial,
                     makeAlignedBillboardMatrix(arcMid, arcDir, camPos, camRight, 0.55f, 0.90f),
                     glm::vec4(stepId + fi * 11.3f, 0.35f, 0.45f, 1.0f - castAge / 0.35f),
                     KIND_LIGHTNING_BOLT
@@ -1714,7 +1733,7 @@ void IceLanceVFX::submitLightningCastAndFlight(
                 const glm::vec3 col = glm::mix(glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(0.45f, 0.65f, 1.0f), u);
                 renderer.submit(
                     m_fireFlashMesh,
-                    m_whiteTexture,
+                    m_whiteMaterial,
                     makeAlignedBillboardMatrix(pos, vel, camPos, camRight, 0.08f * sc, 0.32f * sc),
                     glm::vec4(col, 1.0f - u),
                     KIND_FIRE_FLASH
@@ -1749,7 +1768,7 @@ void IceLanceVFX::submitLightningCastAndFlight(
         // 2.1 Halo electrico azul
         renderer.submit(
             m_fireFlashMesh,
-            m_whiteTexture,
+            m_whiteMaterial,
             makeBillboardMatrix(pos, camRight, camUp, camForward, 1.55f),
             glm::vec4(0.40f, 0.58f, 1.0f, 0.42f),
             KIND_FIRE_FLASH
@@ -1762,7 +1781,7 @@ void IceLanceVFX::submitLightningCastAndFlight(
         orbTransform.scale = glm::vec3(0.38f);
         renderer.submit(
             m_fireOrbMesh,
-            m_whiteTexture,
+            m_whiteMaterial,
             orbTransform.toMatrix(),
             glm::vec4(0.55f, age * 3.0f, 0.95f, 0.95f),
             KIND_FIRE_ORB
@@ -1777,7 +1796,7 @@ void IceLanceVFX::submitLightningCastAndFlight(
             const glm::vec3 arcMid = pos + arcDir * 0.35f;
             renderer.submit(
                 m_fireFlashMesh,
-                m_whiteTexture,
+                m_whiteMaterial,
                 makeAlignedBillboardMatrix(arcMid, arcDir, camPos, camRight, 0.48f, 0.72f),
                 glm::vec4(stepId + fi * 13.1f, 0.40f, 0.50f, 0.95f),
                 KIND_LIGHTNING_BOLT
@@ -1793,7 +1812,7 @@ void IceLanceVFX::submitLightningCastAndFlight(
             const float sz = 0.22f * (1.0f - cycle);
             renderer.submit(
                 m_fireFlashMesh,
-                m_whiteTexture,
+                m_whiteMaterial,
                 makeBillboardMatrix(pPos, camRight, camUp, camForward, sz),
                 glm::vec4(0.85f, 0.92f, 1.0f, 1.0f - cycle),
                 KIND_FIRE_FLASH
@@ -1836,7 +1855,7 @@ void IceLanceVFX::submitLightningCastAndFlight(
                 const float stepId = std::floor(static_cast<float>(timeSeconds) * 20.0f);
                 renderer.submit(
                     m_fireFlashMesh,
-                    m_whiteTexture,
+                    m_whiteMaterial,
                     makeAlignedBillboardMatrix(histPos, histDir, camPos, camRight, 0.60f * (1.0f - 0.5f * u), 0.72f),
                     glm::vec4(stepId + elemIdx * 0.31f, 0.32f, 0.55f, (1.0f - u) * 0.92f),
                     KIND_LIGHTNING_BOLT
@@ -1848,7 +1867,7 @@ void IceLanceVFX::submitLightningCastAndFlight(
                 const float u = lagAge / 0.10f;
                 renderer.submit(
                     m_fireFlashMesh,
-                    m_whiteTexture,
+                    m_whiteMaterial,
                     makeAlignedBillboardMatrix(histPos, histDir, camPos, camRight, 0.22f * (1.0f - 0.4f * u), 0.68f),
                     glm::vec4(0.90f, 0.96f, 1.0f, (1.0f - u) * 0.95f),
                     KIND_FIRE_FLASH
@@ -1863,7 +1882,7 @@ void IceLanceVFX::submitLightningCastAndFlight(
                 const float sc = 0.14f * (0.55f + 0.90f * h1) * (1.0f - u);
                 renderer.submit(
                     m_fireFlashMesh,
-                    m_whiteTexture,
+                    m_whiteMaterial,
                     makeBillboardMatrix(spPos, camRight, camUp, camForward, sc),
                     glm::vec4(glm::mix(glm::vec3(1.0f), glm::vec3(0.45f, 0.65f, 1.0f), u), (1.0f - u) * (0.6f + 0.4f * h2)),
                     KIND_FIRE_FLASH
@@ -1911,7 +1930,7 @@ void IceLanceVFX::submitLightningImpact(
             scModel[3] = glm::vec4(impact.position + normal * 0.022f, 1.0f);
             renderer.submit(
                 m_fireDecalMesh,
-                m_whiteTexture,
+                m_whiteMaterial,
                 scModel,
                 glm::vec4(1.0f - gx_smoothstep(0.0f, 0.35f, age), randSeed, 0.10f, 0.85f * fade),
                 KIND_FIRE_DECAL
@@ -1931,7 +1950,7 @@ void IceLanceVFX::submitLightningImpact(
             burnModel[3] = glm::vec4(impact.position + normal * 0.030f, 1.0f);
             renderer.submit(
                 m_fireDecalMesh,
-                m_whiteTexture,
+                m_whiteMaterial,
                 burnModel,
                 glm::vec4(grow, randSeed, 0.45f, fade * 0.75f),
                 KIND_FIRE_DECAL
@@ -1954,7 +1973,7 @@ void IceLanceVFX::submitLightningImpact(
         ringModel[3] = glm::vec4(impact.position + normal * 0.038f, 1.0f);
         renderer.submit(
             m_fireDecalMesh,
-            m_whiteTexture,
+            m_whiteMaterial,
             ringModel,
             glm::vec4(ringRad, randSeed, 0.85f, fade),
             KIND_FIRE_DECAL
@@ -1971,7 +1990,7 @@ void IceLanceVFX::submitLightningImpact(
         const glm::vec3 col = glm::mix(glm::vec3(1.0f), glm::vec3(0.5f, 0.65f, 1.0f), u);
         renderer.submit(
             m_fireFlashMesh,
-            m_whiteTexture,
+            m_whiteMaterial,
             makeBillboardMatrix(blastCenter, camRight, camUp, camForward, flashSize),
             glm::vec4(col, 1.0f - u),
             KIND_FIRE_FLASH
@@ -1987,7 +2006,7 @@ void IceLanceVFX::submitLightningImpact(
         shockT.scale = glm::vec3(sc);
         renderer.submit(
             m_fireOrbMesh,
-            m_whiteTexture,
+            m_whiteMaterial,
             shockT.toMatrix(),
             glm::vec4(0.55f, age * 3.0f, 0.95f, (1.0f - gx_smoothstep(0.4f, 1.0f, u)) * 0.75f),
             KIND_FIRE_ORB
@@ -2008,7 +2027,7 @@ void IceLanceVFX::submitLightningImpact(
             const glm::vec3 arcMid = blastCenter + arcDir * (len * 0.5f);
             renderer.submit(
                 m_fireFlashMesh,
-                m_whiteTexture,
+                m_whiteMaterial,
                 makeAlignedBillboardMatrix(arcMid, arcDir, camPos, camRight, 0.55f, len),
                 glm::vec4(stepId + fi * 13.7f, 0.30f, 0.50f, fade),
                 KIND_LIGHTNING_BOLT
@@ -2037,7 +2056,7 @@ void IceLanceVFX::submitLightningImpact(
             const glm::vec3 col = glm::mix(glm::vec3(1.0f), glm::vec3(0.45f, 0.65f, 1.0f), u);
             renderer.submit(
                 m_fireFlashMesh,
-                m_whiteTexture,
+                m_whiteMaterial,
                 makeAlignedBillboardMatrix(pos, vel, camPos, camRight, 0.09f * sc, 0.36f * sc),
                 glm::vec4(col, 1.0f - u),
                 KIND_FIRE_FLASH
@@ -2091,7 +2110,7 @@ void IceLanceVFX::submitEarthCastAndFlight(
                 const float u = castAge / 0.12f;
                 renderer.submit(
                     m_fireFlashMesh,
-                    m_whiteTexture,
+                    m_whiteMaterial,
                     makeBillboardMatrix(castPos, camRight, camUp, camForward, 1.45f * (1.0f - 0.5f * u)),
                     glm::vec4(1.0f, 0.69f, 0.38f, 1.0f - u),
                     KIND_FIRE_FLASH
@@ -2107,7 +2126,7 @@ void IceLanceVFX::submitEarthCastAndFlight(
                 const glm::vec3 pos = castPos + dir * (0.4f * castAge) + glm::vec3(0.0f, 0.3f * castAge, 0.0f);
                 renderer.submit(
                     m_fireSmokeMesh,
-                    m_whiteTexture,
+                    m_whiteMaterial,
                     makeRotatedBillboardMatrix(pos, camRight, camUp, camForward, 0.75f * (0.5f + u), h1 * GX_TAU),
                     glm::vec4(0.40f, 0.33f, 0.27f, (1.0f - u) * 0.55f),
                     KIND_FIRE_SMOKE
@@ -2126,7 +2145,7 @@ void IceLanceVFX::submitEarthCastAndFlight(
                 pT.pos = pos;
                 pT.rot = glm::vec3(castAge * 6.0f, h1 * GX_TAU, castAge * 5.0f);
                 pT.scale = glm::vec3(0.11f * (1.0f - u));
-                renderer.submit(m_earthRockMesh, m_whiteTexture, pT.toMatrix(), glm::vec4(0.45f, 0.37f, 0.30f, 1.0f), 0);
+                renderer.submit(m_earthRockMesh, m_whiteMaterial, pT.toMatrix(), glm::vec4(0.45f, 0.37f, 0.30f, 1.0f), 0);
             }
         }
     }
@@ -2151,11 +2170,10 @@ void IceLanceVFX::submitEarthCastAndFlight(
         rockT.scale = glm::vec3(0.68f);
         renderer.submit(
             m_earthRockMesh,
-            m_whiteTexture,
+            m_whiteMaterial,
             rockT.toMatrix(),
             glm::vec4(0.42f, 0.34f, 0.28f, 1.0f),
-            0,
-            glm::vec3(0.12f, 0.07f, 0.03f)
+            0
         );
 
         // Luz calida sutil acompaniando a la roca
@@ -2198,7 +2216,7 @@ void IceLanceVFX::submitEarthCastAndFlight(
                 const glm::vec3 dustCol = glm::mix(glm::vec3(0.37f, 0.31f, 0.27f), glm::vec3(0.23f, 0.19f, 0.17f), u);
                 renderer.submit(
                     m_fireSmokeMesh,
-                    m_whiteTexture,
+                    m_whiteMaterial,
                     makeRotatedBillboardMatrix(dustPos, camRight, camUp, camForward, sz, h2 * GX_TAU + lagAge * 0.7f),
                     glm::vec4(dustCol, alpha),
                     KIND_FIRE_SMOKE
@@ -2215,7 +2233,7 @@ void IceLanceVFX::submitEarthCastAndFlight(
                 pebT.pos = pebPos;
                 pebT.rot = glm::vec3(lagAge * 7.0f, h1 * GX_TAU, lagAge * 5.0f);
                 pebT.scale = glm::vec3(0.11f * (1.0f - 0.7f * u));
-                renderer.submit(m_earthRockMesh, m_whiteTexture, pebT.toMatrix(), glm::vec4(0.48f, 0.40f, 0.32f, 1.0f), 0);
+                renderer.submit(m_earthRockMesh, m_whiteMaterial, pebT.toMatrix(), glm::vec4(0.48f, 0.40f, 0.32f, 1.0f), 0);
             }
 
             // C) Streak (lineas rapidas de movimiento detras del proyectil, 0.18 s)
@@ -2223,7 +2241,7 @@ void IceLanceVFX::submitEarthCastAndFlight(
                 const float u = lagAge / 0.18f;
                 renderer.submit(
                     m_fireFlashMesh,
-                    m_whiteTexture,
+                    m_whiteMaterial,
                     makeAlignedBillboardMatrix(histPos, histDir, camPos, camRight, 0.24f * (1.0f - u), 0.75f),
                     glm::vec4(0.85f, 0.72f, 0.55f, (1.0f - u) * 0.65f),
                     KIND_FIRE_FLASH
@@ -2261,7 +2279,7 @@ void IceLanceVFX::submitEarthImpact(
         const glm::vec3 col = glm::mix(glm::vec3(1.0f, 0.96f, 0.86f), glm::vec3(1.0f, 0.70f, 0.28f), u);
         renderer.submit(
             m_fireFlashMesh,
-            m_whiteTexture,
+            m_whiteMaterial,
             makeBillboardMatrix(blastCenter, camRight, camUp, camForward, (isBounceOnly ? 1.1f : 2.1f) * curve),
             glm::vec4(col, 1.0f - u),
             KIND_FIRE_FLASH
@@ -2274,7 +2292,7 @@ void IceLanceVFX::submitEarthImpact(
         const glm::vec3 col = glm::mix(glm::vec3(1.0f, 0.88f, 0.62f), glm::vec3(0.72f, 0.31f, 0.10f), u);
         renderer.submit(
             m_fireFlameMesh,
-            m_whiteTexture,
+            m_whiteMaterial,
             makeBillboardMatrix(blastCenter, camRight, camUp, camForward, 1.85f * glm::mix(0.3f, 1.1f, u)),
             glm::vec4(col, (1.0f - u) * 0.85f),
             KIND_FIRE_FLAME
@@ -2304,7 +2322,7 @@ void IceLanceVFX::submitEarthImpact(
             chipT.pos = pos;
             chipT.rot = glm::vec3(age * 8.0f * (0.5f + h1), h2 * GX_TAU, age * 6.0f);
             chipT.scale = glm::vec3((isBounceOnly ? 0.14f : 0.22f) * (0.6f + 0.6f * h2) * (1.0f - gx_smoothstep(0.7f, 1.0f, u)));
-            renderer.submit(m_earthRockMesh, m_whiteTexture, chipT.toMatrix(), glm::vec4(0.45f, 0.36f, 0.29f, 1.0f), 0);
+            renderer.submit(m_earthRockMesh, m_whiteMaterial, chipT.toMatrix(), glm::vec4(0.45f, 0.36f, 0.29f, 1.0f), 0);
         }
     }
 
@@ -2329,7 +2347,7 @@ void IceLanceVFX::submitEarthImpact(
             const glm::vec3 dustCol = glm::mix(glm::vec3(0.42f, 0.35f, 0.29f), glm::vec3(0.24f, 0.20f, 0.18f), u);
             renderer.submit(
                 m_fireSmokeMesh,
-                m_whiteTexture,
+                m_whiteMaterial,
                 makeRotatedBillboardMatrix(pos, camRight, camUp, camForward, sz, h2 * GX_TAU + age * 0.5f),
                 glm::vec4(dustCol, alpha),
                 KIND_FIRE_SMOKE
@@ -2357,7 +2375,7 @@ void IceLanceVFX::submitEarthImpact(
             const float sc = (0.6f + 0.8f * h1) * (1.0f - u);
             renderer.submit(
                 m_fireFlashMesh,
-                m_whiteTexture,
+                m_whiteMaterial,
                 makeAlignedBillboardMatrix(pos, vel, camPos, camRight, 0.07f * sc, 0.28f * sc),
                 glm::vec4(1.0f, 0.75f, 0.35f, 1.0f - u),
                 KIND_FIRE_FLASH
@@ -2418,7 +2436,7 @@ void IceLanceVFX::submitWindCastAndFlight(
             );
             renderer.submit(
                 m_fireDecalMesh,
-                m_whiteTexture,
+                m_whiteMaterial,
                 castSwirlMat,
                 glm::vec4(0.82f, 0.96f, 0.92f, 0.72f * castFade),
                 KIND_WIND_DECAL
@@ -2437,7 +2455,7 @@ void IceLanceVFX::submitWindCastAndFlight(
                 );
                 renderer.submit(
                     m_fireFlashMesh,
-                    m_whiteTexture,
+                    m_whiteMaterial,
                     streakMat,
                     glm::vec4(0.88f, 0.98f, 0.95f, 0.75f * castFade),
                     KIND_WIND_STREAK
@@ -2454,7 +2472,7 @@ void IceLanceVFX::submitWindCastAndFlight(
         coreOrbMat = glm::scale(coreOrbMat, glm::vec3(baseScale * 0.68f));
         renderer.submit(
             m_fireOrbMesh,
-            m_whiteTexture,
+            m_whiteMaterial,
             coreOrbMat,
             glm::vec4(0.87f, 0.97f, 0.93f, 0.88f),
             KIND_WIND_ORB
@@ -2466,7 +2484,7 @@ void IceLanceVFX::submitWindCastAndFlight(
         outerOrbMat = glm::scale(outerOrbMat, glm::vec3(baseScale * 1.02f));
         renderer.submit(
             m_fireOrbMesh,
-            m_whiteTexture,
+            m_whiteMaterial,
             outerOrbMat,
             glm::vec4(0.95f, 1.00f, 0.98f, 0.42f),
             KIND_WIND_ORB
@@ -2482,7 +2500,7 @@ void IceLanceVFX::submitWindCastAndFlight(
             );
             renderer.submit(
                 m_fireFlashMesh,
-                m_whiteTexture,
+                m_whiteMaterial,
                 streakMat,
                 glm::vec4(0.90f, 0.98f, 0.95f, 0.72f),
                 KIND_WIND_STREAK
@@ -2514,7 +2532,7 @@ void IceLanceVFX::submitWindCastAndFlight(
                     );
                     renderer.submit(
                         m_fireFlashMesh,
-                        m_whiteTexture,
+                        m_whiteMaterial,
                         trailStreakMat,
                         glm::vec4(0.84f, 0.96f, 0.92f, 0.44f * ratio),
                         KIND_WIND_STREAK
@@ -2532,7 +2550,7 @@ void IceLanceVFX::submitWindCastAndFlight(
                     );
                     renderer.submit(
                         m_fireSmokeMesh,
-                        m_whiteTexture,
+                        m_whiteMaterial,
                         mistMat,
                         glm::vec4(0.86f, 0.95f, 0.93f, 0.28f * ratio),
                         KIND_FIRE_SMOKE
@@ -2587,7 +2605,7 @@ void IceLanceVFX::submitWindImpact(
     );
     renderer.submit(
         m_fireDecalMesh,
-        m_whiteTexture,
+        m_whiteMaterial,
         decalMat,
         glm::vec4(0.86f, 0.97f, 0.93f, 0.85f * ringFade * alphaMult),
         KIND_WIND_DECAL
@@ -2603,7 +2621,7 @@ void IceLanceVFX::submitWindImpact(
         shellMat = glm::scale(shellMat, glm::vec3(shellScale));
         renderer.submit(
             m_fireOrbMesh,
-            m_whiteTexture,
+            m_whiteMaterial,
             shellMat,
             glm::vec4(0.90f, 0.98f, 0.95f, 0.72f * shellFade * alphaMult),
             KIND_WIND_ORB
@@ -2634,7 +2652,7 @@ void IceLanceVFX::submitWindImpact(
         );
         renderer.submit(
             m_fireFlashMesh,
-            m_whiteTexture,
+            m_whiteMaterial,
             streakMat,
             glm::vec4(0.88f, 0.98f, 0.95f, 0.80f * streakFade * alphaMult),
             KIND_WIND_STREAK
@@ -2661,7 +2679,7 @@ void IceLanceVFX::submitWindImpact(
         );
         renderer.submit(
             m_fireSmokeMesh,
-            m_whiteTexture,
+            m_whiteMaterial,
             dustMat,
             glm::vec4(0.86f, 0.95f, 0.93f, 0.36f * dustFade * alphaMult),
             KIND_FIRE_SMOKE
@@ -2722,7 +2740,7 @@ void IceLanceVFX::submitWaterCastAndFlight(
             );
             renderer.submit(
                 m_fireDecalMesh,
-                m_whiteTexture,
+                m_whiteMaterial,
                 castRingMat,
                 glm::vec4(0.55f, 0.88f, 0.98f, 0.68f * castFade),
                 KIND_WATER_MIST
@@ -2740,7 +2758,7 @@ void IceLanceVFX::submitWaterCastAndFlight(
                 );
                 renderer.submit(
                     m_fireFlashMesh,
-                    m_whiteTexture,
+                    m_whiteMaterial,
                     dropMat,
                     glm::vec4(0.75f, 0.94f, 1.00f, 0.85f * castFade),
                     KIND_WATER_DROP
@@ -2756,7 +2774,7 @@ void IceLanceVFX::submitWaterCastAndFlight(
         coreMat = glm::scale(coreMat, glm::vec3(baseScale * 0.65f, baseScale * 0.65f, baseScale * 1.15f));
         renderer.submit(
             m_fireOrbMesh,
-            m_whiteTexture,
+            m_whiteMaterial,
             coreMat,
             glm::vec4(0.78f, 0.94f, 1.00f, 0.92f),
             KIND_WATER_ORB
@@ -2767,7 +2785,7 @@ void IceLanceVFX::submitWaterCastAndFlight(
         outerMat = glm::scale(outerMat, glm::vec3(baseScale * 0.95f));
         renderer.submit(
             m_fireOrbMesh,
-            m_whiteTexture,
+            m_whiteMaterial,
             outerMat,
             glm::vec4(0.85f, 0.96f, 1.00f, 0.48f),
             KIND_WATER_ORB
@@ -2804,7 +2822,7 @@ void IceLanceVFX::submitWaterCastAndFlight(
                 );
                 renderer.submit(
                     m_fireFlashMesh,
-                    m_whiteTexture,
+                    m_whiteMaterial,
                     dropMat,
                     glm::vec4(0.80f, 0.95f, 1.00f, 0.78f * ratio),
                     KIND_WATER_DROP
@@ -2822,7 +2840,7 @@ void IceLanceVFX::submitWaterCastAndFlight(
                     );
                     renderer.submit(
                         m_fireSmokeMesh,
-                        m_whiteTexture,
+                        m_whiteMaterial,
                         mistMat,
                         glm::vec4(0.70f, 0.92f, 0.98f, 0.34f * ratio),
                         KIND_WATER_MIST
@@ -2878,7 +2896,7 @@ void IceLanceVFX::submitWaterImpact(
     );
     renderer.submit(
         m_fireDecalMesh,
-        m_whiteTexture,
+        m_whiteMaterial,
         decalMat,
         glm::vec4(0.68f, 0.92f, 0.98f, 0.75f * ringFade * alphaMult),
         KIND_WATER_MIST
@@ -2913,7 +2931,7 @@ void IceLanceVFX::submitWaterImpact(
         );
         renderer.submit(
             m_fireFlashMesh,
-            m_whiteTexture,
+            m_whiteMaterial,
             dropMat,
             glm::vec4(0.82f, 0.96f, 1.00f, 0.90f * dropFade * alphaMult),
             KIND_WATER_DROP
@@ -2940,7 +2958,7 @@ void IceLanceVFX::submitWaterImpact(
         );
         renderer.submit(
             m_fireSmokeMesh,
-            m_whiteTexture,
+            m_whiteMaterial,
             mistMat,
             glm::vec4(0.76f, 0.94f, 0.99f, 0.42f * mistFade * alphaMult),
             KIND_WATER_MIST
@@ -3008,7 +3026,7 @@ void IceLanceVFX::submitDaggerCastAndFlight(
             );
             renderer.submit(
                 m_fireFlashMesh,
-                m_whiteTexture,
+                m_whiteMaterial,
                 flashMat,
                 glm::vec4(0.95f, 0.97f, 1.00f, 0.90f * castFade),
                 KIND_FIRE_FLASH
@@ -3035,7 +3053,7 @@ void IceLanceVFX::submitDaggerCastAndFlight(
 
             renderer.submit(
                 m_daggerMesh,
-                m_daggerTexture,
+                m_daggerMaterial,
                 model,
                 glm::vec4(1.0f, 1.0f, 1.0f, 1.0f),
                 0
@@ -3067,7 +3085,7 @@ void IceLanceVFX::submitDaggerCastAndFlight(
                     );
                     renderer.submit(
                         m_fireFlashMesh,
-                        m_whiteTexture,
+                        m_whiteMaterial,
                         streakMat,
                         glm::vec4(0.85f, 0.90f, 0.98f, 0.55f * ratio),
                         KIND_FIRE_FLASH
@@ -3123,7 +3141,7 @@ void IceLanceVFX::submitDaggerImpact(
         );
         renderer.submit(
             m_fireFlashMesh,
-            m_whiteTexture,
+            m_whiteMaterial,
             flashMat,
             glm::vec4(1.00f, 0.98f, 0.92f, 0.95f * fFade * alphaMult),
             KIND_FIRE_FLASH
@@ -3140,7 +3158,7 @@ void IceLanceVFX::submitDaggerImpact(
     );
     renderer.submit(
         m_fireDecalMesh,
-        m_whiteTexture,
+        m_whiteMaterial,
         decalMat,
         glm::vec4(0.88f, 0.92f, 0.98f, 0.72f * ringFade * alphaMult),
         KIND_WIND_DECAL
@@ -3168,7 +3186,7 @@ void IceLanceVFX::submitDaggerImpact(
         );
         renderer.submit(
             m_fireFlashMesh,
-            m_whiteTexture,
+            m_whiteMaterial,
             sparkMat,
             glm::vec4(1.00f, 0.90f, 0.68f, 0.90f * sFade * alphaMult),
             KIND_FIRE_FLASH
@@ -3191,7 +3209,7 @@ void IceLanceVFX::submitDaggerImpact(
         );
         renderer.submit(
             m_fireSmokeMesh,
-            m_whiteTexture,
+            m_whiteMaterial,
             dustMat,
             glm::vec4(0.75f, 0.78f, 0.82f, 0.34f * dFade * alphaMult),
             KIND_FIRE_SMOKE

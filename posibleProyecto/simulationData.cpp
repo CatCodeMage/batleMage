@@ -26,7 +26,7 @@ void simulationData::init(GLFWwindow* window) {
 	textures.init();
 	skinnedRenderer.initialize();
 	loadAssetManifest(dataPath("db/assets.json"), libMesh, libModel, libMaterial, textures, skinnedRenderer.maxBones());
-	iceLanceVfx.init(libMesh, textures);
+	iceLanceVfx.init(libMesh, textures, libMaterial);
 
 	map.load(dataPath("db/map.json"), libModel);
 
