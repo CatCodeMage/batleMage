@@ -200,6 +200,7 @@
     <ClInclude Include="controladorPersonaje.h" />
     <ClInclude Include="lanzadorHechizos.h" />
     <ClInclude Include="ModelLibrary.h" />
+    <ClCompile Include="MontageFile.cpp" />
     <ClCompile Include="Paths.cpp" />
     <ClCompile Include="personaje.cpp" />
     <ClCompile Include="PruebaHechizos.cpp" />
@@ -237,6 +238,7 @@
     <ClInclude Include="MapData.h" />
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="MeshLibrary.h" />
+    <ClInclude Include="MontageFile.h" />
     <ClInclude Include="Paths.h" />
     <ClInclude Include="personaje.h" />
     <ClInclude Include="PruebaHechizos.h" />

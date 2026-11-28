@@ -78,16 +78,29 @@ namespace {
 		if (ImGui::Button("+")) mosaic.addViews();
 		ImGui::EndDisabled();
 	}
+	
+	CameraPathPanelAction drawMontageFileButtons() {
+		CameraPathPanelAction requestedAction = CameraPathPanelAction::None;
+		if (ImGui::Button("Guardar montaje")) requestedAction = CameraPathPanelAction::SaveMontage;
+		ImGui::SameLine();
+		if (ImGui::Button("Cargar montaje")) requestedAction = CameraPathPanelAction::LoadMontage;
+		return requestedAction;
+	}
 }
 
-void drawCameraPathPanel(CameraPathMode& mode, CameraPath& path, SceneCamera& selectedCamera, FramesData& framesInfo,
+
+
+CameraPathPanelAction drawCameraPathPanel(CameraPathMode& mode, CameraPath& path, SceneCamera& selectedCamera, FramesData& framesInfo,
 	SceneMosaic& mosaic, const std::vector<int>& characterIds) {
 	ImGui::Begin("Camara");
 	drawMosaicControls(mosaic);
 	ImGui::Separator();
 	drawModeSelector(mode);
 	ImGui::Separator();
+	const CameraPathPanelAction requestedAction = drawMontageFileButtons();
+	ImGui::Separator();
 	if (mode == CameraPathMode::Recording) ImGui::TextUnformatted("Espacio: guardar la vista seleccionada en este frame");
 	drawShotList(path, selectedCamera, framesInfo, characterIds);
 	ImGui::End();
+	return requestedAction;
 }

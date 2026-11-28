@@ -3,5 +3,7 @@
 #include "SceneMosaic.h"
 struct FramesData;
 
-void drawCameraPathPanel(CameraPathMode& mode, CameraPath& path, SceneCamera& selectedCamera, FramesData& framesInfo,
+enum class CameraPathPanelAction { None, SaveMontage, LoadMontage };   // lo hace quien llama: el panel no sabe de ficheros
+
+CameraPathPanelAction drawCameraPathPanel(CameraPathMode& mode, CameraPath& path, SceneCamera& selectedCamera, FramesData& framesInfo,
 	SceneMosaic& mosaic, const std::vector<int>& characterIds);

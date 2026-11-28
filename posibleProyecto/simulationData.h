@@ -21,6 +21,7 @@
 #include "SceneCamera.h"
 #include <array>
 #include "SceneCameraPanel.h"
+#include "CameraPathPanel.h"
 
 enum class InteractionMode { Editing, ControllingCamera };
 
@@ -87,7 +88,10 @@ private:
     void updateViewSelection(GLFWwindow* window, const std::vector<SceneViewport>& views, int framebufferHeight);
     void startControllingCamera(GLFWwindow* window, int viewIndex);
     void enterFullScreen(GLFWwindow* window);
-    SceneCamera cameraForView(int viewIndex) const;
+
+    void handleCameraPathPanelAction(CameraPathPanelAction action);
+    void saveMontageFile() const;
+    void loadMontageFile();
 
     bm::anim::SkinnedRenderer skinnedRenderer;
     std::unordered_map<int, ReplayAnimator> animators;

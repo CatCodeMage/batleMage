@@ -1,0 +1,79 @@
+{
+    "shots": [
+        {
+            "camera": {
+                "cameraType": 5,
+                "distance": 70.0,
+                "fieldOfViewDegrees": 45.0,
+                "freePitch": -20.0,
+                "freePosition": [
+                    0.0,
+                    20.0,
+                    60.0
+                ],
+                "freeYaw": -90.0,
+                "height": 50.0,
+                "sideOffset": 0.0,
+                "targetCharacterId": 1
+            },
+            "startFrame": 0,
+            "transition": {
+                "arcHeight": 0.0,
+                "durationFrames": 219,
+                "focus": 1,
+                "focusCharacterId": 2,
+                "transitionType": 1
+            }
+        },
+        {
+            "camera": {
+                "cameraType": 2,
+                "distance": 5.0,
+                "fieldOfViewDegrees": 45.0,
+                "freePitch": -20.0,
+                "freePosition": [
+                    0.0,
+                    20.0,
+                    60.0
+                ],
+                "freeYaw": -90.0,
+                "height": 2.0,
+                "sideOffset": 0.0,
+                "targetCharacterId": 1
+            },
+            "startFrame": 221,
+            "transition": {
+                "arcHeight": 0.0,
+                "durationFrames": 240,
+                "focus": 2,
+                "focusCharacterId": 0,
+                "transitionType": 1
+            }
+        },
+        {
+            "camera": {
+                "cameraType": 6,
+                "distance": 0.0,
+                "fieldOfViewDegrees": 45.0,
+                "freePitch": -20.0,
+                "freePosition": [
+                    0.0,
+                    20.0,
+                    60.0
+                ],
+                "freeYaw": -90.0,
+                "height": 40.0,
+                "sideOffset": 0.0,
+                "targetCharacterId": 1
+            },
+            "startFrame": 1147,
+            "transition": {
+                "arcHeight": 0.0,
+                "durationFrames": 60,
+                "focus": 0,
+                "focusCharacterId": 0,
+                "transitionType": 0
+            }
+        }
+    ]
+}

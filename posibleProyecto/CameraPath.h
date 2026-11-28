@@ -18,7 +18,7 @@ public:
 
 	ShotTransition& transitionOf(int shotIndex) { return w_shots[shotIndex].transition; }
 	CameraView viewAtFrame(int frame, const std::vector<Entidad>& frameEntities) const;   // con la transicion si toca
-
+	void replaceShots(std::vector<CameraShot> shots) { w_shots = std::move(shots); }
 private:
 	int shotIndexAtFrame(int frame) const;
 	std::vector<CameraShot> w_shots;   // ordenados por startFrame; el primero siempre empieza en 0

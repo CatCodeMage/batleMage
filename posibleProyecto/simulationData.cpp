@@ -2,11 +2,13 @@
 #include <imgui.h>
 #include "CombatPanel.h"
 #include "CameraPathPanel.h"
+#include "MontageFile.h"
 #include <algorithm>
 
 namespace {
 	constexpr float VIEW_NEAR_PLANE = 0.1f;
 	constexpr float VIEW_FAR_PLANE = 300.0f;   // con 100 se cortaria el mapa visto desde lejos, deberia leerse del mapa, luego lo ajustamos
+	constexpr const char* MONTAGE_FILE = "db/montaje.json";
 }
 
 void simulationData::createDefaultSceneCameras() {
@@ -173,7 +175,8 @@ void simulationData::procesMainBodyLoopRealTime(GLFWwindow* window, SystemInfo& 
 	// Pintar la UI
 	if (arePanelsVisible) {
 		drawCombatPanel(framesInfo);
-		drawCameraPathPanel(cameraPathMode, cameraPath, sceneCameras[selectedViewIndex], framesInfo, sceneMosaic, characterIds);		
+		const CameraPathPanelAction requestedAction = drawCameraPathPanel(cameraPathMode, cameraPath, sceneCameras[selectedViewIndex], framesInfo, sceneMosaic, characterIds);
+		handleCameraPathPanelAction(requestedAction);
 		if (cameraPathMode == CameraPathMode::Recording) {
 			drawViewHeaders(sceneCameras, views, selectedViewIndex, sysInfo.getHeight());
 			drawSelectedCameraPanel(sceneCameras[selectedViewIndex], selectedViewIndex, characterIds);
@@ -266,4 +269,32 @@ void simulationData::drawSceneViews(const std::vector<SceneViewport>& views) {
 	const std::vector<Entidad>& frameEntities = framesInfo.combat[framesInfo.frame];
 	for (int viewIndex = 0; viewIndex < (int)views.size(); ++viewIndex)
 		drawSceneInViewport(views[viewIndex], cameraViewForView(viewIndex, frameEntities));
+}
+
+void simulationData::handleCameraPathPanelAction(CameraPathPanelAction action) {
+	switch (action) {
+	case CameraPathPanelAction::SaveMontage: saveMontageFile(); break;
+	case CameraPathPanelAction::LoadMontage: loadMontageFile(); break;
+	case CameraPathPanelAction::None:        break;
+	}
+}
+
+void simulationData::saveMontageFile() const {
+	try {
+		saveMontage(dataPath(MONTAGE_FILE), cameraPath.getShots());
+		std::cout << "Montaje guardado en " << dataPath(MONTAGE_FILE).string() << " (" << cameraPath.getShots().size() << " planos)\n";
+	}
+	catch (const std::exception& error) {
+		std::cout << "No se ha guardado el montaje: " << error.what() << "\n";
+	}
+}
+
+void simulationData::loadMontageFile() {
+	try {
+		cameraPath.replaceShots(loadMontage(dataPath(MONTAGE_FILE)));   // si falla, salta antes de tocar la lista
+		std::cout << "Montaje cargado: " << cameraPath.getShots().size() << " planos\n";
+	}
+	catch (const std::exception& error) {
+		std::cout << "No se ha cargado el montaje: " << error.what() << "\n";
+	}
 }
