@@ -5,6 +5,8 @@
 #include "MontageFile.h"
 #include <algorithm>
 #include "FileDialog.h"
+#include "CombatSimulation.h"
+#include <utility>
 
 namespace {
 	constexpr float VIEW_NEAR_PLANE = 0.1f;
@@ -34,14 +36,24 @@ void simulationData::changeLights(std::vector<SceneLight>& newLights) {
 	lights = newLights;
 }
 
+std::vector<SceneLight> simulationData::setLights() {
+	std::vector<SceneLight> sceneLights;
+	sceneLights = map.m_lights;
+
+	// se deja asi por si hay que cargar luces dinamicas
+
+	return sceneLights;
+}
+
 void simulationData::init(GLFWwindow* window) {
 	textures.init();
 	skinnedRenderer.initialize();
-	loadAssetManifest(dataPath("db/assets.json"), libMesh, libModel, textures, skinnedRenderer.maxBones());
+	loadAssetManifest(dataPath("db/assets.json"), libMesh, libModel, libMaterial, textures, skinnedRenderer.maxBones());
+	iceLanceVfx.init(libMesh, textures, libMaterial);
 
 	map.load(dataPath("db/map.json"), libModel);
 
-	//lights = setLights();, en teoria mas adelante deberiamos cargar las lights por el JSON, lo dejo como aviso
+	lights = setLights(); // en teoria mas adelante deberiamos cargar las lights por el JSON, lo dejo como aviso
 	//de momento un parche en main pero tiene que cambiar.
 
 	program = setShaders();
@@ -52,6 +64,12 @@ void simulationData::init(GLFWwindow* window) {
 
 	framesInfo = generateCombat(libModel, dataPath("db/combate_generado.json"));
 	createDefaultSceneCameras();
+
+	if (!framesInfo.particleFrames.empty()) {
+		particleModule.initialize(std::move(framesInfo.particleStyles));
+	}
+	particleModule.setFrames(std::move(framesInfo.particleFrames), framesInfo.ticksPerSecond);
+
 	visualInterface.init(window);
 
 	constexpr int FIRST_FRAME = 0;
@@ -61,6 +79,7 @@ void simulationData::init(GLFWwindow* window) {
 simulationData::~simulationData() {
 	visualInterface.destroy();
 	glUseProgram(0);
+	particleModule.shutdown();
 	skinnedRenderer.destroy();
 	animators.clear();
 	shadows.destroy();
@@ -162,17 +181,26 @@ void simulationData::procesMainBodyLoopRealTime(GLFWwindow* window, SystemInfo& 
 
 	renderer.submitLights(lights, sysInfo.getTimeStored());
 
+	const std::vector<Entidad>& frameEntities = framesInfo.combat[framesInfo.frame];
+	const double replaySeconds = static_cast<double>(framesInfo.frame) / CombatSimulation::TICKS_PER_SECOND;
+	iceLanceVfx.submitFrame(renderer, framesInfo.combat, framesInfo.impacts, framesInfo.frame,
+		mainCameraView(frameEntities).view, replaySeconds);   // se envian una vez por frame: miran a una sola camara
+
 	// Las sombras no dependen de la camara: una vez por frame, aunque haya varias vistas
 	shadows.render(lights, [&]() { renderer.drawShadowGeometry(libMesh); }, &skinnedRenderer);
 	prepareLightingPrograms();
+	particleModule.seek(framesInfo.frame);   // el tick fija el estado de las particulas, incluso en pausa; se pintan en cada vista
 
 	// Pintar simulacion
 	const std::vector<SceneViewport> views = currentViews(sysInfo);   // otra vez: el doble clic puede haber cambiado el modo
-	drawSceneViews(views); 
+	drawSceneViews(views);
 
-	// Pintar la UI
 	renderer.clearFrame();
 	skinnedRenderer.clear();
+
+	// El tick del combate fija el estado de las particulas, incluso en pausa.
+	particleModule.seek(framesInfo.frame);
+	particleModule.render(viewCamera.get_view(), viewCamera.get_proj());
 
 	// Pintar la UI
 	if (arePanelsVisible) {
@@ -189,7 +217,6 @@ void simulationData::procesMainBodyLoopRealTime(GLFWwindow* window, SystemInfo& 
 	// Mostrar el resultado
 	updateFrame(window);
 }
-
 void simulationData::updateInteractionMode(GLFWwindow* window) {
 	const bool isControllingCamera = interactionMode == InteractionMode::ControllingCamera;
 	const bool hasPressedEscape = keysInput.wasKeyPressed(GLFW_KEY_ESCAPE);
@@ -217,8 +244,10 @@ void simulationData::drawSceneInViewport(const SceneViewport& viewport, const Ca
 		viewport.aspectRatio(), VIEW_NEAR_PLANE, VIEW_FAR_PLANE);
 	const glm::mat4 viewProjection = projection * cameraView.view;
 
-	renderer.drawLighting(libMesh, viewProjection);
-	skinnedRenderer.drawLighting(viewProjection);
+	const glm::vec3 cameraPosition = glm::vec3(glm::inverse(cameraView.view)[3]);   // la columna 3 de la inversa es donde esta la camara
+	renderer.drawLighting(libMesh, libMaterial, viewProjection, cameraPosition);
+	skinnedRenderer.drawLighting(viewProjection, libMaterial, cameraPosition);
+	particleModule.render(cameraView.view, projection);
 }
  
 std::vector<SceneViewport> simulationData::currentViews(const SystemInfo& sysInfo) const {

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="css\styles.css"/>
+    <title>Battle Mage</title>
+</head>
+<body>
+    <header>
+        <h1>Configurador de Combates</h1>
+        <nav id="stepper">
+            <span data-step="1" class="active">1. Tipo de combate</span>
+            <span data-step="2">2. Personajes</span>
+            <span data-step="3">3. Varitas</span>
+            <span data-step="4">4. Mapa</span>
+            <span data-step="5">5. Revision</span>
+        </nav>
+    </header>
+
+    <main>
+        <section id="step-1" class="step active"></section>
+        <section id="step-2" class="step"></section>
+        <section id="step-3" class="step"></section>
+        <section id="step-4" class="step"></section>
+        <section id="step-5" class="step"></section>
+    </main>
+
+    <footer>
+        <button id="btn-prev" disabled>← Atrás</button>
+        <button id="btn-next">Siguiente →</button>
+    </footer>
+
+    
+    <script src="js/dataLoader.js"></script>
+    <script src="js/state.js"></script>
+    <script src="js/ui/step1.js"></script>
+    <script src="js/ui/step2.js"></script>
+    <script src="js/ui/step3.js"></script>
+    <script src="js/ui/step4.js"></script>
+    <script src="js/ui/step5.js"></script>
+    <script src="js/configBuilder.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>

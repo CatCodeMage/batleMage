@@ -4,6 +4,7 @@
 #include "systemInfo.h"
 #include "camera.h"
 #include "MeshLibrary.h"
+#include "ModelLibrary.h"
 #include "Input.h"
 #include "Renderer.h"
 #include "Transform.h"
@@ -13,7 +14,6 @@
 #include "ShadowSystem.h"
 #include "AssetLoadData.h"
 #include "MapData.h"
-#include "webPage.h"
 #include "jsonManager.h"
 #include "UserInterface.h"
 #include "CameraPath.h"
@@ -22,6 +22,10 @@
 #include <array>
 #include "SceneCameraPanel.h"
 #include "CameraPathPanel.h"
+#include "Mp4Exporter.h"
+#include "sistema_particulas/ParticleModule.h"
+#include "IceLanceVFX.h"
+#include "MaterialLibrary.h"
 
 enum class InteractionMode { Editing, ControllingCamera };
 
@@ -44,9 +48,14 @@ struct simulationData
 
     void saveShotIfRequested();
 
+    void destroy();
+
+    std::vector<SceneLight> setLights();
+    
     // Data
     MeshLibrary libMesh;
     ModelLibrary libModel;
+    MaterialLibrary libMaterial;
     TextureLibrary textures;
     MapData map;
     std::vector<SceneLight> lights;
@@ -93,7 +102,11 @@ private:
     void saveMontageFile() const;
     void loadMontageFile();
 
+    CameraView mainCameraView(const std::vector<Entidad>& frameEntities) const;   // a la que miran los efectos de hechizo
+
     bm::anim::SkinnedRenderer skinnedRenderer;
+    bm::particles::ParticleModule particleModule;
     std::unordered_map<int, ReplayAnimator> animators;
+    IceLanceVFX iceLanceVfx;
 };
 

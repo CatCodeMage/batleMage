@@ -21,6 +21,7 @@ uniform mat4 uBoneMatrices[MAX_BONES];
 uniform int uBoneCount;
 
 out vec3 vWorldPos;
+out vec3 vLocalPos;
 #ifndef DEPTH_PASS
 uniform vec4 uBaseColor;
 uniform float uKind;
@@ -50,6 +51,7 @@ void main() {
     mat4 worldTransform = uModel * skin;
     vec4 world = worldTransform * vec4(aPosition, 1.0);
     vWorldPos = world.xyz;
+    vLocalPos = aPosition;
     gl_Position = uViewProj * world;
 
 #ifndef DEPTH_PASS
@@ -104,22 +106,33 @@ void SkinnedRenderer::initialize() {
     m_locKind = glGetUniformLocation(m_lighting.id, "uKind");
     m_locLightPosition = glGetUniformLocation(m_depth.id, "uLightPosition");
     m_locFarPlane = glGetUniformLocation(m_depth.id, "uFarPlane");
+    m_locAlbedoColor = glGetUniformLocation(m_lighting.id, "uAlbedoColor");
+    m_locEmissive = glGetUniformLocation(m_lighting.id, "uEmissive");
+    m_locRoughness = glGetUniformLocation(m_lighting.id, "uRoughness");
+    m_locMetallic = glGetUniformLocation(m_lighting.id, "uMetallic");
+    m_locOpacity = glGetUniformLocation(m_lighting.id, "uOpacity");
+    m_locCamPos = glGetUniformLocation(m_lighting.id, "uCamPos");
+
+    glUseProgram(m_lighting.id);
+    glUniform1i(glGetUniformLocation(m_lighting.id, "uAlbedo"), 0);
+    glUseProgram(0);
 }
 
 void SkinnedRenderer::submit(const SkinnedMesh& mesh, const glm::mat4& model,
-    std::span<const glm::mat4> boneMatrices, GLuint albedoTexture, const glm::vec4& color, int kind) {
+    std::span<const glm::mat4> boneMatrices, MaterialId matId, const glm::vec4& color, int kind) {
     if (boneMatrices.size() != mesh.boneCount() || boneMatrices.size() > m_maxBones)
         throw std::invalid_argument("SkinnedRenderer: paleta de huesos invalida");
-    m_draws.push_back({ &mesh, model, boneMatrices, albedoTexture, mesh.baseColor() * color, static_cast<float>(kind) });
+    m_draws.push_back({ &mesh, model, boneMatrices, matId, mesh.baseColor() * color, static_cast<float>(kind) });
 }
 
-void SkinnedRenderer::drawLighting(const glm::mat4& viewProj) const {
+void SkinnedRenderer::drawLighting(const glm::mat4& viewProj, const MaterialLibrary& matLib, const glm::vec3& cameraPosition) const {
     if (empty()) return;
 
     glUseProgram(m_lighting.id);
     glUniformMatrix4fv(m_lighting.viewProj, 1, GL_FALSE, glm::value_ptr(viewProj));
+    glUniform3fv(m_locCamPos, 1, glm::value_ptr(cameraPosition));   // comparte shader con el Renderer: sin esto los brillos salian desde (0,0,0)
     glActiveTexture(GL_TEXTURE0);
-    draw(m_lighting, true);
+    draw(m_lighting, true, &matLib);
 }
 
 void SkinnedRenderer::drawDepth(const glm::mat4& viewProj, const glm::vec3& lightPosition, float farPlane) const {
@@ -132,7 +145,7 @@ void SkinnedRenderer::drawDepth(const glm::mat4& viewProj, const glm::vec3& ligh
     draw(m_depth, false);
 }
 
-void SkinnedRenderer::draw(const Program& program, bool lighting) const {
+void SkinnedRenderer::draw(const Program& program, bool lighting, const MaterialLibrary* matLib) const {
     for (const Draw& part : m_draws) {
         glUniformMatrix4fv(program.model, 1, GL_FALSE, glm::value_ptr(part.model));
         glUniform1i(program.boneCount, static_cast<GLint>(part.bones.size()));
@@ -140,9 +153,20 @@ void SkinnedRenderer::draw(const Program& program, bool lighting) const {
             glUniformMatrix4fv(program.bones, static_cast<GLsizei>(part.bones.size()), GL_FALSE,
                 glm::value_ptr(part.bones.front()));
         if (lighting) {
+            const Material& mat = matLib->get(part.matId);
             glUniform4fv(m_locColor, 1, glm::value_ptr(part.color));
-            glUniform1f(m_locKind, part.kind);
-            glBindTexture(GL_TEXTURE_2D, part.albedoTexture);
+
+            glUniform4fv(m_locAlbedoColor, 1, glm::value_ptr(mat.albedoColor));
+
+            glUniform3fv(m_locEmissive, 1, glm::value_ptr(mat.emissive));
+
+            glUniform1f(m_locRoughness, mat.roughness);
+            glUniform1f(m_locMetallic, mat.metallic);
+            glUniform1f(m_locOpacity, mat.opacity);
+
+            glActiveTexture(GL_TEXTURE0);
+
+            glBindTexture(GL_TEXTURE_2D, mat.albedoTexture);
         }
         part.mesh->draw();
     }
