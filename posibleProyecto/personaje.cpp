@@ -136,17 +136,31 @@ void Personaje::rotar(const glm::vec3& rotacion)
 
 void Personaje::recibirDano(float cantidadDano)
 {
-    if(yaTieneEstado(EstadoPersonaje::MUERTO)) return;
+    if (yaTieneEstado(EstadoPersonaje::MUERTO)) return;
+    if (cantidadDano < 0.0f)
+    {
+        aumentarVida(-cantidadDano);
+        return;
+    }
+    if (cantidadDano == 0.0f) return;
+
     m_vida -= cantidadDano;
     cout << "Personaje " << m_id << " recibe " << cantidadDano << " de dano. Vida restante: " << m_vida << endl;
 
-    if (m_vida <= 0)
+    if (m_vida <= 0.0f)
     {
-        m_vida = 0;
+        m_vida = 0.0f;
         m_estadosActuales.clear();
         anadirEstado(EstadoPersonaje::MUERTO);
         cout << "Personaje " << m_id << " ha muerto." << endl;
     }
+}
+
+void Personaje::aumentarVida(float cantidad)
+{
+    if (yaTieneEstado(EstadoPersonaje::MUERTO) || cantidad <= 0.0f) return;
+    m_vida += cantidad;
+    if (m_vida > m_vidaMax) m_vida = m_vidaMax;
 }
 
 void Personaje::aplicarEfecto(EffectType efecto, float valor, float duracion)
@@ -241,17 +255,15 @@ bool Personaje::dispararVaritaActual()
 {
     if (yaTieneEstado(EstadoPersonaje::MUERTO) || yaTieneEstado(EstadoPersonaje::CONGELADO)) return false;
     if (m_gestorHechizos == nullptr || m_varitaActual < 0 || m_varitaActual >= static_cast<int>(m_varitas.size())) return false;
-
     float longitud = std::sqrt(m_direccion.x * m_direccion.x + m_direccion.y * m_direccion.y + m_direccion.z * m_direccion.z);
     glm::vec3 direccionDisparo(0.0f, 0.0f, 1.0f);
     if (longitud > 0.0001f)
     {
         direccionDisparo = glm::vec3(m_direccion.x / longitud, m_direccion.y / longitud, m_direccion.z / longitud);
     }
-
     bool disparado = m_varitas[m_varitaActual].intentarDisparar(m_posicion, m_radio, m_margenCasteo, direccionDisparo, m_gestorHechizos, m_id);
     if (disparado) {
-        anadirEstado(EstadoPersonaje::CASTEANDO);
+        anadirEstado(EstadoPersonaje::CASTEANDO, 0.3f);
     }
     return disparado;
 }
@@ -265,31 +277,31 @@ int Personaje::getId() const { return m_id; }
 
 float Personaje::getVida() const { return m_vida; }
 
-float Personaje::getMana() const 
-{ 
-    if (m_varitas.empty()) return 0.0f;
-    return m_varitas[m_varitaActual].getManaActual(); 
+float Personaje::getMana() const
+{
+    if (m_varitaActual < 0 || m_varitaActual >= static_cast<int>(m_varitas.size())) return 0.0f;
+    return m_varitas[m_varitaActual].getManaActual();
 }
-
 float Personaje::getRadio() const { return m_radio; }
 
 glm::vec3 Personaje::getPosicion() const { return m_posicion; }
 glm::vec3 Personaje::getRotacion() const { return m_rotacion; }
 glm::vec3 Personaje::getDireccion() const { return m_direccion; }
 
-void Personaje::setRotacion(const glm::vec3& nuevaRotacion) 
-{ 
+void Personaje::setRotacion(const glm::vec3& nuevaRotacion)
+{
     if (yaTieneEstado(EstadoPersonaje::MUERTO) || yaTieneEstado(EstadoPersonaje::CONGELADO) || yaTieneEstado(EstadoPersonaje::CASTEANDO)) return;
-    m_rotacion = nuevaRotacion; 
+    m_rotacion = nuevaRotacion;
 }
 
-void Personaje::setDireccion(const glm::vec3& nuevaDireccion) 
-{ 
-    if (yaTieneEstado(EstadoPersonaje::MUERTO) || yaTieneEstado(EstadoPersonaje::CONGELADO) || yaTieneEstado(EstadoPersonaje::CASTEANDO)) return;
-    m_direccion = nuevaDireccion; 
+void Personaje::setDireccion(const glm::vec3& nuevaDireccion)
+{
+    if (yaTieneEstado(EstadoPersonaje::MUERTO) || yaTieneEstado(EstadoPersonaje::CONGELADO)) return;
+    m_direccion = nuevaDireccion;
 }
 
 void Personaje::setPosicion(const glm::vec3& nuevaPosicion) { m_posicion = nuevaPosicion; }
+
 void Personaje::setRadio(float radio) { m_radio = radio; }
 
 std::vector<EstadoPersonaje> Personaje::getEstados() const
