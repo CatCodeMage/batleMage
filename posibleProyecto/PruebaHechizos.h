@@ -7,6 +7,7 @@
 #include "hechizosGestor.h"
 #include "Collision.h"
 #include "CombatManager.h"
+#include "jsonManager.h"
 
 // ---------------------------------------------------------------------
 // COMBATE DE PRUEBA SOLO PARA HECHIZOS (no sustituye a CombatSimulation).
@@ -42,6 +43,7 @@ private:
         float castDelay = 0.3f;
         float recarga = 1.2f;
         float inclinacionY = 0.0f;       // > 0 hacia arriba, < 0 hacia abajo
+        int castFrames = 0;
     };
 
     void crearMagos(const std::filesystem::path& combatConfigFile);
@@ -50,7 +52,8 @@ private:
     void aplicarSuelo();
     void aplicarImpactos();
     void informarZonas();   // provisional: informa de zonas y vacía efectos sobre el lanzador
-    void countDownHitEffects();
+    void countDownEffects();
+    void recordImpactVFX(const std::string& type, const glm::vec3& position, const glm::vec3& normal, float duration = 1.9f);
     void recordFrame();
 
     int         idPorNombre(const std::string& nombre) const;
@@ -61,15 +64,18 @@ private:
     std::vector<std::unique_ptr<Personaje>> m_players;
     std::vector<VaritaPrueba> m_varitas;          // m_varitas[i] es la de m_players[i]
     std::vector<int>   m_hitFrames;
+    std::vector<ReplayAnimationState> m_animations;
     std::vector<int>   m_impactosRecibidos;
     std::vector<float> m_danoRecibido;
     int m_disparos = 0;
     int m_proyectiles = 0;
 
+    GeneradorIds     m_ids;        // antes que m_spells
     HechizosGestor   m_spells;
     CombatManager    m_combat;
     CollisionManager m_colisiones;
     int m_tick = 0;
 
     nlohmann::json m_replayFrames = nlohmann::json::array();
+    nlohmann::json m_replayImpacts = nlohmann::json::array();
 };

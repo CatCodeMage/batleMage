@@ -34,6 +34,17 @@ Damage CombatManager::crearDamage(
             hechizo.damage,
             ElementType::Lightning
         );
+
+    case ElementType::Wind:
+        return Damage(
+            hechizo.damage,
+            ElementType::Wind
+        );
+    case ElementType::Water:
+        return Damage(
+            hechizo.damage,
+            ElementType::Water
+        );
     }
     return Damage(
         hechizo.damage,

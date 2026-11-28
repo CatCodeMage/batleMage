@@ -45,7 +45,8 @@ void Hechizo::moverLineal(float dt) {
 
 // Caida con gravedad: x = x0 + v*dt + 1/2*g*dt^2 calculo parabolico
 void Hechizo::moverParabolico(float dt) {
-    const glm::vec3 gravedad(0.0f, -SPELL_GRAVITY, 0.0f);
+    const float effectiveGravity = SPELL_GRAVITY * hechizo.gravityMultiplier;
+    const glm::vec3 gravedad(0.0f, -effectiveGravity, 0.0f);
 
     movement.translacio += movement.velocity * dt + 0.5f * gravedad * dt * dt;
     movement.velocity += gravedad * dt;
@@ -77,6 +78,66 @@ void Hechizo::update(float deltaTime) {
     if (hasExpired()) {
         setActive(false);
     }
+}
+
+bool calcularDireccionBalistica(
+    const glm::vec3& origin,
+    const glm::vec3& target,
+    float speed,
+    float effectiveGravity,
+    float maxLifetime,
+    glm::vec3& outDirection)
+{
+    if (!std::isfinite(speed) || !std::isfinite(effectiveGravity) || !std::isfinite(maxLifetime) ||
+        speed <= 0.0001f || maxLifetime <= 0.0f)
+    {
+        return false;
+    }
+
+    const glm::vec3 delta = target - origin;
+    const glm::vec2 horiz(delta.x, delta.z);
+    const float d = glm::length(horiz);
+    const float h = delta.y;
+
+    if (effectiveGravity <= 1e-6f)
+    {
+        const float dist3D = glm::length(delta);
+        if (dist3D <= 1e-6f) return false;
+        if (dist3D / speed > maxLifetime) return false;
+        outDirection = delta / dist3D;
+        return true;
+    }
+
+    if (d <= 1e-6f)
+    {
+        return false;
+    }
+
+    const float v2 = speed * speed;
+    const float v4 = v2 * v2;
+    const float g = effectiveGravity;
+    const float disc = v4 - g * (g * d * d + 2.0f * h * v2);
+    if (disc < 0.0f || !std::isfinite(disc))
+    {
+        return false;
+    }
+
+    // Solucion de menor angulo para trayectoria directa
+    const float tanTheta = (v2 - std::sqrt(disc)) / (g * d);
+    const float cosTheta = 1.0f / std::sqrt(1.0f + tanTheta * tanTheta);
+    const float sinTheta = tanTheta * cosTheta;
+
+    const float vx = speed * cosTheta;
+    if (vx <= 1e-6f) return false;
+    const float flightTime = d / vx;
+    if (flightTime > maxLifetime)
+    {
+        return false;
+    }
+
+    const glm::vec2 dirXZ = horiz / d;
+    outDirection = glm::normalize(glm::vec3(dirXZ.x * cosTheta, sinTheta, dirXZ.y * cosTheta));
+    return true;
 }
 
 // NUEVO: reacción a un choque con el mundo (lo detecta colisiones, no el hechizo)
@@ -113,6 +174,7 @@ void Hechizo::reset() {
 
     // NUEVO: limpiamos comportamientos y lanzador (indicePool NO se toca)
     idLanzador = -1;
+    idEntidad = INVALID_ENTITY;   // el id era de ese lanzamiento: al volver al pool deja de valer
     etiquetas = ETQ_NINGUNA;
     rebotesRestantes = 0;
 }

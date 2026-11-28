@@ -13,7 +13,6 @@ function renderStep2() {
       ${players.map(([id, p]) => `
         <div class="player-card" data-player="${id}">
           <strong>${id}</strong>
-          <small>HP ${p.stats.maxHealth} · MP ${p.stats.maxMana} · SPD ${p.stats.moveSpeed}</small>
         </div>
       `).join('')}
     </div>
@@ -39,13 +38,21 @@ function renderTeamSlots(team, size) {
 
   for (let i = 0; i < size; i++) {
     const p = assigned[i];
-    container.innerHTML += `
-      <div class="slot ${p ? 'filled' : 'empty'}" data-team="${team}" data-idx="${i}">
-        ${p ? `
-          <span>${p.playerType}</span>
+
+    if (p) {
+      const img = Data.players[p.playerType];
+      container.innerHTML += `
+        <div class="team-card" data-team="${team}" data-idx="${i}">
+          <img class="team-card-img" src="${img}" alt="${p.playerType}">
+          <span class="team-card-name">${p.playerType}</span>
           <button class="btn-remove" data-team="${team}" data-idx="${i}">✕</button>
-        ` : `<em>Vacío</em>`}
-      </div>`;
+        </div>`;
+    } else {
+      container.innerHTML += `
+        <div class="team-card empty" data-team="${team}" data-idx="${i}">
+          <em>Vacío</em>
+        </div>`;
+    }
   }
 
   container.querySelectorAll('.btn-remove').forEach(btn => {

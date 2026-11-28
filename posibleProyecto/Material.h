@@ -4,6 +4,7 @@
 
 struct Material
 {
+	std::string name;
 	GLuint albedoTexture = 0;
 	glm::vec4 albedoColor{ 1.0f };
 	glm::vec3 emissive{ 0.0f };

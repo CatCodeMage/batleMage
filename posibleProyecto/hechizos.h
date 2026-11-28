@@ -5,6 +5,7 @@
 #include <cmath>
 #include <memory>
 #include "hechizoDatos.h"
+#include "GeneradorIds.h"
 
 
 class Hechizo {
@@ -87,6 +88,10 @@ public:
     void setLanzador(int id) { idLanzador = id; }
     int  getLanzador() const { return idLanzador; }
 
+    // id de instancia: lo pone HechizosGestor al sacarlo del pool (distinto en cada lanzamiento)
+    void     setIdEntidad(EntityId id) { idEntidad = id; }
+    EntityId getIdEntidad() const { return idEntidad; }
+
     // comportamientos activados por modificadores (sin memoria dinámica)
     void setComportamientos(uint32_t etq, int rebotes) {
         etiquetas = etq;
@@ -118,6 +123,7 @@ private:
 
     // NUEVO: datos de comportamientos y control
     int      idLanzador = -1;
+    EntityId idEntidad = INVALID_ENTITY;
     uint32_t etiquetas = ETQ_NINGUNA;
     int      rebotesRestantes = 0;
     int      indicePool = -1;   // NO se borra en reset()
@@ -126,3 +132,13 @@ private:
     void moverLineal(float dt);
     void moverParabolico(float dt);
 };
+
+// Calcula la direccion de lanzamiento balistica (angulo menor) para alcanzar un objetivo estacionario.
+// Devuelve false si el objetivo es inalcanzable (discriminante negativo, velocidad/distancia nula o lifetime insuficiente).
+bool calcularDireccionBalistica(
+    const glm::vec3& origin,
+    const glm::vec3& target,
+    float speed,
+    float effectiveGravity,
+    float maxLifetime,
+    glm::vec3& outDirection);

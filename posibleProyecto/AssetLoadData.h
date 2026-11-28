@@ -3,6 +3,8 @@
 #include "MeshLibrary.h"
 #include "ModelLibrary.h"
 #include "TextureLibrary.h"
+#include "Material.h"
+#include "MaterialLibrary.h"
 
 struct ObjMaterial {
     std::string           name;                   
@@ -24,4 +26,4 @@ struct ObjPiece {
 std::vector<ObjPiece> loadObj(const std::filesystem::path& file);
 
 int loadAssetManifest(const std::filesystem::path& manifest, MeshLibrary& meshes, ModelLibrary& models,
-    TextureLibrary& textures);
+    MaterialLibrary& matLib, TextureLibrary& textures, size_t maxBones);

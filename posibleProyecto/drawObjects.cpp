@@ -2,25 +2,19 @@
 #include <algorithm>
 #include <cmath>
 
-static ModelId modelAt(const Entidad& entity, std::span<const ModelAnimation> animations, double timeSeconds) {
-    if (entity.animation == NO_ANIMATION) return entity.model;
-
-    const ModelAnimation& animation = animations[entity.animation];
-    const double visualFrame = std::floor(timeSeconds * animation.fps);
-    const double index = animation.loop
-        ? std::fmod(visualFrame, static_cast<double>(animation.frames.size()))
-        : (std::min)(visualFrame, static_cast<double>(animation.frames.size() - 1));
-    return animation.frames[static_cast<size_t>(index)];
-}
-
-void submitEntidad(Renderer& renderer, const ModelLibrary& models, const Entidad& e,
-    std::span<const ModelAnimation> animations, double timeSeconds) {
+void submitEntidad(Renderer& renderer, const Model& model, const Entidad& e) {
+    if (e.isIceLance || e.isFireBall || e.isLightningBolt || e.isEarthSpike || e.isWindBlade || e.isWaterBolt || e.isDaggerBarrage) return;
     const glm::mat4 modelMatrix = e.transform.toMatrix();   // una vez por entidad, no por parte
-    for (const ModelPart& part : models.get(modelAt(e, animations, timeSeconds)).parts)
-        renderer.submit(part.mesh, part.albedoTexture, modelMatrix, part.color * e.color, e.kind, part.emission);
+    for (const ModelPart& part : model.parts)
+        renderer.submit(part.mesh, part.matId, modelMatrix, e.color, e.kind);
 }
 
-void submitEntidades(Renderer& renderer, const ModelLibrary& models, const std::vector<Entidad>& entities,
-    std::span<const ModelAnimation> animations, double timeSeconds) {
-    for (const Entidad& e : entities) submitEntidad(renderer, models, e, animations, timeSeconds);
+void submitEntidad(bm::anim::SkinnedRenderer& renderer, const SkinnedModel& model, const Entidad& e,
+    const bm::anim::Animator& animator) {
+    const glm::mat4 characterModel = e.transform.toMatrix();
+    for (size_t i = 0; i < model.parts.size(); ++i) {
+        const auto& part = model.parts[i];
+        renderer.submit(part.mesh, characterModel * animator.meshTransform(i),
+            animator.boneMatrices(i), part.matId, e.color, e.kind);
+    }
 }

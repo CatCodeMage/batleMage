@@ -1,6 +1,5 @@
 #include "PruebaHechizos.h"
 #include "lanzadorHechizos.h"
-#include "jsonManager.h"   // readSpells
 #include "Paths.h"         // dataPath
 #include <algorithm>
 #include <cmath>
@@ -10,17 +9,24 @@ using json = nlohmann::json;
 // =====================================================================
 // CONFIGURACIÓN DE LA PRUEBA (cámbiala a tu gusto)
 // =====================================================================
-constexpr float DURACION_PRUEBA_S = 20.0f;   // segundos simulados
+constexpr float DURACION_PRUEBA_S = 25.0f;   // segundos simulados
 constexpr bool  MAGOS_INMORTALES = true;    // los golpes se ven y se cuentan, pero no matan
 constexpr float ALTURA_SUELO = 0.0f;    // map.json: el suelo está en y = 0
 constexpr float DISTANCIA_MAGOS = 10.0f;   // los hechizos alcanzan 12-30 (velocidad x 3 s): en combat.json están a ~56
+
+// Ids de las cartas de prueba (no chocan con los de spells.json, 0..15)
+constexpr int CARTA_MAS_DANO = 100;
+constexpr int CARTA_REBOTE = 101;
+constexpr int CARTA_ICE_LANCE_PARABOLICA = 102;
+constexpr int CARTA_DOBLE = 200;
+constexpr int CARTA_TRIPLE = 201;
 
 // Igual que CombatSimulation, para que el replay sea compatible
 constexpr size_t      POOL_HECHIZOS = 256;
 constexpr float       SPELL_HIT_RADIUS = 0.5f;
 constexpr int         HIT_EFFECT_FRAMES = static_cast<int>(PruebaHechizos::TICKS_PER_SECOND * 0.3f);
+constexpr int         CAST_EFFECT_FRAMES = static_cast<int>(PruebaHechizos::TICKS_PER_SECOND * 0.3f);
 constexpr const char* REPLAY_HIT_ENTITY = "hit";
-constexpr const char* REPLAY_FORMAT_VERSION = "1.7";
 constexpr const char* REPLAY_PLAYER_ENTITIES[] = { "player_red", "player_blue" };
 constexpr const char* REPLAY_DEAD_ENTITIES[] = { "dead_red",   "dead_blue" };
 
@@ -72,6 +78,12 @@ static void entidadDeZona(const EfectoZona& z, const HechizosGestor& gestor, glm
     nombre = "zona_" + gestor.getCatalogoHechizos().at(z.carga.idHechizo).definition.name;
 }
 
+static float pitchOf(const glm::vec3& dir) {
+    const float horiz = std::sqrt(dir.x * dir.x + dir.z * dir.z);
+    if (horiz < 0.0001f && std::abs(dir.y) < 0.0001f) return 0.0f;
+    return std::atan2(-dir.y, horiz);
+}
+
 // [[x, y, z], [giroX, giroY, giroZ], "entidad"]
 static json replayEntity(const glm::vec3& pos, float yaw, const char* entityName, float giroX = 0.0f) {
     return json::array({ json::array({ pos.x, pos.y, pos.z }),
@@ -91,7 +103,13 @@ static bool tocaTornado(const EfectoZona& z, const Tornado& t, const Personaje& 
     return glm::length(glm::vec2(p.x - z.posicion.x, p.z - z.posicion.z)) <= radio + mago.getRadio();
 }
 
-PruebaHechizos::PruebaHechizos() : m_spells(POOL_HECHIZOS) {}
+static json replaySpellEntity(const glm::vec3& pos, float pitch, float yaw, const char* entityName) {
+    return json::array({ json::array({ pos.x, pos.y, pos.z }),
+                         json::array({ pitch, yaw, 0.0f }),
+                         entityName });
+}
+
+PruebaHechizos::PruebaHechizos() : m_spells(POOL_HECHIZOS, m_ids) {}
 
 int PruebaHechizos::idPorNombre(const std::string& nombre) const {
     // Busca en todas las cartas: hechizos (spells.json) y modificadores/multicast (cards.json)
@@ -110,6 +128,7 @@ void PruebaHechizos::setup(const std::filesystem::path& combatConfigFile) {
     crearVaritas();
 
     m_hitFrames.assign(m_players.size(), 0);
+    m_animations.resize(m_players.size());
     m_impactosRecibidos.assign(m_players.size(), 0);
     m_danoRecibido.assign(m_players.size(), 0.0f);
     recordFrame();
@@ -123,12 +142,11 @@ void PruebaHechizos::crearMagos(const std::filesystem::path& combatConfigFile) {
     if (!in) throw std::runtime_error("no se puede abrir " + combatConfigFile.string());
     const json config = json::parse(in);
 
-    int nextId = 1;
     for (const json& player : config.at("players")) {
         // Mismo tipo y altura que combat.json, pero cerca uno del otro (en el eje X) para que los hechizos lleguen
         const float altura = player.at("position").at(1).get<float>();
-        const float x = (nextId == 1 ? -0.5f : 0.5f) * DISTANCIA_MAGOS;
-        m_players.push_back(std::make_unique<Personaje>(nextId++, glm::vec3(x, altura, 0.0f), 1.0f, &m_spells));
+        const float x = (m_players.empty() ? -0.5f : 0.5f) * DISTANCIA_MAGOS;
+        m_players.push_back(std::make_unique<Personaje>(m_ids.nuevo(), glm::vec3(x, altura, 0.0f), 1.0f, &m_spells));
         const std::string tipo = player.value("type", "sphere");
         if (!m_players.back()->cargarDesdeJson(dataPath("db/players.json").string(), tipo))
             throw std::runtime_error("tipo de mago desconocido \"" + tipo + "\"");
@@ -153,28 +171,62 @@ void PruebaHechizos::crearVaritas() {
     m_varitas.assign(m_players.size(), VaritaPrueba{});
     const int triple = idPorNombre("triple_spell");
 
-    // Mago 1 (rojo): multicast x3 de zonas directas -> deben abrirse en abanico (-25º, 0º, +25º)
-    //   3 tornados -> 3 alientos de dragón (cono) -> 3 chorros de agua (caja)
-    VaritaPrueba& v1 = m_varitas[0];
-    const int tornado = idPorNombre("tornado");
-    const int aliento = idPorNombre("dragon_breath");
-    const int chorro  = idPorNombre("water_beam");
-    v1.ranuras = { triple, tornado, tornado, tornado,
-                   triple, aliento, aliento, aliento,
-                   triple, chorro,  chorro,  chorro };
-    v1.castDelay = 3.0f;          // tiempo para ver cada zona sin que se amontonen
-    v1.recarga = 3.0f;
-    v1.inclinacionY = 0.0f;       // solo zonas directas: disparo plano
+    // 1 = prueba de zonas (tornados, alientos, chorros, muros de fuego, bombas)
+    // 2 = showcase de los 8 proyectiles con gravedad (el mago azul se queda quieto)
+    constexpr int ESCENARIO_PRUEBA = 2;
 
-    // Mago 2 (azul): 3 muros de fuego (caja, deben formar abanico) -> 3 bombas (esfera, abanico de 8º)
-    VaritaPrueba& v2 = m_varitas[1];
-    const int muro  = idPorNombre("fire_wall");
-    const int bomba = idPorNombre("bomb");
-    v2.ranuras = { triple, muro,  muro,  muro,
-                   triple, bomba, bomba, bomba };
-    v2.castDelay = 3.5f;          // algo distinto del rojo para que no lancen siempre a la vez
-    v2.recarga = 3.5f;
-    v2.inclinacionY = 0.15f;      // la bomba de veneno cae cerca del rival
+    if (ESCENARIO_PRUEBA == 1) {
+        // Mago 1 (rojo): multicast x3 de zonas directas -> deben abrirse en abanico (-25º, 0º, +25º)
+        //   3 tornados -> 3 alientos de dragón (cono) -> 3 chorros de agua (caja)
+        VaritaPrueba& v1 = m_varitas[0];
+        const int tornado = idPorNombre("tornado");
+        const int aliento = idPorNombre("dragon_breath");
+        const int chorro  = idPorNombre("water_beam");
+        v1.ranuras = { triple, tornado, tornado, tornado,
+                       triple, aliento, aliento, aliento,
+                       triple, chorro,  chorro,  chorro };
+        v1.castDelay = 3.0f;          // tiempo para ver cada zona sin que se amontonen
+        v1.recarga = 3.0f;
+        v1.inclinacionY = 0.0f;       // solo zonas directas: disparo plano
+
+        // Mago 2 (azul): 3 muros de fuego (caja, deben formar abanico) -> 3 bombas (esfera, abanico de 8º)
+        VaritaPrueba& v2 = m_varitas[1];
+        const int muro  = idPorNombre("fire_wall");
+        const int bomba = idPorNombre("bomb");
+        v2.ranuras = { triple, muro,  muro,  muro,
+                       triple, bomba, bomba, bomba };
+        v2.castDelay = 3.5f;          // algo distinto del rojo para que no lancen siempre a la vez
+        v2.recarga = 3.5f;
+        v2.inclinacionY = 0.15f;      // la bomba de veneno cae cerca del rival
+    } else {
+        const int iceLance = idPorNombre("ice_lance");
+        const int fireBall = idPorNombre("fire_ball");
+        const int lightningBolt = idPorNombre("lightning_bolt");
+        const int earthSpike = idPorNombre("earth_spike");
+        const int windBlade = idPorNombre("wind_blade");
+        const int iceShard = idPorNombre("ice_shard");
+        const int waterJet = idPorNombre("water_jet");
+        const int daggerBarrage = idPorNombre("dagger_barrage");
+
+        // Mago 1 (rojo, izquierda): showcase determinista de los 8 proyectiles cada 2.5 s
+        VaritaPrueba& v1 = m_varitas[0];
+        v1.ranuras = {
+            fireBall,
+            iceLance,
+            lightningBolt,
+            earthSpike,
+            windBlade,
+            iceShard,
+            waterJet,
+            daggerBarrage
+        };
+        v1.castDelay = 2.5f;
+        v1.recarga = 2.5f;
+
+        // Mago 2 (azul, derecha): quieto como blanco para apreciar claramente cada hechizo
+        VaritaPrueba& v2 = m_varitas[1];
+        v2.ranuras.clear();
+    }
 }
 
 // =====================================================================
@@ -188,7 +240,7 @@ void PruebaHechizos::step() {
     informarZonas();
     ++m_tick;
     recordFrame();
-    countDownHitEffects();
+    countDownEffects();
 }
 
 bool PruebaHechizos::isFinished() const {
@@ -216,6 +268,8 @@ void PruebaHechizos::dispararVaritas() {
         const glm::vec3 direccion = glm::normalize(glm::vec3(haciaRival.x, v.inclinacionY, haciaRival.z));
         const glm::vec3 origen = mago.getPosicion() + haciaRival * (mago.getRadio() + SPELL_HIT_RADIUS + 0.5f);
 
+        if (v.ranuras.empty()) continue;
+        const int idxAntes = v.indice;
         const ResultadoDisparo r = lanzador.disparar(v.ranuras, v.indice, v.mana, origen, direccion, mago.getId());
 
         v.mana -= r.manaGastado;
@@ -224,8 +278,15 @@ void PruebaHechizos::dispararVaritas() {
         if (r.hayQueRecargar) v.espera = std::max(v.espera, v.recarga + r.recarga);
 
         if (r.disparado) {
+            v.castFrames = CAST_EFFECT_FRAMES;
             ++m_disparos;
             m_proyectiles += r.proyectilesLanzados;
+            if (idxAntes >= 0 && idxAntes < static_cast<int>(v.ranuras.size())) {
+                const auto it = m_spells.getCatalogoHechizos().find(v.ranuras[idxAntes]);
+                if (it != m_spells.getCatalogoHechizos().end()) {
+                    std::cout << "[SHOWCASE] " << it->second.definition.name << "\n";
+                }
+            }
             std::cout << "[PRUEBA] t=" << static_cast<float>(m_tick) / TICKS_PER_SECOND << "s jugador "
                 << mago.getId() << ": " << r.proyectilesLanzados << " proyectiles, mana " << v.mana
                 << (r.hayQueRecargar ? " (recarga)" : "") << "\n";
@@ -239,9 +300,43 @@ void PruebaHechizos::aplicarSuelo() {
         if (!spell->IsActive()) continue;
         const SphereCollider esfera{ spell->getPosition(), SPELL_HIT_RADIUS };
         const CollisionInfo contacto = m_colisiones.getGroundCollisionInfo(esfera, ALTURA_SUELO);
-        if (contacto.collision)
+        if (contacto.collision) {
+            const bool wasApproaching = glm::dot(spell->getVelocityVector(), contacto.normal) < 0.0f;
+            const glm::vec3 hitPos = spell->getPosition() + contacto.normal * (contacto.penetration - SPELL_HIT_RADIUS);
+            const std::string spellName = spell->getName();
+
             m_spells.procesarChoqueSuperficie(spell.get(), contacto.normal, contacto.penetration);
+
+            if (spellName == "ice_lance" || spellName == "fire_ball" || spellName == "lightning_bolt" || spellName == "earth_spike" || spellName == "wind_blade" || spellName == "water_jet" || spellName == "dagger_barrage") {
+                const float fullDuration = (spellName == "fire_ball") ? 3.18f
+                    : ((spellName == "lightning_bolt") ? 2.50f
+                    : ((spellName == "earth_spike") ? 1.60f
+                    : ((spellName == "wind_blade") ? 1.20f
+                    : ((spellName == "water_jet") ? 1.15f
+                    : ((spellName == "dagger_barrage") ? 1.10f : 1.90f)))));
+                if (!spell->IsActive()) {
+                    recordImpactVFX(spellName, hitPos, contacto.normal, fullDuration);
+                } else if (wasApproaching) {
+                    recordImpactVFX(spellName + "_bounce", hitPos, contacto.normal, 0.40f);
+                }
+            }
+        }
     }
+}
+
+void PruebaHechizos::recordImpactVFX(
+    const std::string& type,
+    const glm::vec3& position,
+    const glm::vec3& normal,
+    float duration)
+{
+    m_replayImpacts.push_back({
+        { "type", type },
+        { "position", json::array({ position.x, position.y, position.z }) },
+        { "normal", json::array({ normal.x, normal.y, normal.z }) },
+        { "startTick", m_tick },
+        { "duration", duration }
+    });
 }
 
 // Golpes a magos. Usa el daño del propio hechizo (getDefinition), así se ven los modificadores
@@ -265,6 +360,23 @@ void PruebaHechizos::aplicarImpactos() {
 
             if (!MAGOS_INMORTALES)
                 m_combat.procesarImpacto(esfera, colliderOf(mago), spell->getDefinition(), mago);
+
+            if (spell->getName() == "ice_lance" || spell->getName() == "fire_ball" || spell->getName() == "lightning_bolt" || spell->getName() == "earth_spike" || spell->getName() == "wind_blade" || spell->getName() == "water_jet" || spell->getName() == "dagger_barrage") {
+                const glm::vec3 delta = spell->getPosition() - mago.getPosicion();
+                const glm::vec3 horiz(delta.x, 0.0f, delta.z);
+                const glm::vec3 dir = spell->getDirection();
+                const glm::vec3 hitNormal = glm::length(horiz) > 0.0001f
+                    ? glm::normalize(horiz)
+                    : (glm::length(dir) > 0.0001f ? -dir : glm::vec3(0.0f, 1.0f, 0.0f));
+                const glm::vec3 hitPos = mago.getPosicion() + glm::vec3(0.0f, delta.y, 0.0f) + hitNormal * mago.getRadio();
+                const float fullDuration = (spell->getName() == "fire_ball") ? 3.18f
+                    : ((spell->getName() == "lightning_bolt") ? 2.50f
+                    : ((spell->getName() == "earth_spike") ? 1.60f
+                    : ((spell->getName() == "wind_blade") ? 1.20f
+                    : ((spell->getName() == "water_jet") ? 1.15f
+                    : ((spell->getName() == "dagger_barrage") ? 1.10f : 1.90f)))));
+                recordImpactVFX(spell->getName(), hitPos, hitNormal, fullDuration);
+            }
 
             m_spells.destroySpell(spell.get());
             break;
@@ -299,8 +411,9 @@ void PruebaHechizos::informarZonas() {
     m_spells.limpiarEfectosSobreLanzador();
 }
 
-void PruebaHechizos::countDownHitEffects() {
+void PruebaHechizos::countDownEffects() {
     for (int& f : m_hitFrames) if (f > 0) --f;
+    for (auto& varita : m_varitas) if (varita.castFrames > 0) --varita.castFrames;
 }
 
 size_t PruebaHechizos::countAlive() const {
@@ -322,11 +435,32 @@ void PruebaHechizos::recordFrame() {
     json frame = json::array();
     for (size_t i = 0; i < m_players.size(); ++i) {
         const Personaje& p = *m_players[i];
-        frame.push_back(replayEntity(p.getPosicion(), p.getRotacion().y, replayEntityOfPlayer(i)));
+        const char* action = "idle";
+        bool restart = false;
+        if (!isAlive(p)) {
+            action = "death";
+        } else if (m_hitFrames[i] > 0) {
+            action = "hit";
+            restart = m_hitFrames[i] == HIT_EFFECT_FRAMES;
+        } else if (m_varitas[i].castFrames > 0) {
+            action = "cast";
+            restart = m_varitas[i].castFrames == CAST_EFFECT_FRAMES;
+        }
+
+        json entry = replayEntity(p.getPosicion(), p.getRotacion().y, replayEntityOfPlayer(i));
+        entry.push_back(m_animations[i].record(p.getId(), REPLAY_PLAYER_ENTITIES[i],
+            action, m_replayFrames.size(), restart));
+        frame.push_back(std::move(entry));
     }
     for (const std::unique_ptr<Hechizo>& spell : m_spells.getActiveHechizos()) {
         if (!spell->IsActive()) continue;
-        frame.push_back(replayEntity(spell->getPosition(), yawOf(spell->getDirection()), spell->getName().c_str()));
+        const glm::vec3 dir = spell->getDirection();
+        json sample = replaySpellEntity(spell->getPosition(), pitchOf(dir), yawOf(dir), spell->getName().c_str());
+        // El primer estado visible se graba despues de actualizar el tick de lanzamiento.
+        const double ageTicks = std::round(static_cast<double>(spell->getCurrentLifeTime()) * TICKS_PER_SECOND);
+        sample.push_back((std::max)(0.0, ageTicks - 1.0) / TICKS_PER_SECOND);
+        sample.push_back(spell->getIndicePool());
+        frame.push_back(std::move(sample));
     }
     for (const EfectoZona& z : m_spells.getEfectosZona()) {
         glm::vec3 pos; std::string nombre; float giroX;
@@ -339,8 +473,9 @@ void PruebaHechizos::recordFrame() {
 
 void PruebaHechizos::recordEnding() {
     m_spells.emptySpells();
+    for (auto& varita : m_varitas) varita.castFrames = 0;
     const int ticks = 2 * TICKS_PER_SECOND;
-    for (int t = 0; t < ticks; ++t) { countDownHitEffects(); recordFrame(); }
+    for (int t = 0; t < ticks; ++t) { countDownEffects(); recordFrame(); }
 }
 
 std::string PruebaHechizos::describeWinner() const {
@@ -366,7 +501,8 @@ void PruebaHechizos::writeReplay(const std::filesystem::path& replayFile) const 
             { "ticksPerSecond", TICKS_PER_SECOND },
             { "rotationOrder", "XYZ" },
             { "rotationUnit", "radians" } } },
-        { "frames", m_replayFrames } };
+        { "frames", m_replayFrames },
+        { "impacts", m_replayImpacts } };
 
     std::ofstream out(replayFile);
     if (!out) throw std::runtime_error("no se puede escribir " + replayFile.string());

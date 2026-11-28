@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "luz.h"
+#include "Renderer.h"
 
 // Configuración visual del escenario.
 enum class skybox

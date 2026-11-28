@@ -21,7 +21,8 @@ struct hechizosTemplate {
 class HechizosGestor {
 public:
     // Constructor: Pre-crea un número de hechizos en memoria (Pool)
-    HechizosGestor(size_t poolSize);
+    // 'ids' es del simulador: el gestor solo lo usa para dar id a lo que crea
+    HechizosGestor(size_t poolSize, GeneradorIds& ids);
 
     // para registrar los datos del un hechizo 
     void registrarHechizo(
@@ -31,7 +32,8 @@ public:
         float maxLifeTime,
         MovementPattern pattern = MovementPattern::Linear,
         CastType castType = CastType::Projectile,
-        const DatosZona& zona = {}
+        const DatosZona& zona = {},
+        float gravityMultiplier = 0.0f
     );
 
     // NUEVO: registrar cartas que no vienen de spells.json
@@ -101,4 +103,5 @@ private:
     // Zonas y efectos sobre el lanzador pendientes de aplicar por colisiones/combate
     std::vector<EfectoZona> efectosZona;
     std::vector<EfectoSobreLanzador> efectosSobreLanzador;
+    GeneradorIds& m_ids;   // NO es suyo: pertenece al simulador
 };

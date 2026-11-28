@@ -9,7 +9,7 @@ static glm::vec3 rotarEnXZ(const glm::vec3& d, float grados) {
     return glm::vec3(d.x * c - d.z * s, d.y, d.x * s + d.z * c);
 }
 
-HechizosGestor::HechizosGestor(size_t poolSize) {
+HechizosGestor::HechizosGestor(size_t poolSize, GeneradorIds& ids) : m_ids(ids) {
     // Pre-allocamos los hechizos inactivos para optimizar rendimiento
     spellPool.reserve(poolSize);   // NUEVO
     libres.reserve(poolSize);      // NUEVO
@@ -52,13 +52,13 @@ void HechizosGestor::registrarHechizo(
     int id, const std::string& name, ElementType element,
     float cost, float damage, float cooldown,
     float speed, float radius, glm::vec3 scale,
-    float maxLifeTime, MovementPattern pattern, CastType castType, const DatosZona& zona)
+    float maxLifeTime, MovementPattern pattern, CastType castType, const DatosZona& zona, float gravityMultiplier)
 {
     SpellDefinitionComponent def = {
         id, name, element,
         castType,
         pattern,
-        cost, damage, cooldown
+        cost, damage, cooldown, gravityMultiplier
     };
 
     hechizhosCatalog[id] = { def, speed, radius, scale, maxLifeTime, zona };
@@ -160,6 +160,7 @@ int HechizosGestor::spawnDisparo(const EstadoDisparo& disparo, const glm::vec3& 
         spell->setScale(t.scale);                               // antes no se copiaba la escala
         spell->setMaxLifeTime(t.defaultLifeTime + m.lifetimeExtra);
         spell->setLanzador(idLanzador);
+        spell->setIdEntidad(m_ids.nuevo());
         spell->setComportamientos(m.etiquetas, m.rebotes);
 
         // Abanico centrado: 3 proyectiles -> -8º, 0º, +8º

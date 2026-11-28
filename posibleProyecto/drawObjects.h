@@ -2,10 +2,8 @@
 #include "global.h"
 #include "Renderer.h"
 #include "Entidad.h"
-#include <span>
+#include "skeleton_animation/SkinnedRenderer.h"
 
-void submitEntidad(Renderer& renderer, const ModelLibrary& models, const Entidad& e,
-    std::span<const ModelAnimation> animations = {}, double timeSeconds = 0.0);
-
-void submitEntidades(Renderer& renderer, const ModelLibrary& models, const std::vector<Entidad>& entities,
-    std::span<const ModelAnimation> animations = {}, double timeSeconds = 0.0);
+void submitEntidad(Renderer& renderer, const Model& model, const Entidad& e);
+void submitEntidad(bm::anim::SkinnedRenderer& renderer, const SkinnedModel& model, const Entidad& e,
+    const bm::anim::Animator& animator);

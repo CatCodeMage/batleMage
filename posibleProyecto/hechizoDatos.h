@@ -42,6 +42,7 @@ struct SpellDefinitionComponent {
     float cost;
     float damage;
     float cooldown;
+    float gravityMultiplier = 0.0f;
 };
 
 // Estado dinamico del proyectil

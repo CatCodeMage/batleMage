@@ -1,22 +1,41 @@
 
 #include "jsonManager.h"
+#include "CombatSimulation.h"
+#include "sistema_particulas/logica/ParticleJson.h"
+
 #include <cmath>
+#include <unordered_set>
 
 using json = nlohmann::json;
 
 const std::string SPELLS_PATH = "../db/spells.json";
 const std::string SPELLS_ZONE_PATH = "../db/spells_zone.json";   // hechizos con zona (de momento aparte)
 const std::string PLAYERS_PATH = "../db/players.json";
-const std::string COMBAT_PATH = "../db/combate_generado.json";
 const std::string ENTITIES_PATH = "../db/entities.json";
 const std::string CARDS_PATH = "../db/cards.json";
 
 
+json ReplayAnimationState::record(int id, const char* entity, const char* nextAction,
+	std::size_t frame, bool restart) {
+	if (action != nextAction || restart) {
+		action = nextAction;
+		startFrame = frame;
+	}
+	return {
+		{ "id", id },
+		{ "entity", entity },
+		{ "animation", action },
+		{ "animationStartFrame", startFrame }
+	};
+}
+
 ElementType parseElement(std::string element) {
     if (element == "fire")      return ElementType::Fire;
     if (element == "ice")       return ElementType::ICE;
-    if (element == "physical") return ElementType::Physical;
     if (element == "lightning") return ElementType::Lightning;
+    if (element == "wind")      return ElementType::Wind;
+    if (element == "water")     return ElementType::Water;
+    if (element == "physical")  return ElementType::Physical;
     return ElementType::Fire;
 }
 
@@ -81,16 +100,15 @@ static void leerArchivoHechizos(const std::string& ruta, HechizosGestor& spellMa
             spell["scale"][2].get<float>()
         );
 
-        // Tipo de movimiento. Si no se especifica, el movimiento sera lineal.
-        std::string movementName = spell.value(
-            "movement_pattern",
-            std::string("linear")
-        );
-
-        MovementPattern pattern = MovementPattern::Linear;
-
-        if (movementName == "parabolic") {
-            pattern = MovementPattern::Parabolic;
+        // Tipo de movimiento. Si no se especifica: parabolico si gravityMultiplier > 0, si no lineal.
+        const float gravityMultiplier = spell.value<float>("gravityMultiplier", 0.0f);
+        MovementPattern pattern = (gravityMultiplier > 0.0f)
+            ? MovementPattern::Parabolic
+            : MovementPattern::Linear;
+        if (spell.contains("movement_pattern")) {
+            const std::string movementName = spell.value("movement_pattern", std::string("linear"));
+            if (movementName == "parabolic")   pattern = MovementPattern::Parabolic;
+            else if (movementName == "linear") pattern = MovementPattern::Linear;
         }
 
         // Cómo se entrega ("line" / "area" / "self") y qué zona deja (opcional)
@@ -113,7 +131,8 @@ static void leerArchivoHechizos(const std::string& ruta, HechizosGestor& spellMa
             SPELL_LIFETIME_SECONDS,
             pattern,
             castType,
-            zona
+            zona,
+            gravityMultiplier
         );
 
         id++;
@@ -206,81 +225,85 @@ std::vector<std::string> getPlayers() {
     }
 }
 
-struct EntityInfo {
-    ModelId model;
-    glm::vec3 scale;
-    AnimationId animation = NO_ANIMATION;
-};
-
-static glm::vec3 readVec3(const json& value) {
-    return glm::vec3(value.at(0).get<float>(), value.at(1).get<float>(), value.at(2).get<float>());
+static glm::vec3 replayVector(const json& values) {
+	return { values.at(0).get<float>(), values.at(1).get<float>(), values.at(2).get<float>() };
 }
 
-static ModelId requireModel(const ModelLibrary& models, const std::string& entityName, const std::string& asset) {
-    if (!models.has(asset))
-        throw std::runtime_error("entidad '" + entityName + "': asset desconocido '" + asset + "'");
-    return models.find(asset);
+static ModelId entityModel(const json& definition, const ModelLibrary& models) {
+	const auto& asset = definition.at("asset").get_ref<const std::string&>();
+	if (!models.has(asset)) throw std::runtime_error("asset desconocido: '" + asset + "'");
+	return models.find(asset);
 }
 
-static std::unordered_map<std::string, EntityInfo> loadEntityInfo(const ModelLibrary& models,
-    std::vector<ModelAnimation>& animations) {
-    std::ifstream file(ENTITIES_PATH);
-    if (!file) throw std::runtime_error("no se puede abrir " + ENTITIES_PATH);
-    const json definitions = json::parse(file);
+FramesData generateCombat(const ModelLibrary& modelLib, const std::filesystem::path& replayFile) {
+	std::ifstream replayStream(replayFile), entitiesStream(ENTITIES_PATH);
+	if (!replayStream) throw std::runtime_error("no se puede abrir " + replayFile.string());
+	if (!entitiesStream) throw std::runtime_error("no se puede abrir " + ENTITIES_PATH);
 
-    std::unordered_map<std::string, EntityInfo> entities;
-    for (const auto& [name, definition] : definitions.items()) {
-        EntityInfo info{ requireModel(models, name, definition.at("asset").get<std::string>()),
-            readVec3(definition.at("scale")) };
+	const json replay = json::parse(replayStream);
+	const json catalog = json::parse(entitiesStream);
+	const auto& frames = replay.at("frames");
+	FramesData result;
+	result.ticksPerSecond = replay.value("metadata", json::object())
+		.value("ticksPerSecond", CombatSimulation::TICKS_PER_SECOND);
+	if (!frames.is_array() || frames.empty() || result.ticksPerSecond <= 0)
+		throw std::runtime_error("replay sin frames o con frecuencia invalida: " + replayFile.string());
 
-        const auto config = definition.find("animation");
-        if (config != definition.end()) {
-            ModelAnimation animation;
-            animation.fps = config->at("fps").get<double>();
-            animation.loop = config->value("loop", true);
-            const json& assets = config->at("assets");
-            if (!std::isfinite(animation.fps) || animation.fps <= 0.0 || !assets.is_array() || assets.empty())
-                throw std::runtime_error("entidad '" + name + "': animation requiere fps positivo y una lista de assets");
-            animation.frames.reserve(assets.size());
-            for (const json& asset : assets)
-                animation.frames.push_back(requireModel(models, name, asset.get<std::string>()));
+	const auto particleStyles = replay.find("particleStyles");
+	const auto particleFrames = replay.find("particleFrames");
+	if ((particleStyles == replay.end()) != (particleFrames == replay.end()))
+		throw std::runtime_error("El replay debe incluir particleStyles y particleFrames juntos: " + replayFile.string());
+	if (particleStyles != replay.end()) {
+		result.particleStyles = bm::particles::particleJson::leerEstilos(*particleStyles);
+		result.particleFrames = bm::particles::particleJson::leerFrames(*particleFrames, result.particleStyles, frames.size());
+	}
 
-            info.animation = static_cast<AnimationId>(animations.size());
-            animations.push_back(std::move(animation));
-        }
-        entities.emplace(name, info);
-    }
-    return entities;
-}
+	result.combat.reserve(frames.size());
+	for (const auto& frame : frames) {
+		std::vector<Entidad> entities;
+		entities.reserve(frame.size());
+		std::unordered_set<EntityId> entityIds;
+		for (const auto& record : frame) {
+			Entidad entity;
+			entity.transform.pos = replayVector(record.at(0));
+			entity.transform.rot = replayVector(record.at(1));
+			const json* definition = nullptr;
 
-std::vector<std::vector<Entidad>> generateCombat(const ModelLibrary& modelLib,
-    std::vector<ModelAnimation>& animations) {
-    std::ifstream simulationFile(COMBAT_PATH);
-    if (!simulationFile) throw std::runtime_error("no se puede abrir " + COMBAT_PATH);
-    const json simulationData = json::parse(simulationFile);
-    const json& frames = simulationData.at("frames");
-    if (!frames.is_array() || frames.empty()) throw std::runtime_error("replay sin frames: " + COMBAT_PATH);
+			// El cuarto elemento puede contener solo el ID de un hechizo.
+			const json* extra = (record.size() > 3 && record[3].is_object()) ? &record[3] : nullptr;
+			if (extra) {
+				entity.id = extra->value("id", INVALID_ENTITY);
+				if (entity.id < INVALID_ENTITY ||
+					(entity.id != INVALID_ENTITY && !entityIds.insert(entity.id).second)) {
+					throw std::runtime_error("id de entidad invalido o repetido en un frame del replay");
+				}
+			}
 
-    std::vector<ModelAnimation> configuredAnimations;
-    const auto definitions = loadEntityInfo(modelLib, configuredAnimations);
-    std::vector<std::vector<Entidad>> combatSequence;
-    combatSequence.reserve(frames.size());
-    for (const json& frame : frames) {
-        auto& entities = combatSequence.emplace_back();
-        entities.reserve(frame.size());
-        for (const json& sample : frame) {
-            const std::string name = sample.at(2).get<std::string>();
-            const auto info = definitions.find(name);
-            if (info == definitions.end()) throw std::runtime_error("entidad desconocida en replay: '" + name + "'");
+			if (extra && extra->contains("animation")) {
+				const auto& character = *extra;
+				entity.characterId = entity.id;
+				entity.animation = character.at("animation").get<std::string>();
+				entity.animationStartFrame = character.at("animationStartFrame").get<int>();
+				if (entity.characterId == INVALID_ENTITY ||
+					entity.animationStartFrame < 0 || size_t(entity.animationStartFrame) > result.combat.size()) {
+					throw std::runtime_error("id o inicio de animacion invalido en el replay");
+				}
 
-            Entidad& entity = entities.emplace_back();
-            entity.model = info->second.model;
-            entity.animation = info->second.animation;
-            entity.transform.scale = info->second.scale;
-            entity.transform.pos = readVec3(sample.at(0));
-            entity.transform.rot = readVec3(sample.at(1));
-        }
-    }
-    animations = std::move(configuredAnimations);
-    return combatSequence;
+				const auto& base = catalog.at(character.at("entity").get_ref<const std::string&>());
+				const ModelId baseModel = entityModel(base, modelLib);
+				if (modelLib.get(baseModel).skinned) {
+					entity.model = baseModel;
+					definition = &base;
+				}
+			}
+			if (!definition) {
+				definition = &catalog.at(record.at(2).get_ref<const std::string&>());
+				entity.model = entityModel(*definition, modelLib);
+			}
+			entity.transform.scale = replayVector(definition->at("scale"));
+			entities.push_back(std::move(entity));
+		}
+		result.combat.push_back(std::move(entities));
+	}
+	return result;
 }
