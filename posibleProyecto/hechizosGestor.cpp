@@ -103,6 +103,8 @@ bool HechizosGestor::spawnSpell(int spellId, const glm::vec3& initialPosition, c
 int HechizosGestor::spawnDisparo(const EstadoDisparo& disparo, const glm::vec3& origen,
     const glm::vec3& direccion, int idLanzador) {
     constexpr float SEPARACION_GRADOS = 8.0f;   // abanico del multicast
+    constexpr float SEPARACION_ZONAS_GRADOS = 25.0f;   // las zonas son anchas: más separación
+    constexpr float SEPARACION_ZONAS_METROS = 2.0f;    // desplazamiento lateral entre zonas
     const ModificadoresDisparo& m = disparo.mods;
     const int n = disparo.numProyectiles;
     const float separacion = SEPARACION_GRADOS + m.dispersionExtra;
@@ -118,6 +120,9 @@ int HechizosGestor::spawnDisparo(const EstadoDisparo& disparo, const glm::vec3& 
         const hechizosTemplate& t = it->second;
         const CargaEfecto carga{ t.definition.id, t.definition.damage + m.danoExtra, t.definition.element };
 
+        // Abanico centrado: 3 hechizos -> -x, 0, +x (un hechizo suelto sale recto)
+        const float posAbanico = static_cast<float>(i) - (n - 1) * 0.5f;
+
         // Sobre uno mismo (curación…): sin proyectil, combate lo aplica al lanzador
         if (t.definition.casteo == CastType::Self) {
             efectosSobreLanzador.push_back({ carga, idLanzador });
@@ -129,7 +134,12 @@ int HechizosGestor::spawnDisparo(const EstadoDisparo& disparo, const glm::vec3& 
             if (t.zona.tieneZona()) {
                 DatosZona datos = t.zona;
                 datos.velocidadAvance *= m.multVelocidad;   // speed_up también acelera las zonas que avanzan
-                crearZona(datos, origen, direccion, carga, idLanzador);
+                const float anguloZona = posAbanico * (SEPARACION_ZONAS_GRADOS + m.dispersionExtra);
+                // Lateral = perpendicular a la dirección en el suelo (derecha si posAbanico > 0)
+                glm::vec3 lateral(-direccion.z, 0.0f, direccion.x);
+                if (glm::length(lateral) > 0.0001f) lateral = glm::normalize(lateral);
+                const glm::vec3 origenZona = origen + lateral * (posAbanico * SEPARACION_ZONAS_METROS);
+                crearZona(datos, origenZona, rotarEnXZ(direccion, anguloZona), carga, idLanzador);
             }
             ++lanzados;
             continue;
@@ -153,7 +163,7 @@ int HechizosGestor::spawnDisparo(const EstadoDisparo& disparo, const glm::vec3& 
         spell->setComportamientos(m.etiquetas, m.rebotes);
 
         // Abanico centrado: 3 proyectiles -> -8º, 0º, +8º
-        const float angulo = (static_cast<float>(i) - (n - 1) * 0.5f) * separacion;
+        const float angulo = posAbanico * separacion;
         spell->cast(origen, rotarEnXZ(direccion, angulo));      // isActive = true
         ++lanzados;
     }

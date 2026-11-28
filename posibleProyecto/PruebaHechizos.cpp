@@ -151,19 +151,27 @@ void PruebaHechizos::crearMagos(const std::filesystem::path& combatConfigFile) {
 // =====================================================================
 void PruebaHechizos::crearVaritas() {
     m_varitas.assign(m_players.size(), VaritaPrueba{});
+    const int triple = idPorNombre("triple_spell");
 
-    // Mago 1 (rojo): hechizos de zona (spells_zone.json), uno por disparo
-    //   tornado (avanza hacia el rival) -> bomba -> chorro de agua -> aliento de dragón
+    // Mago 1 (rojo): multicast x3 de zonas directas -> deben abrirse en abanico (-25º, 0º, +25º)
+    //   3 tornados -> 3 alientos de dragón (cono) -> 3 chorros de agua (caja)
     VaritaPrueba& v1 = m_varitas[0];
-    v1.ranuras = { idPorNombre("tornado"), idPorNombre("bomb"), idPorNombre("water_beam"),
-                   idPorNombre("dragon_breath") };
+    const int tornado = idPorNombre("tornado");
+    const int aliento = idPorNombre("dragon_breath");
+    const int chorro  = idPorNombre("water_beam");
+    v1.ranuras = { triple, tornado, tornado, tornado,
+                   triple, aliento, aliento, aliento,
+                   triple, chorro,  chorro,  chorro };
     v1.castDelay = 3.0f;          // tiempo para ver cada zona sin que se amontonen
     v1.recarga = 3.0f;
-    v1.inclinacionY = 0.05f;      // la bomba (parabólica) cae cerca del rival
+    v1.inclinacionY = 0.0f;       // solo zonas directas: disparo plano
 
-    // Mago 2 (azul): nube de veneno -> muro de fuego -> curación (aún sin aplicar)
+    // Mago 2 (azul): 3 muros de fuego (caja, deben formar abanico) -> 3 bombas (esfera, abanico de 8º)
     VaritaPrueba& v2 = m_varitas[1];
-    v2.ranuras = { idPorNombre("poison_bomb"), idPorNombre("fire_wall"), idPorNombre("self_heal") };
+    const int muro  = idPorNombre("fire_wall");
+    const int bomba = idPorNombre("bomb");
+    v2.ranuras = { triple, muro,  muro,  muro,
+                   triple, bomba, bomba, bomba };
     v2.castDelay = 3.5f;          // algo distinto del rojo para que no lancen siempre a la vez
     v2.recarga = 3.5f;
     v2.inclinacionY = 0.15f;      // la bomba de veneno cae cerca del rival
