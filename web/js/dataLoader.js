@@ -13,8 +13,6 @@ async function loadAllData() {
     players:  './db/players.json',
     spells:   './db/spells.json',
     map:      './db/map.json',
-    entities: './db/entities.json',
-    assets:   './db/assets.json',
     hitbox:   './db/hitbox.json',
   };    
 
