@@ -22,6 +22,66 @@
     "path": "./posibleProyecto/assets/fireball.obj",
     "hitbox": "sphere"
   },
+  "fireball_00": {
+    "path": "./posibleProyecto/assets/fireball_vfx/fireball_00.obj"
+  },
+  "fireball_01": {
+    "path": "./posibleProyecto/assets/fireball_vfx/fireball_01.obj"
+  },
+  "fireball_02": {
+    "path": "./posibleProyecto/assets/fireball_vfx/fireball_02.obj"
+  },
+  "fireball_03": {
+    "path": "./posibleProyecto/assets/fireball_vfx/fireball_03.obj"
+  },
+  "fireball_04": {
+    "path": "./posibleProyecto/assets/fireball_vfx/fireball_04.obj"
+  },
+  "fireball_05": {
+    "path": "./posibleProyecto/assets/fireball_vfx/fireball_05.obj"
+  },
+  "fireball_06": {
+    "path": "./posibleProyecto/assets/fireball_vfx/fireball_06.obj"
+  },
+  "fireball_07": {
+    "path": "./posibleProyecto/assets/fireball_vfx/fireball_07.obj"
+  },
+  "fireball_08": {
+    "path": "./posibleProyecto/assets/fireball_vfx/fireball_08.obj"
+  },
+  "fireball_09": {
+    "path": "./posibleProyecto/assets/fireball_vfx/fireball_09.obj"
+  },
+  "fireball_10": {
+    "path": "./posibleProyecto/assets/fireball_vfx/fireball_10.obj"
+  },
+  "fireball_11": {
+    "path": "./posibleProyecto/assets/fireball_vfx/fireball_11.obj"
+  },
+  "fireball_12": {
+    "path": "./posibleProyecto/assets/fireball_vfx/fireball_12.obj"
+  },
+  "fireball_13": {
+    "path": "./posibleProyecto/assets/fireball_vfx/fireball_13.obj"
+  },
+  "fireball_14": {
+    "path": "./posibleProyecto/assets/fireball_vfx/fireball_14.obj"
+  },
+  "fireball_15": {
+    "path": "./posibleProyecto/assets/fireball_vfx/fireball_15.obj"
+  },
+  "fireball_16": {
+    "path": "./posibleProyecto/assets/fireball_vfx/fireball_16.obj"
+  },
+  "fireball_17": {
+    "path": "./posibleProyecto/assets/fireball_vfx/fireball_17.obj"
+  },
+  "fireball_18": {
+    "path": "./posibleProyecto/assets/fireball_vfx/fireball_18.obj"
+  },
+  "fireball_19": {
+    "path": "./posibleProyecto/assets/fireball_vfx/fireball_19.obj"
+  },
   "hit": {
     "path": "./posibleProyecto/assets/hit.obj",
     "hitbox": "sphere"
@@ -73,5 +133,33 @@
   "tree_pineTallA": {
     "path": "./posibleProyecto/assets/kenney_nature/tree_pineTallA.obj",
     "hitbox": "cilinder"
+  },
+  "elaina": {
+    "type": "skinned",
+    "path": "./posibleProyecto/assets/elaina.glb",
+    "animations": {
+      "idle": "Elaina",
+      "move": "Elaina"
+    }
+  },
+  "mago_fuego": {
+    "type": "skinned",
+    "path": "./posibleProyecto/assets/mago_fuego_varita1.glb",
+    "animations": {
+      "idle": "circle_combat",
+      "move": "walk_v6",
+      "cast": "cast_spell",
+      "death": "death_dissolve"
+    }
+  },
+  "maga_hielo": {
+    "type": "skinned",
+    "path": "./posibleProyecto/assets/maga_hielo_varita1.glb",
+    "animations": {
+      "idle": "circle_combat",
+      "move": "walk_v6",
+      "cast": "cast_spell",
+      "death": "death_dissolve"
+    }
   }
 }

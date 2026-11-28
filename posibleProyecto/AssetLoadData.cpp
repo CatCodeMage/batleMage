@@ -1,6 +1,9 @@
 #include "AssetLoadData.h"
 #include "Paths.h"
 
+#include <algorithm>
+#include <cctype>
+
 // La implementacion de tinyobjloader se compila aqui y en ningun otro .cpp.
 // fast_float desactivado: la version que trae la libreria no compila en C++20
 // con MSVC (error C3615 en loop_parse_if_eight_digits).
@@ -180,6 +183,7 @@ static ObjMaterial describeMaterial(int materialId, const std::vector<tinyobj::m
     ObjMaterial material;
     material.name = source.name;
     material.color = glm::vec4(source.diffuse[0], source.diffuse[1], source.diffuse[2], 1.0f);
+    material.emission = glm::vec3(source.emission[0], source.emission[1], source.emission[2]);
 
     const bool hasAlbedoTexture = !source.diffuse_texname.empty();
     if (hasAlbedoTexture) material.albedoTexture = objFolder / source.diffuse_texname;
@@ -209,19 +213,79 @@ static GLuint loadAlbedoTexture(const ObjMaterial& material, TextureLibrary& tex
     return hasAlbedoTexture ? textures.load(material.albedoTexture) : textures.white();
 }
 
-static Model registerPieces(const std::string& assetName, const std::vector<ObjPiece>& pieces, MeshLibrary& meshes, TextureLibrary& textures) {
+static Model registerPieces(const std::string& assetName, const std::vector<ObjPiece>& pieces, MeshLibrary& meshes, TextureLibrary& textures, MaterialLibrary& matLib) {
     Model model;
     for (size_t pieceIndex = 0; pieceIndex < pieces.size(); ++pieceIndex) {
         const ObjPiece& piece = pieces[pieceIndex];
         const std::string meshName = assetName + "#" + std::to_string(pieceIndex);
         const MeshId mesh = meshes.add(meshName, piece.verts, piece.idx);
-        model.parts.push_back({ mesh, piece.material.color, loadAlbedoTexture(piece.material, textures) });
+        Material mat;
+        mat.name = piece.material.name;
+        mat.albedoColor = piece.material.color;
+        mat.albedoTexture = loadAlbedoTexture(piece.material, textures);
+        // valores por defecto
+        mat.roughness = 0.8f;
+        mat.metallic = 0.0f;
+        mat.emissive = glm::vec3(0.0f);
+        mat.opacity = 1.0f;
+
+        const std::string materialKey = assetName + "/" + piece.material.name;
+        const MaterialId matId = matLib.add(mat, materialKey);
+
+        model.parts.push_back({ mesh, matId });
+    }
+    return model;
+}
+
+static Model loadSkinnedModel(const std::filesystem::path& file, const json& config,
+    TextureLibrary& textures, MaterialLibrary& matLib, size_t maxBones, std::string assetName) {
+    using namespace bm::anim;
+    const auto imported = std::make_shared<const ImportedModel>(AssimpModelLoader::load(file));
+    for (const ImportedMesh& mesh : imported->meshes) {
+        if (mesh.bones.size() > maxBones)
+            throw std::runtime_error(file.string() + ": la submalla '" + mesh.name + "' tiene " +
+                std::to_string(mesh.bones.size()) + " huesos, el limite es " + std::to_string(maxBones));
+    }
+
+    Model model;
+    model.skinned = std::make_unique<SkinnedModel>(imported);
+    auto& skinned = *model.skinned;
+    if (config.contains("animations"))
+        skinned.animations = config.at("animations").get<decltype(skinned.animations)>();
+
+    const bool hasIdle = bool(skinned.findClip("idle"));
+    for (const std::string action : { "idle", "move", "cast", "hit", "death" }) {
+        if (!skinned.findClip(action))
+            std::cerr << "[Animacion] " << file << ": falta el clip para '" << action << "' (se usa "
+                      << (hasIdle && action != "death" ? "idle" : "la pose de reposo") << ")\n";
+    }
+
+    skinned.parts.reserve(imported->meshes.size());
+    for (const ImportedMesh& mesh : imported->meshes) {
+        Material mat;
+
+        mat.name = mesh.material.name;
+        mat.albedoColor = mesh.material.baseColor;
+        mat.albedoTexture = textures.load(mesh.material.albedo, file);
+        mat.roughness = 0.8f;
+        mat.metallic = 0.0f;
+        mat.emissive = glm::vec3(0.0f);
+        mat.opacity = 1.0f;
+        mat.isDoubleSided = mesh.material.isDoubleSided;
+        if (!mat.isDoubleSided) std::cout << "[Material] " << assetName << "/" << mat.name << ": una cara\n";   // comprobacion temporal
+
+        const std::string key =
+            assetName + "/" + mesh.material.name;
+
+        const MaterialId matId = matLib.add(mat, key);
+
+        skinned.parts.push_back({ SkinnedMesh(mesh), matId});
     }
     return model;
 }
 
 int loadAssetManifest(const std::filesystem::path& manifest, MeshLibrary& meshes, ModelLibrary& models,
-    TextureLibrary& textures) {
+    MaterialLibrary& matLib, TextureLibrary& textures, size_t maxBones) {
 
     std::ifstream in(manifest);
     if (!in) throw std::runtime_error("no se puede abrir " + std::filesystem::absolute(manifest).string());
@@ -232,10 +296,21 @@ int loadAssetManifest(const std::filesystem::path& manifest, MeshLibrary& meshes
         const std::string& name = it.key();
         try {
             if (models.has(name)) throw std::runtime_error("nombre repetido");
-            std::string path = it.value().at("path").get<std::string>();
+            const json& config = it.value();
+            const auto file = dataPath(config.at("path").get<std::string>());
+            std::string extension = file.extension().string();
+            std::transform(extension.begin(), extension.end(), extension.begin(),
+                [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
 
-            const std::vector<ObjPiece> pieces = loadObj(dataPath(path));
-            models.add(name, registerPieces(name, pieces, meshes, textures));
+            const bool skinnedFormat = extension == ".glb" || extension == ".gltf" || extension == ".fbx";
+            if (config.value("type", "") == "skinned" && !skinnedFormat)
+                throw std::runtime_error("el tipo skinned requiere un archivo GLB, glTF o FBX");
+
+            if (skinnedFormat) {
+                models.add(name, loadSkinnedModel(file, config, textures, matLib, maxBones, name));
+            } else {
+                models.add(name, registerPieces(name, loadObj(file), meshes, textures, matLib));
+            }
             ++cargados;
         }
         catch (const std::exception& ex) {

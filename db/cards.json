@@ -1,0 +1,10 @@
+{
+  "damage_plus":  { "id": 100, "type": "modifier",  "mana": 5.0, "cast_delay": 0.08,
+                    "mods": { "damage_extra": 10.0 } },
+  "bounce":       { "id": 101, "type": "modifier",  "mana": 0.0, "cast_delay": 0.0,
+                    "mods": { "bounces": 4, "lifetime_extra": 3.0, "tags": ["bounce"] } },
+  "speed_up":     { "id": 102, "type": "modifier",  "mana": 3.0, "cast_delay": 0.0,
+                    "mods": { "speed_mult": 1.5 } },
+  "double_spell": { "id": 200, "type": "multicast", "mana": 0.0, "cast_delay": 0.0, "draws": 2 },
+  "triple_spell": { "id": 201, "type": "multicast", "mana": 2.0, "cast_delay": 0.03, "draws": 3 }
+}

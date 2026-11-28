@@ -1,6 +1,7 @@
 
 #include "ShadowSystem.h"
 #include "shaders.h"
+#include "skeleton_animation/SkinnedRenderer.h"
 
 #include <algorithm>
 #include <iostream>
@@ -11,7 +12,7 @@ namespace {
 // Vertex shader de profundidad.
 // Utiliza los atributos actuales de Mesh.cpp:
 // location 0 = posicion
-// location 3..5 = matriz de modelo por instancia
+// location 3..6 = matriz de modelo por instancia
 constexpr const char* DepthVertexSource = R"GLSL(
 #version 330 core
 
@@ -30,45 +31,6 @@ void main() {
     gl_Position = uLightViewProjection * worldPos;
 }
 )GLSL";
-
-// Fragment shader de profundidad.
-// Guarda la distancia radial desde la luz, normalizada.
-constexpr const char* DepthFragmentSource = R"GLSL(
-#version 330 core
-
-in vec3 vWorldPos;
-
-uniform vec3 uLightPosition;
-uniform float uFarPlane;
-
-void main() {
-    float distanceToLight =
-        length(vWorldPos - uLightPosition);
-
-    gl_FragDepth = clamp(
-        distanceToLight / uFarPlane,
-        0.0,
-        1.0
-    );
-}
-)GLSL";
-
-// Comprobar si un shader se ha compilado.
-bool shaderCompiled(GLuint shader) {
-    if (shader == 0) {
-        return false;
-    }
-
-    GLint compiled = GL_FALSE;
-
-    glGetShaderiv(
-        shader,
-        GL_COMPILE_STATUS,
-        &compiled
-    );
-
-    return compiled == GL_TRUE;
-}
 
 } // namespace
 
@@ -133,86 +95,7 @@ bool ShadowSystem::initialize() {
         return false;
     }
 
-    // Compilar el vertex shader de profundidad.
-    GLuint vs = compileShader(
-        GL_VERTEX_SHADER,
-        DepthVertexSource
-    );
-
-    // Compilar el fragment shader de profundidad.
-    GLuint fs = compileShader(
-        GL_FRAGMENT_SHADER,
-        DepthFragmentSource
-    );
-
-    // Comprobar compilacion.
-    if (!shaderCompiled(vs) || !shaderCompiled(fs))
-    {
-        if (vs != 0) {
-            glDeleteShader(vs);
-        }
-
-        if (fs != 0) {
-            glDeleteShader(fs);
-        }
-
-        return false;
-    }
-
-    // Crear el programa de profundidad.
-    GLuint program = glCreateProgram();
-
-    glAttachShader(program, vs);
-    glAttachShader(program, fs);
-
-    glLinkProgram(program);
-
-    // Los shaders individuales ya no se necesitan.
-    glDeleteShader(vs);
-    glDeleteShader(fs);
-
-    // Comprobar que el programa se ha enlazado.
-    GLint linked = GL_FALSE;
-
-    glGetProgramiv(
-        program,
-        GL_LINK_STATUS,
-        &linked
-    );
-
-    if (linked != GL_TRUE)
-    {
-        GLint logLength = 0;
-
-        glGetProgramiv(
-            program,
-            GL_INFO_LOG_LENGTH,
-            &logLength
-        );
-
-        std::string log(
-            std::max(1, logLength),
-            '\0'
-        );
-
-        glGetProgramInfoLog(
-            program,
-            GLsizei(log.size()),
-            nullptr,
-            log.data()
-        );
-
-        std::cerr
-            << "ShadowSystem: error enlazando "
-            << "el shader de profundidad:\n"
-            << log << '\n';
-
-        glDeleteProgram(program);
-
-        return false;
-    }
-
-    m_depthProgram = program;
+    m_depthProgram = createShaderProgram(DepthVertexSource, depthFragmentSrc);
 
     // Buscar uniforms del shader de profundidad.
     m_locLightViewProjection = glGetUniformLocation(
@@ -255,7 +138,8 @@ void ShadowSystem::setEnabled(bool enabled) {
 
 void ShadowSystem::render(
     const std::vector<SceneLight>& lights,
-    const DrawGeometry& drawGeometry
+    const DrawGeometry& drawGeometry,
+    const bm::anim::SkinnedRenderer* skinned
 ) {
     // Las asignaciones se recalculan cada frame.
     clearFrameAssignments();
@@ -367,6 +251,13 @@ void ShadowSystem::render(
                 // Dibujar la geometria con el
                 // shader de profundidad activo.
                 drawGeometry();
+                if (skinned && !skinned->empty()) {
+                    // Las submallas animadas pueden tener superficies de una sola cara.
+                    glDisable(GL_CULL_FACE);
+                    skinned->drawDepth(matrix, position, radius);
+                    glEnable(GL_CULL_FACE);
+                    glUseProgram(m_depthProgram);
+                }
             }
         );
 

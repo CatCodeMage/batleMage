@@ -1,0 +1,154 @@
+{
+    "shots": [
+        {
+            "camera": {
+                "cameraType": 0,
+                "distance": 0.0,
+                "fieldOfViewDegrees": 45.0,
+                "freePitch": -19.900020599365234,
+                "freePosition": [
+                    -10.94864273071289,
+                    12.259049415588379,
+                    36.00503158569336
+                ],
+                "freeYaw": -70.09999084472656,
+                "height": 0.0,
+                "sideOffset": 0.0,
+                "targetCharacterId": 1
+            },
+            "startFrame": 0,
+            "transition": {
+                "arcHeight": 0.0,
+                "durationFrames": 240,
+                "focus": 0,
+                "focusCharacterId": 0,
+                "transitionType": 1
+            }
+        },
+        {
+            "camera": {
+                "cameraType": 4,
+                "distance": 4.0,
+                "fieldOfViewDegrees": 45.0,
+                "freePitch": -20.0,
+                "freePosition": [
+                    0.0,
+                    20.0,
+                    60.0
+                ],
+                "freeYaw": -90.0,
+                "height": 5.0,
+                "sideOffset": 0.0,
+                "targetCharacterId": 1
+            },
+            "startFrame": 365,
+            "transition": {
+                "arcHeight": 0.0,
+                "durationFrames": 240,
+                "focus": 0,
+                "focusCharacterId": 0,
+                "transitionType": 1
+            }
+        },
+        {
+            "camera": {
+                "cameraType": 6,
+                "distance": 0.0,
+                "fieldOfViewDegrees": 45.0,
+                "freePitch": -20.0,
+                "freePosition": [
+                    0.0,
+                    20.0,
+                    60.0
+                ],
+                "freeYaw": -90.0,
+                "height": 40.0,
+                "sideOffset": 0.0,
+                "targetCharacterId": 1
+            },
+            "startFrame": 625,
+            "transition": {
+                "arcHeight": 3.5999999046325684,
+                "durationFrames": 240,
+                "focus": 0,
+                "focusCharacterId": 0,
+                "transitionType": 1
+            }
+        },
+        {
+            "camera": {
+                "cameraType": 5,
+                "distance": 70.0,
+                "fieldOfViewDegrees": 45.0,
+                "freePitch": -20.0,
+                "freePosition": [
+                    0.0,
+                    20.0,
+                    60.0
+                ],
+                "freeYaw": -90.0,
+                "height": 50.0,
+                "sideOffset": 0.0,
+                "targetCharacterId": 1
+            },
+            "startFrame": 856,
+            "transition": {
+                "arcHeight": 0.0,
+                "durationFrames": 240,
+                "focus": 0,
+                "focusCharacterId": 0,
+                "transitionType": 1
+            }
+        },
+        {
+            "camera": {
+                "cameraType": 1,
+                "distance": 6.0,
+                "fieldOfViewDegrees": 50.0,
+                "freePitch": -20.0,
+                "freePosition": [
+                    0.0,
+                    20.0,
+                    60.0
+                ],
+                "freeYaw": -90.0,
+                "height": 3.0,
+                "sideOffset": 1.0,
+                "targetCharacterId": 1
+            },
+            "startFrame": 1032,
+            "transition": {
+                "arcHeight": 8.699999809265137,
+                "durationFrames": 240,
+                "focus": 0,
+                "focusCharacterId": 0,
+                "transitionType": 1
+            }
+        },
+        {
+            "camera": {
+                "cameraType": 1,
+                "distance": 6.0,
+                "fieldOfViewDegrees": 50.0,
+                "freePitch": -20.0,
+                "freePosition": [
+                    0.0,
+                    20.0,
+                    60.0
+                ],
+                "freeYaw": -90.0,
+                "height": 3.0,
+                "sideOffset": 1.0,
+                "targetCharacterId": 2
+            },
+            "startFrame": 1271,
+            "transition": {
+                "arcHeight": 0.0,
+                "durationFrames": 60,
+                "focus": 0,
+                "focusCharacterId": 0,
+                "transitionType": 0
+            }
+        }
+    ]
+}

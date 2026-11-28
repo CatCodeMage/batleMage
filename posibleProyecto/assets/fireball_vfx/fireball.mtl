@@ -1,0 +1,11 @@
+newmtl fire_core
+Kd 1.000 0.480 0.040
+Ke 1.000 0.660 0.110
+
+newmtl fire_body
+Kd 1.000 0.280 0.010
+Ke 0.880 0.330 0.028
+
+newmtl fire_tips
+Kd 1.000 0.140 0.000
+Ke 0.700 0.140 0.012

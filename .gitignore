@@ -76,6 +76,7 @@ StyleCopReport.xml
 *.ilk
 *.meta
 *.obj
+*.mtl
 *.iobj
 *.pch
 *.pdb
@@ -368,7 +369,13 @@ FodyWeavers.xsd
 
 # Assets (modelos .obj, .mtl y texturas): fuera de git por tamano; se comparten aparte.
 # [Aa] porque la carpeta se llama Assets en disco y assets en las rutas de los JSON.
-posibleProyecto/[Aa]ssets/
+posibleProyecto/[Aa]ssets/*
+!posibleProyecto/[Aa]ssets/fireball_vfx/
+!posibleProyecto/[Aa]ssets/fireball_vfx/fireball.mtl
+!posibleProyecto/[Aa]ssets/fireball_vfx/fireball_[0-9][0-9].obj
 
 #compilació
 build
+
+# Imgui dades locals
+imgui.ini

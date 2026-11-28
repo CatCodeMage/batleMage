@@ -5,11 +5,11 @@
     },
     "player_red": {
         "scale": [1, 1, 1],
-        "asset": "spirit_red"
+        "asset": "mago_fuego"
     },
     "player_blue": {
         "scale": [1, 1, 1],
-        "asset": "spirit_blue"
+        "asset": "maga_hielo"
     },
     "dead_red": {
         "scale": [1, 1, 1],
@@ -27,7 +27,21 @@
         "scale": [0.5, 0.5, 0.5],
         "asset": "fireball"
     },
-    "fire_ball":       { "scale": [0.5, 0.5, 0.5], "asset": "fireball" },
+    "fire_ball": {
+        "scale": [1.05, 1.05, 1.05],
+        "asset": "fireball_00",
+        "animation": {
+            "fps": 16,
+            "spinDegreesPerSecond": 288,
+            "loop": true,
+            "assets": [
+                "fireball_00", "fireball_01", "fireball_02", "fireball_03", "fireball_04",
+                "fireball_05", "fireball_06", "fireball_07", "fireball_08", "fireball_09",
+                "fireball_10", "fireball_11", "fireball_12", "fireball_13", "fireball_14",
+                "fireball_15", "fireball_16", "fireball_17", "fireball_18", "fireball_19"
+            ]
+        }
+    },
     "meteor":          { "scale": [0.5, 0.5, 0.5], "asset": "fireball" },
     "flame_wall":      { "scale": [0.5, 0.5, 0.5], "asset": "fireball" },
     "ice_lance":       { "scale": [0.5, 0.5, 0.5], "asset": "ice_cube" },
@@ -42,5 +56,37 @@
     "poison_cloud":    { "scale": [0.5, 0.5, 0.5], "asset": "fireball" },
     "healing":         { "scale": [0.5, 0.5, 0.5], "asset": "fireball" },
     "wind_blade":      { "scale": [0.5, 0.5, 0.5], "asset": "fireball" },
-    "water_jet":       { "scale": [0.5, 0.5, 0.5], "asset": "fireball" }
+    "water_jet":       { "scale": [0.5, 0.5, 0.5], "asset": "fireball" },
+
+    "bomb":        { "scale": [0.4, 0.4, 0.4], "asset": "rock" },
+    "poison_bomb": { "scale": [0.4, 0.4, 0.4], "asset": "rock" },
+
+    "zona_esfera_1": { "scale": [1, 1, 1], "asset": "fireball_00",
+        "animation": { "fps": 24, "loop": true, "assets": ["fireball_00","fireball_01","fireball_02","fireball_03","fireball_04","fireball_05","fireball_06","fireball_07","fireball_08","fireball_09","fireball_10","fireball_11","fireball_12","fireball_13","fireball_14"] } },
+    "zona_esfera_2": { "scale": [2, 2, 2], "asset": "fireball_00",
+        "animation": { "fps": 24, "loop": true, "assets": ["fireball_00","fireball_01","fireball_02","fireball_03","fireball_04","fireball_05","fireball_06","fireball_07","fireball_08","fireball_09","fireball_10","fireball_11","fireball_12","fireball_13","fireball_14"] } },
+    "zona_esfera_4": { "scale": [4, 4, 4], "asset": "fireball_00",
+        "animation": { "fps": 24, "loop": true, "assets": ["fireball_00","fireball_01","fireball_02","fireball_03","fireball_04","fireball_05","fireball_06","fireball_07","fireball_08","fireball_09","fireball_10","fireball_11","fireball_12","fireball_13","fireball_14"] } },
+    "zona_esfera_6": { "scale": [6, 6, 6], "asset": "fireball_00",
+        "animation": { "fps": 24, "loop": true, "assets": ["fireball_00","fireball_01","fireball_02","fireball_03","fireball_04","fireball_05","fireball_06","fireball_07","fireball_08","fireball_09","fireball_10","fireball_11","fireball_12","fireball_13","fireball_14"] } },
+    "zona_esfera_025": { "scale": [0.25, 0.25, 0.25], "asset": "fireball_00",
+        "animation": { "fps": 24, "loop": true, "assets": ["fireball_00","fireball_01","fireball_02","fireball_03","fireball_04","fireball_05","fireball_06","fireball_07","fireball_08","fireball_09","fireball_10","fireball_11","fireball_12","fireball_13","fireball_14"] } },
+    "zona_esfera_05": { "scale": [0.5, 0.5, 0.5], "asset": "fireball_00",
+        "animation": { "fps": 24, "loop": true, "assets": ["fireball_00","fireball_01","fireball_02","fireball_03","fireball_04","fireball_05","fireball_06","fireball_07","fireball_08","fireball_09","fireball_10","fireball_11","fireball_12","fireball_13","fireball_14"] } },
+    "zona_esfera_15": { "scale": [1.5, 1.5, 1.5], "asset": "fireball_00",
+        "animation": { "fps": 24, "loop": true, "assets": ["fireball_00","fireball_01","fireball_02","fireball_03","fireball_04","fireball_05","fireball_06","fireball_07","fireball_08","fireball_09","fireball_10","fireball_11","fireball_12","fireball_13","fireball_14"] } },
+    "zona_esfera_25": { "scale": [2.5, 2.5, 2.5], "asset": "fireball_00",
+        "animation": { "fps": 24, "loop": true, "assets": ["fireball_00","fireball_01","fireball_02","fireball_03","fireball_04","fireball_05","fireball_06","fireball_07","fireball_08","fireball_09","fireball_10","fireball_11","fireball_12","fireball_13","fireball_14"] } },
+    "zona_esfera_3": { "scale": [3, 3, 3], "asset": "fireball_00",
+        "animation": { "fps": 24, "loop": true, "assets": ["fireball_00","fireball_01","fireball_02","fireball_03","fireball_04","fireball_05","fireball_06","fireball_07","fireball_08","fireball_09","fireball_10","fireball_11","fireball_12","fireball_13","fireball_14"] } },
+    "zona_esfera_5": { "scale": [5, 5, 5], "asset": "fireball_00",
+        "animation": { "fps": 24, "loop": true, "assets": ["fireball_00","fireball_01","fireball_02","fireball_03","fireball_04","fireball_05","fireball_06","fireball_07","fireball_08","fireball_09","fireball_10","fireball_11","fireball_12","fireball_13","fireball_14"] } },
+    "zona_esfera_7": { "scale": [7, 7, 7], "asset": "fireball_00",
+        "animation": { "fps": 24, "loop": true, "assets": ["fireball_00","fireball_01","fireball_02","fireball_03","fireball_04","fireball_05","fireball_06","fireball_07","fireball_08","fireball_09","fireball_10","fireball_11","fireball_12","fireball_13","fireball_14"] } },
+
+    "zona_water_beam":    { "scale": [1.5, 2.0, 3.2],  "asset": "ice_cube" },
+    "zona_fire_wall":     { "scale": [6.0, 2.0, 0.27], "asset": "ice_cube" },
+    "zona_dragon_breath": { "scale": [2.1, 1.0, 2.5],  "asset": "rock_cone" },
+    "zona_tornado":       { "scale": [2.0, 2.0, 2.0],  "asset": "rock_cone" },
+    "dagger_barrage":  { "scale": [0.6, 0.6, 0.6], "asset": "fireball" }
 }
