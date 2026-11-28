@@ -296,6 +296,10 @@ CameraView simulationData::cameraViewForView(int viewIndex, const std::vector<En
 	return cameraViewFor(sceneCameras[isControllingCamera ? freeCameraView : viewIndex], frameEntities);   // a pantalla entera, solo la que se mueve
 }
 
+CameraView simulationData::mainCameraView(const std::vector<Entidad>& frameEntities) const {
+	return cameraViewForView(selectedViewIndex, frameEntities);   // en Resultado y a pantalla entera ya devuelve la que se ve en grande
+}
+
 void simulationData::drawSceneViews(const std::vector<SceneViewport>& views) {
 	const std::vector<Entidad>& frameEntities = framesInfo.combat[framesInfo.frame];
 	for (int viewIndex = 0; viewIndex < (int)views.size(); ++viewIndex)

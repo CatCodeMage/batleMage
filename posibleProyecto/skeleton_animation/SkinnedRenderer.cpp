@@ -167,9 +167,16 @@ void SkinnedRenderer::draw(const Program& program, bool lighting, const Material
             glActiveTexture(GL_TEXTURE0);
 
             glBindTexture(GL_TEXTURE_2D, mat.albedoTexture);
+
+            if (mat.isDoubleSided) glDisable(GL_CULL_FACE);
+            else {
+                glEnable(GL_CULL_FACE);   // el contorno de Blender solo se ve si se descartan sus caras traseras
+                glCullFace(GL_BACK);
+            }
         }
         part.mesh->draw();
     }
+    glDisable(GL_CULL_FACE);   // el resto del pintado cuenta con que esta desactivado
 }
 
 void SkinnedRenderer::destroy() {

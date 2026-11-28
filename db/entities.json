@@ -5,11 +5,11 @@
     },
     "player_red": {
         "scale": [1, 1, 1],
-        "asset": "elaina"
+        "asset": "mago_fuego"
     },
     "player_blue": {
         "scale": [1, 1, 1],
-        "asset": "spirit_blue"
+        "asset": "maga_hielo"
     },
     "dead_red": {
         "scale": [1, 1, 1],

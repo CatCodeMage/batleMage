@@ -142,6 +142,7 @@ void readHierarchy(const aiNode* node, std::int32_t parentIndex,
 
 [[nodiscard]] ImportedMaterial readMaterial(const aiScene& scene, unsigned materialIndex,
                                              const std::filesystem::path& file) {
+
     ImportedMaterial result;
     if (materialIndex >= scene.mNumMaterials) return result;
 
@@ -157,6 +158,8 @@ void readHierarchy(const aiNode* node, std::int32_t parentIndex,
         result.baseColor = glm::vec4(color.r, color.g, color.b, color.a);
     }
     result.albedo = readAlbedo(scene, material, file);
+    int twoSided = 0;
+    result.isDoubleSided = material.Get(AI_MATKEY_TWOSIDED, twoSided) == aiReturn_SUCCESS && twoSided != 0;
     return result;
 }
 

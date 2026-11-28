@@ -271,6 +271,8 @@ static Model loadSkinnedModel(const std::filesystem::path& file, const json& con
         mat.metallic = 0.0f;
         mat.emissive = glm::vec3(0.0f);
         mat.opacity = 1.0f;
+        mat.isDoubleSided = mesh.material.isDoubleSided;
+        if (!mat.isDoubleSided) std::cout << "[Material] " << assetName << "/" << mat.name << ": una cara\n";   // comprobacion temporal
 
         const std::string key =
             assetName + "/" + mesh.material.name;

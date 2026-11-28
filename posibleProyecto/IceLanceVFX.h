@@ -20,7 +20,7 @@ public:
         const std::vector<std::vector<Entidad>>& combatFrames,
         const std::vector<ImpactVFX>& impacts,
         int currentFrame,
-        const Camera& camera,
+        const glm::mat4& view,
         double timeSeconds) const;
 
 private:

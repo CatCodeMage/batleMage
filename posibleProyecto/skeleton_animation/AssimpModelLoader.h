@@ -58,6 +58,7 @@ struct ImportedMaterial {
     std::string name;
     glm::vec4 baseColor{1.0f};
     ImportedTexture albedo;
+    bool isDoubleSided = false;   // glTF: si el modelo no dice lo contrario, una sola cara
 };
 
 struct ImportedMesh {

@@ -141,5 +141,25 @@
       "idle": "Elaina",
       "move": "Elaina"
     }
+  },
+  "mago_fuego": {
+    "type": "skinned",
+    "path": "./posibleProyecto/assets/mago_fuego_varita1.glb",
+    "animations": {
+      "idle": "circle_combat",
+      "move": "walk_v6",
+      "cast": "cast_spell",
+      "death": "death_dissolve"
+    }
+  },
+  "maga_hielo": {
+    "type": "skinned",
+    "path": "./posibleProyecto/assets/maga_hielo_varita1.glb",
+    "animations": {
+      "idle": "circle_combat",
+      "move": "walk_v6",
+      "cast": "cast_spell",
+      "death": "death_dissolve"
+    }
   }
 }

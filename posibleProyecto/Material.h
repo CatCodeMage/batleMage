@@ -11,4 +11,5 @@ struct Material
 	float roughness = 1.0f;
 	float metallic = 0.0f;
 	float opacity = 1.0f;
+	bool isDoubleSided = true;   // false: no se pintan las caras traseras (p. ej. los contornos *_Line de Blender)
 };
