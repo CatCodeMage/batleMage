@@ -4,11 +4,13 @@
 #include "CameraPathPanel.h"
 #include "MontageFile.h"
 #include <algorithm>
+#include "FileDialog.h"
 
 namespace {
 	constexpr float VIEW_NEAR_PLANE = 0.1f;
 	constexpr float VIEW_FAR_PLANE = 300.0f;   // con 100 se cortaria el mapa visto desde lejos, deberia leerse del mapa, luego lo ajustamos
-	constexpr const char* MONTAGE_FILE = "db/montaje.json";
+	constexpr const char* DEFAULT_MONTAGE_FILE = "db/montaje.json";   // solo lo que propone la ventana: se puede elegir otro
+	constexpr FileTypeFilter MONTAGE_FILE_TYPE{ ".json", "Montaje (JSON)" };
 }
 
 void simulationData::createDefaultSceneCameras() {
@@ -280,21 +282,27 @@ void simulationData::handleCameraPathPanelAction(CameraPathPanelAction action) {
 }
 
 void simulationData::saveMontageFile() const {
-	try {
-		saveMontage(dataPath(MONTAGE_FILE), cameraPath.getShots());
-		std::cout << "Montaje guardado en " << dataPath(MONTAGE_FILE).string() << " (" << cameraPath.getShots().size() << " planos)\n";
-	}
-	catch (const std::exception& error) {
-		std::cout << "No se ha guardado el montaje: " << error.what() << "\n";
+	const std::optional<std::filesystem::path> chosenFile = askFileToSave("Guardar montaje", dataPath(DEFAULT_MONTAGE_FILE), MONTAGE_FILE_TYPE);
+	if (chosenFile) {
+		try {
+			saveMontage(*chosenFile, cameraPath.getShots());
+			std::cout << "Montaje guardado en " << chosenFile->string() << " (" << cameraPath.getShots().size() << " planos)\n";
+		}
+		catch (const std::exception& error) {
+			std::cout << "No se ha guardado el montaje: " << error.what() << "\n";
+		}
 	}
 }
 
 void simulationData::loadMontageFile() {
-	try {
-		cameraPath.replaceShots(loadMontage(dataPath(MONTAGE_FILE)));   // si falla, salta antes de tocar la lista
-		std::cout << "Montaje cargado: " << cameraPath.getShots().size() << " planos\n";
-	}
-	catch (const std::exception& error) {
-		std::cout << "No se ha cargado el montaje: " << error.what() << "\n";
+	const std::optional<std::filesystem::path> chosenFile = askFileToOpen("Cargar montaje", dataPath(DEFAULT_MONTAGE_FILE), MONTAGE_FILE_TYPE);
+	if (chosenFile){ 
+		try {
+			cameraPath.replaceShots(loadMontage(*chosenFile));   // si falla, salta antes de tocar la lista
+			std::cout << "Montaje cargado de " << chosenFile->string() << ": " << cameraPath.getShots().size() << " planos\n";
+		}
+		catch (const std::exception& error) {
+			std::cout << "No se ha cargado el montaje: " << error.what() << "\n";
+		}
 	}
 }

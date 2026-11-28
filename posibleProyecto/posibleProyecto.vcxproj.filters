@@ -180,6 +180,12 @@
     <ClCompile Include="MontageFile.cpp">
       <Filter>Archivos de recursos\Archivos de origen</Filter>
     </ClCompile>
+    <ClCompile Include="libs\tinyfiledialogs\tinyfiledialogs.c">
+      <Filter>Archivos de recursos\Archivos de origen</Filter>
+    </ClCompile>
+    <ClCompile Include="FileDialog.cpp">
+      <Filter>Archivos de recursos\Archivos de origen</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h">
@@ -342,6 +348,9 @@
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
     <ClInclude Include="MontageFile.h">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
+    <ClInclude Include="FileDialog.h">
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
   </ItemGroup>
